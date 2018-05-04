@@ -20,7 +20,7 @@ public final class AppState {
         this.resources = context.getResources();
     }
 
-    public AppState getInstance(Context context) {
+    public static AppState getInstance(Context context) {
         if (state == null) {
             synchronized (AppState.class) {
                 if (state == null) {
