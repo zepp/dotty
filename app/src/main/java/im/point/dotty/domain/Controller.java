@@ -3,7 +3,8 @@ package im.point.dotty.domain;
 import android.content.Context;
 import android.content.Intent;
 
-import im.point.dotty.MainActivity;
+import im.point.dotty.main.MainActivity;
+import im.point.dotty.login.LoginActivity;
 
 public final class Controller {
     private static volatile Controller controller;
@@ -33,7 +34,7 @@ public final class Controller {
         if (state.isLoggedIn()) {
             intent = MainActivity.getIntent(context);
         } else {
-            intent = MainActivity.getIntent(context);
+            intent = LoginActivity.getIntent(context);
         }
         intent.setFlags(flags);
         context.startActivity(intent);

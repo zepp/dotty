@@ -1,9 +1,11 @@
-package im.point.dotty;
+package im.point.dotty.main;
 
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import im.point.dotty.R;
 
 public class MainActivity extends AppCompatActivity {
 
