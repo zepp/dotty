@@ -1,13 +1,15 @@
 package im.point.dotty.network;
 
-import retrofit2.Call;
+import io.reactivex.Observable;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public interface PointAPI {
+    String BASE = "https://point.im";
+
     @GET("api/login")
-    Call<LoginReply> login(@Query("login") String login, @Query("password") String password);
+    Observable<LoginReply> login(@Query("login") String login, @Query("password") String password);
 
     @GET("api/logout")
-    Call<LogoutReply> logout(@Query("csrf_token") String token);
+    Observable<LogoutReply> logout(@Query("csrf_token") String token);
 }
