@@ -52,15 +52,17 @@ public final class Controller {
 
     public Observable<LoginReply> login(final String name, String password) {
         Observable<LoginReply> result = api.login(name, password)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+                .subscribeOn(Schedulers.io());
         result.subscribe(new DisposableObserver<LoginReply>() {
             @Override
             public void onNext(LoginReply loginReply) {
-                state.setIsLoggedIn(true);
-                state.setUserName(name);
-                state.setCsrfToken(loginReply.getCsrfToken());
-                state.setToken(loginReply.getToken());
+                if (loginReply.getError() == null) {
+                    state.setIsLoggedIn(true);
+                    state.setUserName(name);
+                    state.setCsrfToken(loginReply.getCsrfToken());
+                    state.setToken(loginReply.getToken());
+
+                }
             }
 
             @Override
@@ -71,13 +73,12 @@ public final class Controller {
             public void onComplete() {
             }
         });
-        return result;
+        return result.observeOn(AndroidSchedulers.mainThread());
     }
 
     public Observable<LogoutReply> logout() {
         Observable<LogoutReply> result = api.logout(state.getCsrfToken())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+                .subscribeOn(Schedulers.io());
         result.subscribe(new DisposableObserver<LogoutReply>() {
             @Override
             public void onNext(LogoutReply logoutReply) {
@@ -94,7 +95,7 @@ public final class Controller {
             public void onComplete() {
             }
         });
-        return result;
+        return result.observeOn(AndroidSchedulers.mainThread());
     }
 
     public void resetActivityBackStack() {
