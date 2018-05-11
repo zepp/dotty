@@ -61,7 +61,7 @@ public final class Controller {
                     state.setUserName(name);
                     state.setCsrfToken(loginReply.getCsrfToken());
                     state.setToken(loginReply.getToken());
-
+                    resetActivityBackStack();
                 }
             }
 
@@ -85,6 +85,7 @@ public final class Controller {
                 state.setIsLoggedIn(false);
                 state.setCsrfToken(null);
                 state.setToken(null);
+                resetActivityBackStack();
             }
 
             @Override
