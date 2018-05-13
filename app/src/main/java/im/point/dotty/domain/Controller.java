@@ -10,7 +10,7 @@ import im.point.dotty.login.LoginActivity;
 import im.point.dotty.main.MainActivity;
 import im.point.dotty.network.LoginReply;
 import im.point.dotty.network.LogoutReply;
-import im.point.dotty.network.PointAPI;
+import im.point.dotty.network.AuthAPI;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableObserver;
@@ -25,18 +25,18 @@ public final class Controller {
     private final AppState state;
     private final Gson gson;
     private final Retrofit retrofit;
-    private final PointAPI api;
+    private final AuthAPI api;
 
     private Controller(Context context) {
         this.context = context;
         this.state = AppState.getInstance(context);
         this.gson = new GsonBuilder().setLenient().create();
         this.retrofit = new Retrofit.Builder()
-                .baseUrl(PointAPI.BASE)
+                .baseUrl(AuthAPI.BASE)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
-        this.api = retrofit.create(PointAPI.class);
+        this.api = retrofit.create(AuthAPI.class);
     }
 
     public static Controller getInstance(Context context) {
