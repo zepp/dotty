@@ -69,19 +69,22 @@ public class LoginFragment extends Fragment {
     private class OnLogin implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            controller.login(userNameText, passwordText).subscribe(new DisposableSingleObserver<LoginReply>() {
-                @Override
-                public void onSuccess(LoginReply loginReply) {
-                    if (loginReply.getError() != null) {
-                        Toast.makeText(getContext(), loginReply.getError(), Toast.LENGTH_SHORT).show();
-                    }
-                }
+            controller.login(userNameText, passwordText)
+                    .subscribe(new DisposableSingleObserver<LoginReply>() {
+                        @Override
+                        public void onSuccess(LoginReply loginReply) {
+                            if (loginReply.getError() == null) {
+                                AuthController.resetActivityBackStack(getContext());
+                            } else {
+                                Toast.makeText(getContext(), loginReply.getError(), Toast.LENGTH_SHORT).show();
+                            }
+                        }
 
-                @Override
-                public void onError(Throwable e) {
-                    Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
+                        @Override
+                        public void onError(Throwable e) {
+                            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
         }
     }
 

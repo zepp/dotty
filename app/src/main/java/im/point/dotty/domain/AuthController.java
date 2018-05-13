@@ -22,14 +22,12 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public final class AuthController {
     private static volatile AuthController controller;
-    private final Context context;
     private final AppState state;
     private final Gson gson;
     private final Retrofit retrofit;
     private final AuthAPI api;
 
     private AuthController(Context context) {
-        this.context = context;
         this.state = AppState.getInstance(context);
         this.gson = new GsonBuilder().setLenient().create();
         this.retrofit = new Retrofit.Builder()
@@ -50,7 +48,7 @@ public final class AuthController {
         return controller;
     }
 
-    public Single<LoginReply> login(final String name, String password) {
+    public Single<LoginReply> login(String name, String password) {
         Single<LoginReply> single = Single.create(emitter -> {
             api.login(name, password).enqueue(new Callback<LoginReply>() {
                 @Override
@@ -61,7 +59,6 @@ public final class AuthController {
                         state.setUserName(name);
                         state.setCsrfToken(reply.getCsrfToken());
                         state.setToken(reply.getToken());
-                        resetActivityBackStack();
                     }
                     emitter.onSuccess(reply);
                 }
@@ -83,7 +80,6 @@ public final class AuthController {
                     state.setIsLoggedIn(false);
                     state.setCsrfToken(null);
                     state.setToken(null);
-                    resetActivityBackStack();
                     emitter.onSuccess(response.body());
                 }
 
@@ -96,11 +92,11 @@ public final class AuthController {
         return single.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
     }
 
-    public void resetActivityBackStack() {
+    public static void resetActivityBackStack(Context context) {
         final int flags = Intent.FLAG_ACTIVITY_NO_ANIMATION | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK;
         Intent intent;
 
-        if (state.isLoggedIn()) {
+        if (AppState.getInstance(context).isLoggedIn()) {
             intent = MainActivity.getIntent(context);
         } else {
             intent = LoginActivity.getIntent(context);
