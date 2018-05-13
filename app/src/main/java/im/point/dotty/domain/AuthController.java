@@ -8,15 +8,16 @@ import com.google.gson.GsonBuilder;
 
 import im.point.dotty.login.LoginActivity;
 import im.point.dotty.main.MainActivity;
+import im.point.dotty.network.AuthAPI;
 import im.point.dotty.network.LoginReply;
 import im.point.dotty.network.LogoutReply;
-import im.point.dotty.network.AuthAPI;
-import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public final class AuthController {
@@ -34,7 +35,6 @@ public final class AuthController {
         this.retrofit = new Retrofit.Builder()
                 .baseUrl(AuthAPI.BASE)
                 .addConverterFactory(GsonConverterFactory.create(gson))
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
         this.api = retrofit.create(AuthAPI.class);
     }
@@ -50,53 +50,50 @@ public final class AuthController {
         return controller;
     }
 
-    public Observable<LoginReply> login(final String name, String password) {
-        Observable<LoginReply> result = api.login(name, password)
-                .subscribeOn(Schedulers.io());
-        result.subscribe(new DisposableObserver<LoginReply>() {
-            @Override
-            public void onNext(LoginReply loginReply) {
-                if (loginReply.getError() == null) {
-                    state.setIsLoggedIn(true);
-                    state.setUserName(name);
-                    state.setCsrfToken(loginReply.getCsrfToken());
-                    state.setToken(loginReply.getToken());
-                    resetActivityBackStack();
+    public Single<LoginReply> login(final String name, String password) {
+        Single<LoginReply> single = Single.create(emitter -> {
+            api.login(name, password).enqueue(new Callback<LoginReply>() {
+                @Override
+                public void onResponse(Call<LoginReply> call, Response<LoginReply> response) {
+                    LoginReply reply = response.body();
+                    if (reply.getError() == null) {
+                        state.setIsLoggedIn(true);
+                        state.setUserName(name);
+                        state.setCsrfToken(reply.getCsrfToken());
+                        state.setToken(reply.getToken());
+                        resetActivityBackStack();
+                    }
+                    emitter.onSuccess(reply);
                 }
-            }
 
-            @Override
-            public void onError(Throwable e) {
-            }
-
-            @Override
-            public void onComplete() {
-            }
+                @Override
+                public void onFailure(Call<LoginReply> call, Throwable t) {
+                    emitter.onError(t);
+                }
+            });
         });
-        return result.observeOn(AndroidSchedulers.mainThread());
+        return single.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Observable<LogoutReply> logout() {
-        Observable<LogoutReply> result = api.logout(state.getCsrfToken())
-                .subscribeOn(Schedulers.io());
-        result.subscribe(new DisposableObserver<LogoutReply>() {
-            @Override
-            public void onNext(LogoutReply logoutReply) {
-                state.setIsLoggedIn(false);
-                state.setCsrfToken(null);
-                state.setToken(null);
-                resetActivityBackStack();
-            }
+    public Single<LogoutReply> logout() {
+        Single<LogoutReply> single = Single.create(emitter -> {
+            api.logout(state.getCsrfToken()).enqueue(new Callback<LogoutReply>() {
+                @Override
+                public void onResponse(Call<LogoutReply> call, Response<LogoutReply> response) {
+                    state.setIsLoggedIn(false);
+                    state.setCsrfToken(null);
+                    state.setToken(null);
+                    resetActivityBackStack();
+                    emitter.onSuccess(response.body());
+                }
 
-            @Override
-            public void onError(Throwable e) {
-            }
-
-            @Override
-            public void onComplete() {
-            }
+                @Override
+                public void onFailure(Call<LogoutReply> call, Throwable t) {
+                    emitter.onError(t);
+                }
+            });
         });
-        return result.observeOn(AndroidSchedulers.mainThread());
+        return single.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
     }
 
     public void resetActivityBackStack() {
