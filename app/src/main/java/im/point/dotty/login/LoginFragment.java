@@ -1,9 +1,9 @@
 package im.point.dotty.login;
 
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
-import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -13,31 +13,31 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import im.point.dotty.R;
-import im.point.dotty.domain.Controller;
+import im.point.dotty.domain.AuthController;
 import im.point.dotty.network.LoginReply;
-import io.reactivex.observers.DisposableObserver;
+import io.reactivex.observers.DisposableSingleObserver;
 
 
 public class LoginFragment extends Fragment {
     private TextInputEditText userName;
     private TextInputEditText password;
     private Button login;
-    private Controller controller;
+    private AuthController controller;
 
     private String userNameText = "";
     private String passwordText = "";
+
+    public LoginFragment() {
+    }
 
     public static Fragment netInstance() {
         return new LoginFragment();
     }
 
-    public LoginFragment() {
-    }
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        controller = Controller.getInstance(getContext());
+        controller = AuthController.getInstance(getContext());
     }
 
     @Override
@@ -70,10 +70,12 @@ public class LoginFragment extends Fragment {
         @Override
         public void onClick(View v) {
             controller.login(userNameText, passwordText)
-                    .subscribe(new DisposableObserver<LoginReply>() {
+                    .subscribe(new DisposableSingleObserver<LoginReply>() {
                         @Override
-                        public void onNext(LoginReply loginReply) {
-                            if (loginReply.getError() != null) {
+                        public void onSuccess(LoginReply loginReply) {
+                            if (loginReply.getError() == null) {
+                                AuthController.resetActivityBackStack(getContext());
+                            } else {
                                 Toast.makeText(getContext(), loginReply.getError(), Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -81,10 +83,6 @@ public class LoginFragment extends Fragment {
                         @Override
                         public void onError(Throwable e) {
                             Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-
-                        @Override
-                        public void onComplete() {
                         }
                     });
         }
