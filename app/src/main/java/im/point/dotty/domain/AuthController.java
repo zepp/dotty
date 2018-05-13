@@ -19,15 +19,15 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public final class Controller {
-    private static volatile Controller controller;
+public final class AuthController {
+    private static volatile AuthController controller;
     private final Context context;
     private final AppState state;
     private final Gson gson;
     private final Retrofit retrofit;
     private final AuthAPI api;
 
-    private Controller(Context context) {
+    private AuthController(Context context) {
         this.context = context;
         this.state = AppState.getInstance(context);
         this.gson = new GsonBuilder().setLenient().create();
@@ -39,11 +39,11 @@ public final class Controller {
         this.api = retrofit.create(AuthAPI.class);
     }
 
-    public static Controller getInstance(Context context) {
+    public static AuthController getInstance(Context context) {
         if (controller == null) {
-            synchronized (Controller.class) {
+            synchronized (AuthController.class) {
                 if (controller == null) {
-                    controller = new Controller(context);
+                    controller = new AuthController(context);
                 }
             }
         }

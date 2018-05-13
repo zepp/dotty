@@ -13,7 +13,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import im.point.dotty.R;
-import im.point.dotty.domain.Controller;
+import im.point.dotty.domain.AuthController;
 import im.point.dotty.network.LoginReply;
 import io.reactivex.observers.DisposableObserver;
 
@@ -22,7 +22,7 @@ public class LoginFragment extends Fragment {
     private TextInputEditText userName;
     private TextInputEditText password;
     private Button login;
-    private Controller controller;
+    private AuthController controller;
 
     private String userNameText = "";
     private String passwordText = "";
@@ -37,7 +37,7 @@ public class LoginFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        controller = Controller.getInstance(getContext());
+        controller = AuthController.getInstance(getContext());
     }
 
     @Override
