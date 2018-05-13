@@ -20,14 +20,14 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public final class AuthController {
-    private static volatile AuthController controller;
+public final class AuthInteractor {
+    private static volatile AuthInteractor interactor;
     private final AppState state;
     private final Gson gson;
     private final Retrofit retrofit;
     private final AuthAPI api;
 
-    private AuthController(Context context) {
+    private AuthInteractor(Context context) {
         this.state = AppState.getInstance(context);
         this.gson = new GsonBuilder().setLenient().create();
         this.retrofit = new Retrofit.Builder()
@@ -37,15 +37,15 @@ public final class AuthController {
         this.api = retrofit.create(AuthAPI.class);
     }
 
-    public static AuthController getInstance(Context context) {
-        if (controller == null) {
-            synchronized (AuthController.class) {
-                if (controller == null) {
-                    controller = new AuthController(context);
+    public static AuthInteractor getInstance(Context context) {
+        if (interactor == null) {
+            synchronized (AuthInteractor.class) {
+                if (interactor == null) {
+                    interactor = new AuthInteractor(context);
                 }
             }
         }
-        return controller;
+        return interactor;
     }
 
     public Single<LoginReply> login(String name, String password) {

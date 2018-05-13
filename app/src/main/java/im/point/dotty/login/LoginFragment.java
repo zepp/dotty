@@ -13,7 +13,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import im.point.dotty.R;
-import im.point.dotty.domain.AuthController;
+import im.point.dotty.domain.AuthInteractor;
 import im.point.dotty.network.LoginReply;
 import io.reactivex.observers.DisposableSingleObserver;
 
@@ -22,7 +22,7 @@ public class LoginFragment extends Fragment {
     private TextInputEditText userName;
     private TextInputEditText password;
     private Button login;
-    private AuthController controller;
+    private AuthInteractor interactor;
 
     private String userNameText = "";
     private String passwordText = "";
@@ -37,7 +37,7 @@ public class LoginFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        controller = AuthController.getInstance(getContext());
+        interactor = AuthInteractor.getInstance(getContext());
     }
 
     @Override
@@ -69,12 +69,12 @@ public class LoginFragment extends Fragment {
     private class OnLogin implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            controller.login(userNameText, passwordText)
+            interactor.login(userNameText, passwordText)
                     .subscribe(new DisposableSingleObserver<LoginReply>() {
                         @Override
                         public void onSuccess(LoginReply loginReply) {
                             if (loginReply.getError() == null) {
-                                AuthController.resetActivityBackStack(getContext());
+                                AuthInteractor.resetActivityBackStack(getContext());
                             } else {
                                 Toast.makeText(getContext(), loginReply.getError(), Toast.LENGTH_SHORT).show();
                             }
