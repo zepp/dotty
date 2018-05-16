@@ -3,13 +3,13 @@ package im.point.dotty.network;
 import com.google.gson.annotations.SerializedName;
 
 public final class LogoutReply {
-    @SerializedName("ok") Boolean isOk;
+    @SerializedName("ok") boolean isOk;
 
-    public LogoutReply(Boolean isOk) {
+    public LogoutReply(boolean isOk) {
         this.isOk = isOk;
     }
 
-    public Boolean getOk() {
+    public boolean getOk() {
         return isOk;
     }
 }
