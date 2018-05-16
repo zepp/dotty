@@ -32,7 +32,7 @@ public final class MainInteractor {
         this.api = retrofit.create(PointAPI.class);
     }
 
-    MainInteractor getInstance(Context context) {
+    public static MainInteractor getInstance(Context context) {
         if (interactor == null) {
             synchronized (MainInteractor.class) {
                 if (interactor == null) {
@@ -43,14 +43,14 @@ public final class MainInteractor {
         return interactor;
     }
 
-    Single<List<MetaPost>> getRecent() {
+    public Single<List<MetaPost>> getRecent() {
         Single<PostsReply> single = Single.create(emitter -> {
             api.getRecent(state.getToken(), null).enqueue(new SingleCallbackAdapter<>(emitter));
         });
         return single.map(reply -> reply.getPosts()).observeOn(AndroidSchedulers.mainThread());
     }
 
-    Single<List<MetaPost>> getAll() {
+    public Single<List<MetaPost>> getAll() {
         Single<PostsReply> single = Single.create(emitter -> {
             api.getAll(state.getToken(), null).enqueue(new SingleCallbackAdapter<>(emitter));
         });

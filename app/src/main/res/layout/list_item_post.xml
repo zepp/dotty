@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="4dp"
+    android:layout_marginTop="4dp"
+    android:background="@android:color/background_light"
+    android:columnCount="2"
+    android:padding="8dp">
+
+    <TextView android:id="@+id/post_tags"
+        android:layout_gravity="left"
+        android:text="tag1 tag2"/>
+
+    <TextView android:id="@+id/post_id"
+        android:layout_gravity="right"
+        android:text="axhc"/>
+
+    <TextView android:id="@+id/post_text"
+        android:layout_columnSpan="2"
+        android:layout_gravity="fill"
+        android:layout_marginTop="8dp"
+        android:text="text"/>
+</GridLayout>
