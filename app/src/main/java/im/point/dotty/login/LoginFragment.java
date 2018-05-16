@@ -73,11 +73,7 @@ public class LoginFragment extends Fragment {
                     .subscribe(new DisposableSingleObserver<LoginReply>() {
                         @Override
                         public void onSuccess(LoginReply loginReply) {
-                            if (loginReply.getError() == null) {
-                                AuthInteractor.resetActivityBackStack(getContext());
-                            } else {
-                                Toast.makeText(getContext(), loginReply.getError(), Toast.LENGTH_SHORT).show();
-                            }
+                            AuthInteractor.resetActivityBackStack(getContext());
                         }
 
                         @Override

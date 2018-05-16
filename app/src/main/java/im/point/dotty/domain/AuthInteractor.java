@@ -52,12 +52,10 @@ public final class AuthInteractor {
         single.subscribe(new DisposableSingleObserver<LoginReply>() {
             @Override
             public void onSuccess(LoginReply reply) {
-                if (reply.getError() == null) {
-                    state.setIsLoggedIn(true);
-                    state.setUserName(name);
-                    state.setCsrfToken(reply.getCsrfToken());
-                    state.setToken(reply.getToken());
-                }
+                state.setIsLoggedIn(true);
+                state.setUserName(name);
+                state.setCsrfToken(reply.getCsrfToken());
+                state.setToken(reply.getToken());
             }
 
             @Override

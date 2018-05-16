@@ -1,11 +1,12 @@
 package im.point.dotty.domain;
 
+import im.point.dotty.network.Envelope;
 import io.reactivex.SingleEmitter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class SingleCallbackAdapter<T> implements Callback<T> {
+public class SingleCallbackAdapter<T extends Envelope> implements Callback<T> {
     private final SingleEmitter<T> emitter;
 
     SingleCallbackAdapter(SingleEmitter<T> emitter) {
@@ -21,7 +22,11 @@ public class SingleCallbackAdapter<T> implements Callback<T> {
         if (!contentType.equals("application/json")) {
             emitter.onError(new RuntimeException("content type is unsupported: " + contentType));
         }
-        emitter.onSuccess(response.body());
+        T envelope = response.body();
+        if (envelope.getError() != null) {
+            emitter.onError(new RuntimeException(envelope.getError()));
+        }
+        emitter.onSuccess(envelope);
     }
 
     @Override
