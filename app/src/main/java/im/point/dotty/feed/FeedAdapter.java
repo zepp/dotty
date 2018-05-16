@@ -11,7 +11,7 @@ import java.util.List;
 import im.point.dotty.R;
 import im.point.dotty.network.MetaPost;
 
-class FeedAdapter extends RecyclerView.Adapter<PostHolder> {
+public class FeedAdapter extends RecyclerView.Adapter<PostHolder> {
     private List<MetaPost> list;
 
     FeedAdapter() {
@@ -19,11 +19,11 @@ class FeedAdapter extends RecyclerView.Adapter<PostHolder> {
         this.list = new ArrayList<>();
     }
 
-    List<MetaPost> getList() {
+    public List<MetaPost> getList() {
         return list;
     }
 
-    void setList(List<MetaPost> list) {
+    public void setList(List<MetaPost> list) {
         this.list = list;
         notifyDataSetChanged();
     }
