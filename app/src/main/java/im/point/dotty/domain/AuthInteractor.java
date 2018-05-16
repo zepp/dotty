@@ -13,10 +13,7 @@ import im.point.dotty.network.LoginReply;
 import im.point.dotty.network.LogoutReply;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import io.reactivex.observers.DisposableSingleObserver;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -50,46 +47,43 @@ public final class AuthInteractor {
 
     public Single<LoginReply> login(String name, String password) {
         Single<LoginReply> single = Single.create(emitter -> {
-            api.login(name, password).enqueue(new Callback<LoginReply>() {
-                @Override
-                public void onResponse(Call<LoginReply> call, Response<LoginReply> response) {
-                    LoginReply reply = response.body();
-                    if (reply.getError() == null) {
-                        state.setIsLoggedIn(true);
-                        state.setUserName(name);
-                        state.setCsrfToken(reply.getCsrfToken());
-                        state.setToken(reply.getToken());
-                    }
-                    emitter.onSuccess(reply);
-                }
-
-                @Override
-                public void onFailure(Call<LoginReply> call, Throwable t) {
-                    emitter.onError(t);
-                }
-            });
+            api.login(name, password).enqueue(new SingleCallbackAdapter<>(emitter));
         });
-        return single.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+        single.subscribe(new DisposableSingleObserver<LoginReply>() {
+            @Override
+            public void onSuccess(LoginReply reply) {
+                if (reply.getError() == null) {
+                    state.setIsLoggedIn(true);
+                    state.setUserName(name);
+                    state.setCsrfToken(reply.getCsrfToken());
+                    state.setToken(reply.getToken());
+                }
+            }
+
+            @Override
+            public void onError(Throwable e) {
+            }
+        });
+        return single.observeOn(AndroidSchedulers.mainThread());
     }
 
     public Single<LogoutReply> logout() {
         Single<LogoutReply> single = Single.create(emitter -> {
-            api.logout(state.getCsrfToken()).enqueue(new Callback<LogoutReply>() {
-                @Override
-                public void onResponse(Call<LogoutReply> call, Response<LogoutReply> response) {
-                    state.setIsLoggedIn(false);
-                    state.setCsrfToken(null);
-                    state.setToken(null);
-                    emitter.onSuccess(response.body());
-                }
-
-                @Override
-                public void onFailure(Call<LogoutReply> call, Throwable t) {
-                    emitter.onError(t);
-                }
-            });
+            api.logout(state.getCsrfToken()).enqueue(new SingleCallbackAdapter<>(emitter));
         });
-        return single.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+        single.subscribe(new DisposableSingleObserver<LogoutReply>() {
+            @Override
+            public void onSuccess(LogoutReply logoutReply) {
+                state.setIsLoggedIn(false);
+                state.setCsrfToken(null);
+                state.setToken(null);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+            }
+        });
+        return single.observeOn(AndroidSchedulers.mainThread());
     }
 
     public static void resetActivityBackStack(Context context) {
