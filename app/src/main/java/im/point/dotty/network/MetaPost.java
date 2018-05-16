@@ -9,4 +9,28 @@ public final class MetaPost {
     @SerializedName("editable") boolean isEditable;
     @SerializedName("recommended") boolean isRecommended;
     Post post;
+
+    public boolean isBookmarked() {
+        return isBookmarked;
+    }
+
+    public long getUid() {
+        return uid;
+    }
+
+    public boolean isSubscribed() {
+        return isSubscribed;
+    }
+
+    public boolean isEditable() {
+        return isEditable;
+    }
+
+    public boolean isRecommended() {
+        return isRecommended;
+    }
+
+    public Post getPost() {
+        return post;
+    }
 }

@@ -2,10 +2,12 @@ package im.point.dotty.network;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 public final class Post {
     @SerializedName("pinned") boolean isPinned;
-    String[] files;
-    String[] tags;
+    List<String> files;
+    List<String> tags;
     @SerializedName("comments_count") int commentsCount;
     String text;
     String created;
@@ -17,11 +19,11 @@ public final class Post {
         return isPinned;
     }
 
-    public String[] getFiles() {
+    public List<String> getFiles() {
         return files;
     }
 
-    public String[] getTags() {
+    public List<String> getTags() {
         return tags;
     }
 
