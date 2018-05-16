@@ -47,17 +47,31 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public Fragment getItem(int position) {
-            return null;
+            switch (position) {
+                case 0:
+                    return new RecentFragment();
+                case 1:
+                    return new CommentedFragment();
+                default:
+                    return new AllFragment();
+            }
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return null;
+            switch (position) {
+                case 0:
+                    return getString(R.string.main_recent);
+                case 1:
+                    return getString(R.string.main_commented);
+                default:
+                    return getString(R.string.main_all);
+            }
         }
 
         @Override
         public int getCount() {
-            return 0;
+            return 3;
         }
     }
 }

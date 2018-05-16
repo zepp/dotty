@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Dotty</string>
+
+    <string name="main_recent">recent</string>
+    <string name="main_commented">commented</string>
+    <string name="main_all">all</string>
 </resources>
