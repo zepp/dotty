@@ -14,6 +14,7 @@ public final class Post {
     String type;
     String id;
     @SerializedName("private")boolean isPrivate;
+    Author author;
 
     public boolean isPinned() {
         return isPinned;
