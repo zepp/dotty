@@ -5,7 +5,13 @@ import android.content.Context;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.util.List;
+
+import im.point.dotty.network.MetaPost;
 import im.point.dotty.network.PointAPI;
+import im.point.dotty.network.PostsReply;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -35,5 +41,19 @@ public final class MainInteractor {
             }
         }
         return interactor;
+    }
+
+    Single<List<MetaPost>> getRecent() {
+        Single<PostsReply> single = Single.create(emitter -> {
+            api.getRecent(state.getToken(), null).enqueue(new SingleCallbackAdapter<>(emitter));
+        });
+        return single.map(reply -> reply.getPosts()).observeOn(AndroidSchedulers.mainThread());
+    }
+
+    Single<List<MetaPost>> getAll() {
+        Single<PostsReply> single = Single.create(emitter -> {
+            api.getAll(state.getToken(), null).enqueue(new SingleCallbackAdapter<>(emitter));
+        });
+        return single.map(reply -> reply.getPosts()).observeOn(AndroidSchedulers.mainThread());
     }
 }
