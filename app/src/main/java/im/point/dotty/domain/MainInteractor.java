@@ -56,4 +56,11 @@ public final class MainInteractor {
         });
         return single.map(reply -> reply.getPosts()).observeOn(AndroidSchedulers.mainThread());
     }
+
+    public Single<List<MetaPost>> getCommented() {
+        Single<PostsReply> single = Single.create(emitter -> {
+           api.getComments(state.getToken(), null).enqueue(new SingleCallbackAdapter<>(emitter));
+        });
+        return single.map(reply -> reply.getPosts()).observeOn(AndroidSchedulers.mainThread());
+    }
 }
