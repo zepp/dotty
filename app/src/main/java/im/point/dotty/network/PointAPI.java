@@ -20,4 +20,7 @@ public interface PointAPI {
 
     @GET("/api/blog/{user}")
     Call<PostsReply> getUserPosts(@Header("Authorization") String token, @Path("user") String user, @Query("before") String before);
+
+    @GET("/api/unread-counters")
+    Call<CountersReply> getCounters(@Header("Authorization") String token);
 }
