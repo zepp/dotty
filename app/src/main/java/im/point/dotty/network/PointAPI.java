@@ -35,4 +35,13 @@ public interface PointAPI {
 
     @GET("/api/post/{post}")
     Call<PostReply> getPost(@Header("Authorization") String token, @Path("post") String id);
+
+    @GET("/api/user/login/{login}")
+    Call<UserReply> getUser(@Header("Authorization") String token, @Path("login") String login);
+
+    @GET("/api/user/id/{id}")
+    Call<UserReply> getUser(@Header("Authorization") String token, @Path("id") int id);
+
+    @GET("/api/me")
+    Call<UserReply> getMyself(@Header("Authorization") String token);
 }
