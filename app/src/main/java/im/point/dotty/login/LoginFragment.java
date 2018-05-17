@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import im.point.dotty.DottyApplication;
 import im.point.dotty.R;
 import im.point.dotty.domain.AuthInteractor;
 import im.point.dotty.network.LoginReply;
@@ -73,7 +74,7 @@ public class LoginFragment extends Fragment {
                     .subscribe(new DisposableSingleObserver<LoginReply>() {
                         @Override
                         public void onSuccess(LoginReply loginReply) {
-                            AuthInteractor.resetActivityBackStack(getContext());
+                            DottyApplication.resetActivityBackStack(getActivity().getApplicationContext());
                         }
 
                         @Override

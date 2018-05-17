@@ -10,6 +10,6 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        AuthInteractor.resetActivityBackStack(getApplicationContext());
+        DottyApplication.resetActivityBackStack(getApplicationContext());
     }
 }
