@@ -1,13 +1,10 @@
 package im.point.dotty.domain;
 
 import android.content.Context;
-import android.content.Intent;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import im.point.dotty.login.LoginActivity;
-import im.point.dotty.main.MainActivity;
 import im.point.dotty.network.AuthAPI;
 import im.point.dotty.network.LoginReply;
 import im.point.dotty.network.LogoutReply;
@@ -82,18 +79,5 @@ public final class AuthInteractor {
             }
         });
         return single.observeOn(AndroidSchedulers.mainThread());
-    }
-
-    public static void resetActivityBackStack(Context context) {
-        final int flags = Intent.FLAG_ACTIVITY_NO_ANIMATION | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK;
-        Intent intent;
-
-        if (AppState.getInstance(context).isLoggedIn()) {
-            intent = MainActivity.getIntent(context);
-        } else {
-            intent = LoginActivity.getIntent(context);
-        }
-        intent.setFlags(flags);
-        context.startActivity(intent);
     }
 }
