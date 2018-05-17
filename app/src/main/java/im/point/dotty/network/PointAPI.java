@@ -23,4 +23,7 @@ public interface PointAPI {
 
     @GET("/api/unread-counters")
     Call<CountersReply> getCounters(@Header("Authorization") String token);
+
+    @GET("/api/post/{post}")
+    Call<PostReply> getPost(@Header("Authorization") String token, @Path("post") String id);
 }
