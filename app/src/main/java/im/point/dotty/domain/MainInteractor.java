@@ -35,10 +35,6 @@ public final class MainInteractor extends Interactor {
         this.state = AppState.getInstance(applicationContext);
     }
 
-    @Override
-    public void onDestroy() {
-    }
-
     public Single<List<MetaPost>> getRecent() {
         Single<PostsReply> single = Single.create(emitter -> {
             api.getRecent(state.getToken(), null).enqueue(new SingleCallbackAdapter<>(emitter));

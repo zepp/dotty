@@ -3,6 +3,12 @@ package im.point.dotty.domain;
 import android.content.Context;
 
 public abstract class Interactor {
-    public abstract void onCreate(Context applicationContext);
-    public abstract void onDestroy();
+    protected Context context;
+
+    public void onCreate(Context applicationContext) {
+        this.context = applicationContext;
+    }
+
+    public void onDestroy() {
+    }
 }

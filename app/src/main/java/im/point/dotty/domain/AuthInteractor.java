@@ -34,10 +34,6 @@ public final class AuthInteractor extends Interactor {
         this.state = AppState.getInstance(applicationContext);
     }
 
-    @Override
-    public void onDestroy() {
-    }
-
     public Single<LoginReply> login(String name, String password) {
         Single<LoginReply> single = Single.create(emitter -> {
             api.login(name, password).enqueue(new SingleCallbackAdapter<>(emitter));
