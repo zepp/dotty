@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public final class Post {
+public class RawPost {
     @SerializedName("pinned") boolean isPinned;
     List<String> files;
     List<String> tags;

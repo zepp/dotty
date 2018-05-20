@@ -1,6 +1,6 @@
 package im.point.dotty.network;
 
-public class Envelope {
+public abstract class Envelope {
     protected String error;
 
     public String getError() {

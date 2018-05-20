@@ -3,14 +3,14 @@ package im.point.dotty.network;
 import java.util.List;
 
 public final class PostReply extends Envelope {
-    Post post;
-    List<Comment> comments;
+    RawPost post;
+    List<RawComment> comments;
 
-    public Post getPost() {
+    public RawPost getPost() {
         return post;
     }
 
-    public List<Comment> getComments() {
+    public List<RawComment> getComments() {
         return comments;
     }
 }

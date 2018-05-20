@@ -2,7 +2,7 @@ package im.point.dotty.network;
 
 import com.google.gson.annotations.SerializedName;
 
-public final class Comment {
+public class RawComment {
     String created;
     String text;
     Author author;
