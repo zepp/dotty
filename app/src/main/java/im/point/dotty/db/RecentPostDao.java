@@ -7,14 +7,17 @@ import android.arch.persistence.room.Query;
 
 import java.util.List;
 
-import im.point.dotty.model.Comment;
+import im.point.dotty.model.RecentPost;
 import io.reactivex.Flowable;
 
 @Dao
-public interface CommentDao {
+public interface RecentPostDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void addComments(Comment... comments);
+    void addPosts(List<RecentPost> posts);
 
-    @Query("SELECT * FROM comments WHERE post_id = :postId ORDER BY timestamp")
-    Flowable<List<Comment>> getComments(String postId);
+    @Query("SELECT * FROM recent_posts ORDER BY timestamp")
+    Flowable<List<RecentPost>> getRecentPosts();
+
+    @Query("SELECT * FROM recent_posts WHERE id = :id")
+    Flowable<RecentPost> getPost(long id);
 }

@@ -6,8 +6,7 @@ import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
 
 import im.point.dotty.model.User;
-import io.reactivex.Observable;
-import io.reactivex.Single;
+import io.reactivex.Flowable;
 
 @Dao
 public interface UserDao {
@@ -18,5 +17,5 @@ public interface UserDao {
     void updateUser(User user);
 
     @Query("SELECT * FROM users WHERE id = :id")
-    Observable<User> getUser(long id);
+    Flowable<User> getUser(long id);
 }

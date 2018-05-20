@@ -3,14 +3,14 @@ package im.point.dotty.model;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
+import android.support.annotation.NonNull;
 
 import java.util.Date;
 
 @Entity(tableName = "comments",
-        primaryKeys = {"post_id", "id"},
-        foreignKeys = {@ForeignKey(entity = Post.class, parentColumns = "id", childColumns = "text_id"),
-                @ForeignKey(entity = User.class, parentColumns = "id", childColumns = "user_id")})
+        primaryKeys = {"post_id", "id"})
 public class Comment {
+    @NonNull
     @ColumnInfo(name = "post_id")
     public String postId;
     public int id;
