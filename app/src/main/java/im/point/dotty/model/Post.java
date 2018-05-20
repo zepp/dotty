@@ -1,15 +1,11 @@
 package im.point.dotty.model;
 
 import android.arch.persistence.room.ColumnInfo;
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.ForeignKey;
 import android.arch.persistence.room.PrimaryKey;
 
 import java.util.Date;
 
-@Entity(tableName = "posts",
-        foreignKeys = @ForeignKey(entity = User.class, parentColumns = "id", childColumns = "user_id"))
-public class Post {
+public abstract class Post {
     @PrimaryKey
     public long id;
     @ColumnInfo(name =  "user_id")
