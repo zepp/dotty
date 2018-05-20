@@ -30,4 +30,10 @@ public final class DottyApplication extends Application {
         super.onCreate();
         InteractorManager.getInstance(getApplicationContext());
     }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        InteractorManager.getInstance(getApplicationContext()).clear();
+    }
 }
