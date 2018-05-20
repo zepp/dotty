@@ -7,7 +7,7 @@ public class RawComment {
     String text;
     Author author;
     @SerializedName("post id") String postId;
-    @SerializedName("to comment id") int parentCommentId;
+    @SerializedName("to comment id") int toCommentId;
     @SerializedName("is rec") boolean isRecommendation;
     int id;
 
@@ -27,8 +27,8 @@ public class RawComment {
         return postId;
     }
 
-    public int getParentCommentId() {
-        return parentCommentId;
+    public int getToCommentId() {
+        return toCommentId;
     }
 
     public boolean isRecommendation() {
