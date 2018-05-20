@@ -8,9 +8,9 @@
     android:columnCount="2"
     android:padding="8dp">
 
-    <TextView android:id="@+id/post_tags"
+    <TextView android:id="@+id/post_author"
         android:layout_gravity="left"
-        android:text="tag1 tag2"/>
+        android:text="author"/>
 
     <TextView android:id="@+id/post_id"
         android:layout_gravity="right"
@@ -19,6 +19,12 @@
     <TextView android:id="@+id/post_text"
         android:layout_columnSpan="2"
         android:layout_gravity="fill"
+        android:layout_marginBottom="8dp"
         android:layout_marginTop="8dp"
         android:text="text"/>
+
+    <TextView android:id="@+id/post_tags"
+        android:layout_columnSpan="2"
+        android:layout_gravity="left"
+        android:text="tag1 tag2"/>
 </GridLayout>
