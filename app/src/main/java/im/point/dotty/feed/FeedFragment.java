@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import im.point.dotty.R;
+import im.point.dotty.domain.InteractorManager;
 import im.point.dotty.domain.MainInteractor;
 
 public abstract class FeedFragment extends Fragment {
@@ -21,7 +22,7 @@ public abstract class FeedFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        interactor = MainInteractor.getInstance(getActivity().getApplicationContext());
+        interactor = InteractorManager.from(this).get(MainInteractor.class);
         adapter = new FeedAdapter();
     }
 

@@ -15,15 +15,13 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public final class MainInteractor {
-    private static volatile MainInteractor interactor;
-    private final AppState state;
+public final class MainInteractor extends Interactor {
+    private AppState state;
     private final Gson gson;
     private final Retrofit retrofit;
     private final PointAPI api;
 
-    private MainInteractor(Context context) {
-        this.state = AppState.getInstance(context);
+    public MainInteractor() {
         this.gson = new GsonBuilder().setLenient().create();
         this.retrofit = new Retrofit.Builder()
                 .baseUrl(PointAPI.BASE)
@@ -32,15 +30,9 @@ public final class MainInteractor {
         this.api = retrofit.create(PointAPI.class);
     }
 
-    public static MainInteractor getInstance(Context context) {
-        if (interactor == null) {
-            synchronized (MainInteractor.class) {
-                if (interactor == null) {
-                    interactor = new MainInteractor(context);
-                }
-            }
-        }
-        return interactor;
+    @Override
+    public void onCreate(Context applicationContext) {
+        this.state = AppState.getInstance(applicationContext);
     }
 
     public Single<List<MetaPost>> getRecent() {
