@@ -4,7 +4,7 @@ import android.arch.persistence.room.TypeConverter;
 
 import java.util.Date;
 
-final class Converter {
+final class DateConverter {
     @TypeConverter
     public static Date fromTimestamp(Long value) {
         return value == null ? null : new Date(value);
