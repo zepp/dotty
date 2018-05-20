@@ -6,7 +6,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class SingleCallbackAdapter<T extends Envelope> implements Callback<T> {
+class SingleCallbackAdapter<T extends Envelope> implements Callback<T> {
     private final SingleEmitter<T> emitter;
 
     SingleCallbackAdapter(SingleEmitter<T> emitter) {
