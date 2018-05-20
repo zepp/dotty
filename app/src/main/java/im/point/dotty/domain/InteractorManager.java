@@ -1,6 +1,7 @@
 package im.point.dotty.domain;
 
 import android.content.Context;
+import android.support.v4.app.Fragment;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,6 +25,10 @@ public final class InteractorManager {
             }
         }
         return manager;
+    }
+
+    public static InteractorManager from(Fragment fragment) {
+        return getInstance(fragment.getActivity().getApplicationContext());
     }
 
     public <T extends Interactor> T get(Class<T> type) {

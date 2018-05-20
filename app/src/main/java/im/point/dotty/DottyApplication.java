@@ -6,6 +6,7 @@ import android.content.Intent;
 
 import im.point.dotty.domain.AppState;
 import im.point.dotty.domain.AuthInteractor;
+import im.point.dotty.domain.InteractorManager;
 import im.point.dotty.login.LoginActivity;
 import im.point.dotty.main.MainActivity;
 
@@ -27,6 +28,6 @@ public final class DottyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        AuthInteractor.getInstance(getApplicationContext());
+        InteractorManager.getInstance(getApplicationContext());
     }
 }

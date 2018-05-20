@@ -15,6 +15,7 @@ import android.widget.Toast;
 import im.point.dotty.DottyApplication;
 import im.point.dotty.R;
 import im.point.dotty.domain.AuthInteractor;
+import im.point.dotty.domain.InteractorManager;
 import im.point.dotty.network.LoginReply;
 import io.reactivex.observers.DisposableSingleObserver;
 
@@ -38,7 +39,7 @@ public class LoginFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        interactor = AuthInteractor.getInstance(getContext());
+        interactor = InteractorManager.from(this).get(AuthInteractor.class);
     }
 
     @Override

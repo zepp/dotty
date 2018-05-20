@@ -14,15 +14,13 @@ import io.reactivex.observers.DisposableSingleObserver;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public final class AuthInteractor {
-    private static volatile AuthInteractor interactor;
-    private final AppState state;
+public final class AuthInteractor extends Interactor {
+    private AppState state;
     private final Gson gson;
     private final Retrofit retrofit;
     private final AuthAPI api;
 
-    private AuthInteractor(Context context) {
-        this.state = AppState.getInstance(context);
+    private AuthInteractor() {
         this.gson = new GsonBuilder().setLenient().create();
         this.retrofit = new Retrofit.Builder()
                 .baseUrl(AuthAPI.BASE)
@@ -31,15 +29,13 @@ public final class AuthInteractor {
         this.api = retrofit.create(AuthAPI.class);
     }
 
-    public static AuthInteractor getInstance(Context context) {
-        if (interactor == null) {
-            synchronized (AuthInteractor.class) {
-                if (interactor == null) {
-                    interactor = new AuthInteractor(context);
-                }
-            }
-        }
-        return interactor;
+    @Override
+    public void onCreate(Context applicationContext) {
+        this.state = AppState.getInstance(applicationContext);
+    }
+
+    @Override
+    public void onDestroy() {
     }
 
     public Single<LoginReply> login(String name, String password) {
