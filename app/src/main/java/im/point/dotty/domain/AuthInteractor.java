@@ -20,7 +20,7 @@ public final class AuthInteractor extends Interactor {
     private final Retrofit retrofit;
     private final AuthAPI api;
 
-    private AuthInteractor() {
+    public AuthInteractor() {
         this.gson = new GsonBuilder().setLenient().create();
         this.retrofit = new Retrofit.Builder()
                 .baseUrl(AuthAPI.BASE)

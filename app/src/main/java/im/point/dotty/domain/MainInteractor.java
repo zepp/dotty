@@ -21,7 +21,7 @@ public final class MainInteractor extends Interactor {
     private final Retrofit retrofit;
     private final PointAPI api;
 
-    private MainInteractor() {
+    public MainInteractor() {
         this.gson = new GsonBuilder().setLenient().create();
         this.retrofit = new Retrofit.Builder()
                 .baseUrl(PointAPI.BASE)
