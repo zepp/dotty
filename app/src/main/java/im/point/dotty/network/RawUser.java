@@ -13,7 +13,7 @@ public class RawUser extends Envelope {
     @SerializedName("bl") boolean isBlackListed;
     Boolean gender;
     @SerializedName("wl") boolean isWhiteListed;
-    String birthday;
+    String birthdate;
     long id;
     @SerializedName("rec sub") boolean isSubscribedToRecommendations;
     String avatar;
@@ -64,8 +64,8 @@ public class RawUser extends Envelope {
         return isWhiteListed;
     }
 
-    public String getBirthday() {
-        return birthday;
+    public String getBirthdate() {
+        return birthdate;
     }
 
     public long getId() {

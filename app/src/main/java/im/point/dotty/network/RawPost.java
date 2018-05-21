@@ -51,4 +51,8 @@ public class RawPost {
     public boolean isPrivate() {
         return isPrivate;
     }
+
+    public Author getAuthor() {
+        return author;
+    }
 }
