@@ -4,11 +4,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
-import java.util.List;
-
 import im.point.dotty.R;
 import im.point.dotty.model.Post;
-import im.point.dotty.network.MetaPost;
 
 class PostHolder extends RecyclerView.ViewHolder {
     private TextView author;
@@ -25,6 +22,7 @@ class PostHolder extends RecyclerView.ViewHolder {
     }
 
     void bind(Post post) {
+        author.setText(post.name.length() == 0 ? post.login : post.name);
         id.setText("#" + post.textId);
         text.setText(post.text);
     }

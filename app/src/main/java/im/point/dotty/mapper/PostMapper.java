@@ -18,6 +18,8 @@ public final class PostMapper {
             result.id = post.getUid();
             result.textId = post.getPost().getId();
             result.userId = post.getPost().getAuthor().getId();
+            result.login = post.getPost().getAuthor().getLogin();
+            result.name = post.getPost().getAuthor().getName();
             result.text = post.getPost().getText();
             result.timestamp = format.parse(post.getPost().getCreated());
         } catch (ParseException e) {
