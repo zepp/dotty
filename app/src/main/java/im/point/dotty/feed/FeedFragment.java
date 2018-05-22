@@ -13,11 +13,12 @@ import android.view.ViewGroup;
 import im.point.dotty.R;
 import im.point.dotty.domain.InteractorManager;
 import im.point.dotty.domain.MainInteractor;
+import im.point.dotty.model.Post;
 
-public abstract class FeedFragment extends Fragment {
+public abstract class FeedFragment<T extends Post> extends Fragment {
     protected RecyclerView posts;
     protected MainInteractor interactor;
-    protected FeedAdapter adapter;
+    protected FeedAdapter<T> adapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

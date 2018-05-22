@@ -20,6 +20,8 @@ import im.point.dotty.model.RecentPost;
 import im.point.dotty.network.MetaPost;
 import im.point.dotty.network.PointAPI;
 import im.point.dotty.network.PostsReply;
+import io.reactivex.Completable;
+import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;
@@ -55,7 +57,7 @@ public final class MainInteractor extends Interactor {
         this.allPostDao = database.getAllPostDao();
     }
 
-    public Single<List<MetaPost>> fetchRecent() {
+    public Completable fetchRecent() {
         Single<PostsReply> single = Single.create(emitter -> {
             api.getRecent(state.getToken(), null).enqueue(new SingleCallbackAdapter<>(emitter));
         });
@@ -75,10 +77,14 @@ public final class MainInteractor extends Interactor {
                     public void onError(Throwable e) {
                     }
                 });
-        return single.map(reply -> reply.getPosts()).observeOn(AndroidSchedulers.mainThread());
+        return Completable.fromSingle(single).observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Single<List<MetaPost>> fetchAll() {
+    public Flowable<List<RecentPost>> getRecent() {
+        return recentPostDao.getRecentPosts().observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Completable fetchAll() {
         Single<PostsReply> single = Single.create(emitter -> {
             api.getAll(state.getToken(), null).enqueue(new SingleCallbackAdapter<>(emitter));
         });
@@ -98,10 +104,14 @@ public final class MainInteractor extends Interactor {
                     public void onError(Throwable e) {
                     }
                 });
-        return single.map(reply -> reply.getPosts()).observeOn(AndroidSchedulers.mainThread());
+        return Completable.fromSingle(single).observeOn(AndroidSchedulers.mainThread());
     }
 
-    public Single<List<MetaPost>> fetchCommented() {
+    public Flowable<List<AllPost>> getAll() {
+        return allPostDao.getAllPosts().observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Completable fetchCommented() {
         Single<PostsReply> single = Single.create(emitter -> {
            api.getComments(state.getToken(), null).enqueue(new SingleCallbackAdapter<>(emitter));
         });
@@ -122,6 +132,10 @@ public final class MainInteractor extends Interactor {
                     }
                 });
 
-        return single.map(reply -> reply.getPosts()).observeOn(AndroidSchedulers.mainThread());
+        return Completable.fromSingle(single).observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public Flowable<List<CommentedPost>> getCommented() {
+        return commentedPostDao.getCommentedPosts().observeOn(AndroidSchedulers.mainThread());
     }
 }

@@ -5,20 +5,36 @@ import android.widget.Toast;
 import java.util.List;
 
 import im.point.dotty.feed.FeedFragment;
-import im.point.dotty.network.MetaPost;
-import io.reactivex.observers.DisposableSingleObserver;
+import im.point.dotty.model.CommentedPost;
+import io.reactivex.observers.DisposableCompletableObserver;
+import io.reactivex.subscribers.DisposableSubscriber;
 
-public final class CommentedFragment extends FeedFragment {
+public final class CommentedFragment extends FeedFragment<CommentedPost> {
     public CommentedFragment() {
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        interactor.fetchCommented().subscribe(new DisposableSingleObserver<List<MetaPost>>() {
+        interactor.getCommented().subscribe(new DisposableSubscriber<List<CommentedPost>>() {
             @Override
-            public void onSuccess(List<MetaPost> metaPosts) {
-                adapter.setList(metaPosts);
+            public void onNext(List<CommentedPost> commentedPosts) {
+                adapter.setList(commentedPosts);
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                Toast.makeText(getContext(), t.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+        });
+        interactor.fetchCommented().subscribe(new DisposableCompletableObserver() {
+            @Override
+            public void onComplete() {
             }
 
             @Override
