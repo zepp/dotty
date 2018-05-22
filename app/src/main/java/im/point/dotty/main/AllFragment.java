@@ -1,9 +1,11 @@
 package im.point.dotty.main;
 
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import java.util.List;
 
+import im.point.dotty.R;
 import im.point.dotty.feed.FeedFragment;
 import im.point.dotty.model.AllPost;
 import io.reactivex.observers.DisposableCompletableObserver;
@@ -32,16 +34,25 @@ public final class AllFragment extends FeedFragment<AllPost> {
 
             }
         });
-        interactor.fetchAll().subscribe(new DisposableCompletableObserver() {
-            @Override
-            public void onComplete() {
+    }
 
-            }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.main_refresh) {
+            interactor.fetchAll().subscribe(new DisposableCompletableObserver() {
+                @Override
+                public void onComplete() {
 
-            @Override
-            public void onError(Throwable e) {
-                Toast.makeText(getContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    Toast.makeText(getContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
     }
 }
