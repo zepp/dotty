@@ -7,21 +7,25 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import im.point.dotty.R;
 import im.point.dotty.domain.InteractorManager;
 import im.point.dotty.domain.MainInteractor;
+import im.point.dotty.model.Post;
 
-public abstract class FeedFragment extends Fragment {
+public abstract class FeedFragment<T extends Post> extends Fragment {
     protected RecyclerView posts;
     protected MainInteractor interactor;
-    protected FeedAdapter adapter;
+    protected FeedAdapter<T> adapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         interactor = InteractorManager.from(this).get(MainInteractor.class);
         adapter = new FeedAdapter();
     }
@@ -38,5 +42,11 @@ public abstract class FeedFragment extends Fragment {
         posts = view.findViewById(R.id.feed_posts);
         posts.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         posts.setAdapter(adapter);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.main_menu, menu);
     }
 }

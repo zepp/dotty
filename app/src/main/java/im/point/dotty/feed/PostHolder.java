@@ -4,34 +4,26 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
-import java.util.List;
-
 import im.point.dotty.R;
-import im.point.dotty.network.MetaPost;
+import im.point.dotty.model.Post;
 
 class PostHolder extends RecyclerView.ViewHolder {
-    private TextView tags;
+    private TextView author;
     private TextView id;
     private TextView text;
+    private TextView tags;
 
     PostHolder(View itemView) {
         super(itemView);
-        tags = itemView.findViewById(R.id.post_tags);
+        author = itemView.findViewById(R.id.post_author);
         id = itemView.findViewById(R.id.post_id);
         text = itemView.findViewById(R.id.post_text);
+        tags = itemView.findViewById(R.id.post_tags);
     }
 
-    String join(List<String> list, String delim) {
-        String a = "";
-        for (String tag : list) {
-            a += " " + tag;
-        }
-        return a.trim();
-    }
-
-    void bind(MetaPost post) {
-        tags.setText(join(post.getPost().getTags(), " "));
-        id.setText(post.getPost().getId());
-        text.setText(post.getPost().getText());
+    void bind(Post post) {
+        author.setText(post.name.length() == 0 ? post.login : post.name);
+        id.setText("#" + post.textId);
+        text.setText(post.text);
     }
 }

@@ -2,13 +2,13 @@ package im.point.dotty.network;
 
 import com.google.gson.annotations.SerializedName;
 
-public final class MetaPost {
+public class MetaPost {
     @SerializedName("bookmarked") boolean isBookmarked;
     long uid;
     @SerializedName("subscribed") boolean isSubscribed;
     @SerializedName("editable") boolean isEditable;
     @SerializedName("recommended") boolean isRecommended;
-    Post post;
+    RawPost post;
 
     public boolean isBookmarked() {
         return isBookmarked;
@@ -30,7 +30,7 @@ public final class MetaPost {
         return isRecommended;
     }
 
-    public Post getPost() {
+    public RawPost getPost() {
         return post;
     }
 }

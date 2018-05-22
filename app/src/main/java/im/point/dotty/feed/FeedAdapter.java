@@ -9,21 +9,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 import im.point.dotty.R;
+import im.point.dotty.model.Post;
 import im.point.dotty.network.MetaPost;
 
-public class FeedAdapter extends RecyclerView.Adapter<PostHolder> {
-    private List<MetaPost> list;
+public class FeedAdapter<T extends Post> extends RecyclerView.Adapter<PostHolder> {
+    private List<T> list;
 
     FeedAdapter() {
         setHasStableIds(true);
         this.list = new ArrayList<>();
     }
 
-    public List<MetaPost> getList() {
+    public List<T> getList() {
         return list;
     }
 
-    public void setList(List<MetaPost> list) {
+    public void setList(List<T> list) {
         this.list = list;
         notifyDataSetChanged();
     }
@@ -46,6 +47,6 @@ public class FeedAdapter extends RecyclerView.Adapter<PostHolder> {
 
     @Override
     public long getItemId(int position) {
-        return list.get(position).getUid();
+        return list.get(position).id;
     }
 }

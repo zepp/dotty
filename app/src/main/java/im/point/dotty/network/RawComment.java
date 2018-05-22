@@ -2,12 +2,12 @@ package im.point.dotty.network;
 
 import com.google.gson.annotations.SerializedName;
 
-public final class Comment {
+public class RawComment {
     String created;
     String text;
     Author author;
     @SerializedName("post id") String postId;
-    @SerializedName("to comment id") int parentCommentId;
+    @SerializedName("to comment id") int toCommentId;
     @SerializedName("is rec") boolean isRecommendation;
     int id;
 
@@ -27,8 +27,8 @@ public final class Comment {
         return postId;
     }
 
-    public int getParentCommentId() {
-        return parentCommentId;
+    public int getToCommentId() {
+        return toCommentId;
     }
 
     public boolean isRecommendation() {

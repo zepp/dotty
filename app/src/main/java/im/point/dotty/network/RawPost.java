@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public final class Post {
+public class RawPost {
     @SerializedName("pinned") boolean isPinned;
     List<String> files;
     List<String> tags;
@@ -50,5 +50,9 @@ public final class Post {
 
     public boolean isPrivate() {
         return isPrivate;
+    }
+
+    public Author getAuthor() {
+        return author;
     }
 }
