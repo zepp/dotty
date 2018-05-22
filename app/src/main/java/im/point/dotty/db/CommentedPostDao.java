@@ -15,7 +15,7 @@ public interface CommentedPostDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<CommentedPost> posts);
 
-    @Query("SELECT * FROM commented_posts ORDER BY timestamp")
+    @Query("SELECT * FROM commented_posts ORDER BY timestamp DESC")
     Flowable<List<CommentedPost>> getAll();
 
     @Query("SELECT * FROM commented_posts WHERE id = :id")

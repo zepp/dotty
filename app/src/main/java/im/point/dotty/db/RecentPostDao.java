@@ -15,7 +15,7 @@ public interface RecentPostDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<RecentPost> posts);
 
-    @Query("SELECT * FROM recent_posts ORDER BY timestamp")
+    @Query("SELECT * FROM recent_posts ORDER BY timestamp DESC")
     Flowable<List<RecentPost>> getAll();
 
     @Query("SELECT * FROM recent_posts WHERE id = :id")
