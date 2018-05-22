@@ -15,7 +15,7 @@ public final class RecentFragment extends FeedFragment {
     @Override
     public void onStart() {
         super.onStart();
-        interactor.getRecent().subscribe(new DisposableSingleObserver<List<MetaPost>>() {
+        interactor.fetchRecent().subscribe(new DisposableSingleObserver<List<MetaPost>>() {
             @Override
             public void onSuccess(List<MetaPost> metaPosts) {
                 adapter.setList(metaPosts);

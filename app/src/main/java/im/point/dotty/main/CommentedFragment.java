@@ -15,7 +15,7 @@ public final class CommentedFragment extends FeedFragment {
     @Override
     public void onStart() {
         super.onStart();
-        interactor.getCommented().subscribe(new DisposableSingleObserver<List<MetaPost>>() {
+        interactor.fetchCommented().subscribe(new DisposableSingleObserver<List<MetaPost>>() {
             @Override
             public void onSuccess(List<MetaPost> metaPosts) {
                 adapter.setList(metaPosts);

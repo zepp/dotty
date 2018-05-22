@@ -20,9 +20,7 @@ public abstract class DottyDatabase extends RoomDatabase {
 
     public abstract CommentedPostDao getCommentedPostDao();
 
-    public abstract AllPostDao getAllDao();
+    public abstract AllPostDao getAllPostDao();
 
     public abstract UserPostDao getUserPostsDao();
-
-    public abstract CommentDao getCommentDao();
 }
