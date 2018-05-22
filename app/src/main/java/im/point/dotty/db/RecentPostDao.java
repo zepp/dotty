@@ -13,10 +13,10 @@ import io.reactivex.Flowable;
 @Dao
 public interface RecentPostDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void addPosts(List<RecentPost> posts);
+    void insertAll(List<RecentPost> posts);
 
     @Query("SELECT * FROM recent_posts ORDER BY timestamp")
-    Flowable<List<RecentPost>> getRecentPosts();
+    Flowable<List<RecentPost>> getAll();
 
     @Query("SELECT * FROM recent_posts WHERE id = :id")
     Flowable<RecentPost> getPost(long id);

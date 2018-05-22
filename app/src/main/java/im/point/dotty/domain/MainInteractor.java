@@ -70,7 +70,7 @@ public final class MainInteractor extends Interactor {
                         for (MetaPost post : metaPosts) {
                             posts.add(PostMapper.mapRecentPost(post));
                         }
-                        recentPostDao.addPosts(posts);
+                        recentPostDao.insertAll(posts);
                     }
 
                     @Override
@@ -81,7 +81,7 @@ public final class MainInteractor extends Interactor {
     }
 
     public Flowable<List<RecentPost>> getRecent() {
-        return recentPostDao.getRecentPosts().observeOn(AndroidSchedulers.mainThread());
+        return recentPostDao.getAll().observeOn(AndroidSchedulers.mainThread());
     }
 
     public Completable fetchAll() {
@@ -97,7 +97,7 @@ public final class MainInteractor extends Interactor {
                         for (MetaPost post : metaPosts) {
                             posts.add(PostMapper.mapAllPost(post));
                         }
-                        allPostDao.addPosts(posts);
+                        allPostDao.insertAll(posts);
                     }
 
                     @Override
@@ -108,7 +108,7 @@ public final class MainInteractor extends Interactor {
     }
 
     public Flowable<List<AllPost>> getAll() {
-        return allPostDao.getAllPosts().observeOn(AndroidSchedulers.mainThread());
+        return allPostDao.getAll().observeOn(AndroidSchedulers.mainThread());
     }
 
     public Completable fetchCommented() {
@@ -124,7 +124,7 @@ public final class MainInteractor extends Interactor {
                         for (MetaPost post : metaPosts) {
                             posts.add(PostMapper.mapCommentedPost(post));
                         }
-                        commentedPostDao.addPosts(posts);
+                        commentedPostDao.insertAll(posts);
                     }
 
                     @Override
@@ -136,6 +136,6 @@ public final class MainInteractor extends Interactor {
     }
 
     public Flowable<List<CommentedPost>> getCommented() {
-        return commentedPostDao.getCommentedPosts().observeOn(AndroidSchedulers.mainThread());
+        return commentedPostDao.getAll().observeOn(AndroidSchedulers.mainThread());
     }
 }

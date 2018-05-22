@@ -13,11 +13,11 @@ import io.reactivex.Flowable;
 @Dao
 public interface CommentedPostDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void addPosts(List<CommentedPost> posts);
+    void insertAll(List<CommentedPost> posts);
 
     @Query("SELECT * FROM commented_posts ORDER BY timestamp")
-    Flowable<List<CommentedPost>> getCommentedPosts();
+    Flowable<List<CommentedPost>> getAll();
 
-    @Query("SELECT * FROM commented_posts WHERE id = :id ORDER BY timestamp")
-    Flowable<List<CommentedPost>> getCommentedPost(long id);
+    @Query("SELECT * FROM commented_posts WHERE id = :id")
+    Flowable<CommentedPost> getPost(long id);
 }
