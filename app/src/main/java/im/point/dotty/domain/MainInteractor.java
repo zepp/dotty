@@ -22,9 +22,9 @@ import im.point.dotty.network.PointAPI;
 import im.point.dotty.network.PostsReply;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
-import io.reactivex.Single;
+import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.observers.DisposableSingleObserver;
+import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -58,26 +58,29 @@ public final class MainInteractor extends Interactor {
     }
 
     public Completable fetchRecent() {
-        Single<PostsReply> single = Single.create(emitter -> {
-            api.getRecent(state.getToken(), null).enqueue(new SingleCallbackAdapter<>(emitter));
+        Observable<PostsReply> source = Observable.create(emitter -> {
+            api.getRecent(state.getToken(), null).enqueue(new ObservableCallBackAdapte<>(emitter));
         });
-        single.observeOn(Schedulers.io())
-                .map(reply -> reply.getPosts())
-                .subscribe(new DisposableSingleObserver<List<MetaPost>>() {
+        source.observeOn(Schedulers.io())
+                .flatMap(postsReply -> Observable.fromIterable(postsReply.getPosts()))
+                .subscribe(new DisposableObserver<MetaPost>() {
+                    final List<RecentPost> list = new ArrayList<>();
+
                     @Override
-                    public void onSuccess(List<MetaPost> metaPosts) {
-                        List<RecentPost> posts = new ArrayList<>();
-                        for (MetaPost post : metaPosts) {
-                            posts.add(PostMapper.mapRecentPost(post));
-                        }
-                        recentPostDao.insertAll(posts);
+                    public void onNext(MetaPost post) {
+                        list.add(PostMapper.mapRecentPost(post));
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        recentPostDao.insertAll(list);
                     }
 
                     @Override
                     public void onError(Throwable e) {
                     }
                 });
-        return Completable.fromSingle(single).observeOn(AndroidSchedulers.mainThread());
+        return Completable.fromObservable(source).observeOn(AndroidSchedulers.mainThread());
     }
 
     public Flowable<List<RecentPost>> getRecent() {
@@ -85,26 +88,29 @@ public final class MainInteractor extends Interactor {
     }
 
     public Completable fetchAll() {
-        Single<PostsReply> single = Single.create(emitter -> {
-            api.getAll(state.getToken(), null).enqueue(new SingleCallbackAdapter<>(emitter));
+        Observable<PostsReply> source = Observable.create(emitter -> {
+            api.getAll(state.getToken(), null).enqueue(new ObservableCallBackAdapte<>(emitter));
         });
-        single.observeOn(Schedulers.io())
-                .map(reply -> reply.getPosts())
-                .subscribe(new DisposableSingleObserver<List<MetaPost>>() {
+        source.observeOn(Schedulers.io())
+                .flatMap(reply -> Observable.fromIterable(reply.getPosts()))
+                .subscribe(new DisposableObserver<MetaPost>() {
+                    final List<AllPost> list = new ArrayList<>();
+
                     @Override
-                    public void onSuccess(List<MetaPost> metaPosts) {
-                        List<AllPost> posts = new ArrayList<>();
-                        for (MetaPost post : metaPosts) {
-                            posts.add(PostMapper.mapAllPost(post));
-                        }
-                        allPostDao.insertAll(posts);
+                    public void onNext(MetaPost post) {
+                        list.add(PostMapper.mapAllPost(post));
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        allPostDao.insertAll(list);
                     }
 
                     @Override
                     public void onError(Throwable e) {
                     }
                 });
-        return Completable.fromSingle(single).observeOn(AndroidSchedulers.mainThread());
+        return Completable.fromObservable(source).observeOn(AndroidSchedulers.mainThread());
     }
 
     public Flowable<List<AllPost>> getAll() {
@@ -112,19 +118,22 @@ public final class MainInteractor extends Interactor {
     }
 
     public Completable fetchCommented() {
-        Single<PostsReply> single = Single.create(emitter -> {
-           api.getComments(state.getToken(), null).enqueue(new SingleCallbackAdapter<>(emitter));
+        Observable<PostsReply> source = Observable.create(emitter -> {
+            api.getComments(state.getToken(), null).enqueue(new ObservableCallBackAdapte<>(emitter));
         });
-        single.observeOn(Schedulers.io())
-                .map(reply -> reply.getPosts())
-                .subscribe(new DisposableSingleObserver<List<MetaPost>>() {
+        source.observeOn(Schedulers.io())
+                .flatMap(reply -> Observable.fromIterable(reply.getPosts()))
+                .subscribe(new DisposableObserver<MetaPost>() {
+                    final List<CommentedPost> list = new ArrayList<>();
+
                     @Override
-                    public void onSuccess(List<MetaPost> metaPosts) {
-                        List<CommentedPost> posts = new ArrayList<>();
-                        for (MetaPost post : metaPosts) {
-                            posts.add(PostMapper.mapCommentedPost(post));
-                        }
-                        commentedPostDao.insertAll(posts);
+                    public void onNext(MetaPost post) {
+                        list.add(PostMapper.mapCommentedPost(post));
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        commentedPostDao.insertAll(list);
                     }
 
                     @Override
@@ -132,7 +141,7 @@ public final class MainInteractor extends Interactor {
                     }
                 });
 
-        return Completable.fromSingle(single).observeOn(AndroidSchedulers.mainThread());
+        return Completable.fromObservable(source).observeOn(AndroidSchedulers.mainThread());
     }
 
     public Flowable<List<CommentedPost>> getCommented() {
