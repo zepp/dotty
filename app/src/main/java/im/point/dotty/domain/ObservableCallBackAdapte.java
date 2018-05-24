@@ -21,10 +21,12 @@ class ObservableCallBackAdapte<T extends Envelope> implements Callback<T> {
         String contentType = response.headers().get("content-type");
         if (!contentType.equals("application/json")) {
             emitter.onError(new RuntimeException("content type is unsupported: " + contentType));
+            return;
         }
         T envelope = response.body();
         if (envelope.getError() != null) {
             emitter.onError(new RuntimeException(envelope.getError()));
+            return;
         }
         emitter.onNext(envelope);
         emitter.onComplete();
