@@ -6,7 +6,6 @@ import android.content.Context;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import im.point.dotty.db.AllPostDao;
@@ -17,14 +16,13 @@ import im.point.dotty.mapper.PostMapper;
 import im.point.dotty.model.AllPost;
 import im.point.dotty.model.CommentedPost;
 import im.point.dotty.model.RecentPost;
-import im.point.dotty.network.MetaPost;
 import im.point.dotty.network.PointAPI;
 import im.point.dotty.network.PostsReply;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.observers.DisposableObserver;
+import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -63,23 +61,9 @@ public final class MainInteractor extends Interactor {
         });
         source.observeOn(Schedulers.io())
                 .flatMap(postsReply -> Observable.fromIterable(postsReply.getPosts()))
-                .subscribe(new DisposableObserver<MetaPost>() {
-                    final List<RecentPost> list = new ArrayList<>();
-
-                    @Override
-                    public void onNext(MetaPost post) {
-                        list.add(PostMapper.mapRecentPost(post));
-                    }
-
-                    @Override
-                    public void onComplete() {
-                        recentPostDao.insertAll(list);
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                    }
-                });
+                .map(PostMapper::mapRecentPost)
+                .toList()
+                .doOnSuccess(recentPosts -> recentPostDao.insertAll(recentPosts));
         return Completable.fromObservable(source).observeOn(AndroidSchedulers.mainThread());
     }
 
@@ -93,23 +77,9 @@ public final class MainInteractor extends Interactor {
         });
         source.observeOn(Schedulers.io())
                 .flatMap(reply -> Observable.fromIterable(reply.getPosts()))
-                .subscribe(new DisposableObserver<MetaPost>() {
-                    final List<AllPost> list = new ArrayList<>();
-
-                    @Override
-                    public void onNext(MetaPost post) {
-                        list.add(PostMapper.mapAllPost(post));
-                    }
-
-                    @Override
-                    public void onComplete() {
-                        allPostDao.insertAll(list);
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                    }
-                });
+                .map(PostMapper::mapAllPost)
+                .toList()
+                .doOnSuccess(allPosts -> allPostDao.insertAll(allPosts));
         return Completable.fromObservable(source).observeOn(AndroidSchedulers.mainThread());
     }
 
@@ -123,24 +93,9 @@ public final class MainInteractor extends Interactor {
         });
         source.observeOn(Schedulers.io())
                 .flatMap(reply -> Observable.fromIterable(reply.getPosts()))
-                .subscribe(new DisposableObserver<MetaPost>() {
-                    final List<CommentedPost> list = new ArrayList<>();
-
-                    @Override
-                    public void onNext(MetaPost post) {
-                        list.add(PostMapper.mapCommentedPost(post));
-                    }
-
-                    @Override
-                    public void onComplete() {
-                        commentedPostDao.insertAll(list);
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                    }
-                });
-
+                .map(PostMapper::mapCommentedPost)
+                .toList()
+                .doOnSuccess(commentedPosts -> commentedPostDao.insertAll(commentedPosts));
         return Completable.fromObservable(source).observeOn(AndroidSchedulers.mainThread());
     }
 
