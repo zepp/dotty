@@ -19,6 +19,8 @@ import im.point.dotty.model.RecentPost;
 import im.point.dotty.network.ObservableCallBackAdapter;
 import im.point.dotty.network.PointAPI;
 import im.point.dotty.network.PostsReply;
+import im.point.dotty.repository.RepoFactory;
+import im.point.dotty.repository.Repository;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
@@ -28,78 +30,43 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public final class MainInteractor extends Interactor {
-    private final Gson gson;
-    private final Retrofit retrofit;
-    private final PointAPI api;
-    private AppState state;
-    private DottyDatabase database;
-    private RecentPostDao recentPostDao;
-    private CommentedPostDao commentedPostDao;
-    private AllPostDao allPostDao;
+    private RepoFactory repoFactory;
+    private Repository<RecentPost> recentPostRepository;
+    private Repository<CommentedPost> commentedPostRepository;
+    private Repository<AllPost> allPostRepository;
 
     public MainInteractor() {
-        this.gson = new GsonBuilder().setLenient().create();
-        this.retrofit = new Retrofit.Builder()
-                .baseUrl(PointAPI.BASE)
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
-        this.api = retrofit.create(PointAPI.class);
     }
 
     @Override
     public void onCreate(Context applicationContext) {
-        this.state = AppState.getInstance(applicationContext);
-        this.database = Room.databaseBuilder(applicationContext, DottyDatabase.class, "main").build();
-        this.recentPostDao = database.getRecentPostDao();
-        this.commentedPostDao = database.getCommentedPostDao();
-        this.allPostDao = database.getAllPostDao();
+        repoFactory = new RepoFactory(applicationContext);
+        recentPostRepository = repoFactory.getRecentRepo();
+        commentedPostRepository = repoFactory.getCommentedRepo();
+        allPostRepository = repoFactory.getAllRepo();
     }
 
     public Completable fetchRecent() {
-        Observable<PostsReply> source = Observable.create(emitter -> {
-            api.getRecent(state.getToken(), null).enqueue(new ObservableCallBackAdapter<>(emitter));
-        });
-        source.observeOn(Schedulers.io())
-                .flatMap(postsReply -> Observable.fromIterable(postsReply.getPosts()))
-                .map(PostMapper::mapRecentPost)
-                .toList()
-                .doOnSuccess(recentPosts -> recentPostDao.insertAll(recentPosts));
-        return Completable.fromObservable(source).observeOn(AndroidSchedulers.mainThread());
+        return Completable.fromSingle(recentPostRepository.fetch()).observeOn(AndroidSchedulers.mainThread());
     }
 
     public Flowable<List<RecentPost>> getRecent() {
-        return recentPostDao.getAll().observeOn(AndroidSchedulers.mainThread());
+        return recentPostRepository.getAll().observeOn(AndroidSchedulers.mainThread());
     }
 
     public Completable fetchAll() {
-        Observable<PostsReply> source = Observable.create(emitter -> {
-            api.getAll(state.getToken(), null).enqueue(new ObservableCallBackAdapter<>(emitter));
-        });
-        source.observeOn(Schedulers.io())
-                .flatMap(reply -> Observable.fromIterable(reply.getPosts()))
-                .map(PostMapper::mapAllPost)
-                .toList()
-                .doOnSuccess(allPosts -> allPostDao.insertAll(allPosts));
-        return Completable.fromObservable(source).observeOn(AndroidSchedulers.mainThread());
+        return Completable.fromSingle(allPostRepository.fetch()).observeOn(AndroidSchedulers.mainThread());
     }
 
     public Flowable<List<AllPost>> getAll() {
-        return allPostDao.getAll().observeOn(AndroidSchedulers.mainThread());
+        return allPostRepository.getAll().observeOn(AndroidSchedulers.mainThread());
     }
 
     public Completable fetchCommented() {
-        Observable<PostsReply> source = Observable.create(emitter -> {
-            api.getComments(state.getToken(), null).enqueue(new ObservableCallBackAdapter<>(emitter));
-        });
-        source.observeOn(Schedulers.io())
-                .flatMap(reply -> Observable.fromIterable(reply.getPosts()))
-                .map(PostMapper::mapCommentedPost)
-                .toList()
-                .doOnSuccess(commentedPosts -> commentedPostDao.insertAll(commentedPosts));
-        return Completable.fromObservable(source).observeOn(AndroidSchedulers.mainThread());
+        return Completable.fromSingle(commentedPostRepository.fetch()).observeOn(AndroidSchedulers.mainThread());
     }
 
     public Flowable<List<CommentedPost>> getCommented() {
-        return commentedPostDao.getAll().observeOn(AndroidSchedulers.mainThread());
+        return commentedPostRepository.getAll().observeOn(AndroidSchedulers.mainThread());
     }
 }
