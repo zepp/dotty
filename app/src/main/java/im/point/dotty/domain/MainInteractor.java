@@ -16,13 +16,13 @@ import im.point.dotty.mapper.PostMapper;
 import im.point.dotty.model.AllPost;
 import im.point.dotty.model.CommentedPost;
 import im.point.dotty.model.RecentPost;
+import im.point.dotty.network.ObservableCallBackAdapter;
 import im.point.dotty.network.PointAPI;
 import im.point.dotty.network.PostsReply;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -57,7 +57,7 @@ public final class MainInteractor extends Interactor {
 
     public Completable fetchRecent() {
         Observable<PostsReply> source = Observable.create(emitter -> {
-            api.getRecent(state.getToken(), null).enqueue(new ObservableCallBackAdapte<>(emitter));
+            api.getRecent(state.getToken(), null).enqueue(new ObservableCallBackAdapter<>(emitter));
         });
         source.observeOn(Schedulers.io())
                 .flatMap(postsReply -> Observable.fromIterable(postsReply.getPosts()))
@@ -73,7 +73,7 @@ public final class MainInteractor extends Interactor {
 
     public Completable fetchAll() {
         Observable<PostsReply> source = Observable.create(emitter -> {
-            api.getAll(state.getToken(), null).enqueue(new ObservableCallBackAdapte<>(emitter));
+            api.getAll(state.getToken(), null).enqueue(new ObservableCallBackAdapter<>(emitter));
         });
         source.observeOn(Schedulers.io())
                 .flatMap(reply -> Observable.fromIterable(reply.getPosts()))
@@ -89,7 +89,7 @@ public final class MainInteractor extends Interactor {
 
     public Completable fetchCommented() {
         Observable<PostsReply> source = Observable.create(emitter -> {
-            api.getComments(state.getToken(), null).enqueue(new ObservableCallBackAdapte<>(emitter));
+            api.getComments(state.getToken(), null).enqueue(new ObservableCallBackAdapter<>(emitter));
         });
         source.observeOn(Schedulers.io())
                 .flatMap(reply -> Observable.fromIterable(reply.getPosts()))

@@ -8,6 +8,7 @@ import com.google.gson.GsonBuilder;
 import im.point.dotty.network.AuthAPI;
 import im.point.dotty.network.LoginReply;
 import im.point.dotty.network.LogoutReply;
+import im.point.dotty.network.SingleCallbackAdapter;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.observers.DisposableSingleObserver;

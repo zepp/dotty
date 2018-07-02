@@ -1,15 +1,15 @@
-package im.point.dotty.domain;
+package im.point.dotty.network;
 
 import im.point.dotty.network.Envelope;
-import io.reactivex.ObservableEmitter;
+import io.reactivex.SingleEmitter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-class ObservableCallBackAdapte<T extends Envelope> implements Callback<T> {
-    private final ObservableEmitter<T> emitter;
+public class SingleCallbackAdapter<T extends Envelope> implements Callback<T> {
+    private final SingleEmitter<T> emitter;
 
-    public ObservableCallBackAdapte(ObservableEmitter<T> emitter) {
+    public SingleCallbackAdapter(SingleEmitter<T> emitter) {
         this.emitter = emitter;
     }
 
@@ -28,8 +28,7 @@ class ObservableCallBackAdapte<T extends Envelope> implements Callback<T> {
             emitter.onError(new RuntimeException(envelope.getError()));
             return;
         }
-        emitter.onNext(envelope);
-        emitter.onComplete();
+        emitter.onSuccess(envelope);
     }
 
     @Override
