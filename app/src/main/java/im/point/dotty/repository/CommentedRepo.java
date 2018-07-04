@@ -3,8 +3,9 @@ package im.point.dotty.repository;
 import java.util.List;
 
 import im.point.dotty.db.CommentedPostDao;
-import im.point.dotty.mapper.PostMapper;
+import im.point.dotty.mapper.Mapper;
 import im.point.dotty.model.CommentedPost;
+import im.point.dotty.network.MetaPost;
 import im.point.dotty.network.ObservableCallBackAdapter;
 import im.point.dotty.network.PointAPI;
 import im.point.dotty.network.PostsReply;
@@ -17,11 +18,13 @@ class CommentedRepo implements Repository<CommentedPost> {
     private final PointAPI api;
     private final CommentedPostDao commentedPostDao;
     private final String token;
+    private final Mapper<CommentedPost, MetaPost> mapper;
 
-    CommentedRepo(PointAPI api, String token, CommentedPostDao commentedPostDao) {
+    CommentedRepo(PointAPI api, String token, CommentedPostDao commentedPostDao, Mapper<CommentedPost, MetaPost> mapper) {
         this.api = api;
         this.commentedPostDao = commentedPostDao;
         this.token = token;
+        this.mapper = mapper;
     }
 
     @Override
@@ -36,7 +39,7 @@ class CommentedRepo implements Repository<CommentedPost> {
         });
         return source.observeOn(Schedulers.io())
                 .flatMap(reply -> Observable.fromIterable(reply.getPosts()))
-                .map(PostMapper::mapCommentedPost)
+                .map(mapper::map)
                 .toList()
                 .doOnSuccess(commentedPosts -> commentedPostDao.insertAll(commentedPosts));
     }

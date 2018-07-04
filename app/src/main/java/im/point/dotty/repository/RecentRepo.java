@@ -3,8 +3,9 @@ package im.point.dotty.repository;
 import java.util.List;
 
 import im.point.dotty.db.RecentPostDao;
-import im.point.dotty.mapper.PostMapper;
+import im.point.dotty.mapper.Mapper;
 import im.point.dotty.model.RecentPost;
+import im.point.dotty.network.MetaPost;
 import im.point.dotty.network.ObservableCallBackAdapter;
 import im.point.dotty.network.PointAPI;
 import im.point.dotty.network.PostsReply;
@@ -17,11 +18,13 @@ class RecentRepo implements Repository<RecentPost> {
     private final PointAPI api;
     private final RecentPostDao recentPostDao;
     private final String token;
+    private final Mapper<RecentPost, MetaPost> mapper;
 
-    RecentRepo(PointAPI api, String token, RecentPostDao recentPostDao) {
+    RecentRepo(PointAPI api, String token, RecentPostDao recentPostDao, Mapper<RecentPost, MetaPost> mapper) {
         this.api = api;
         this.token = token;
         this.recentPostDao = recentPostDao;
+        this.mapper = mapper;
     }
 
     @Override
@@ -36,7 +39,7 @@ class RecentRepo implements Repository<RecentPost> {
         });
         return source.observeOn(Schedulers.io())
                 .flatMap(postsReply -> Observable.fromIterable(postsReply.getPosts()))
-                .map(PostMapper::mapRecentPost)
+                .map(mapper::map)
                 .toList()
                 .doOnSuccess(recentPosts -> recentPostDao.insertAll(recentPosts));
     }

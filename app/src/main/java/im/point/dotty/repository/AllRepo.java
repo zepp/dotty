@@ -3,8 +3,9 @@ package im.point.dotty.repository;
 import java.util.List;
 
 import im.point.dotty.db.AllPostDao;
-import im.point.dotty.mapper.PostMapper;
+import im.point.dotty.mapper.Mapper;
 import im.point.dotty.model.AllPost;
+import im.point.dotty.network.MetaPost;
 import im.point.dotty.network.ObservableCallBackAdapter;
 import im.point.dotty.network.PointAPI;
 import im.point.dotty.network.PostsReply;
@@ -17,11 +18,13 @@ class AllRepo implements Repository<AllPost> {
     private final PointAPI api;
     private final AllPostDao allPostDao;
     private final String token;
+    private final Mapper<AllPost, MetaPost> mapper;
 
-    AllRepo(PointAPI api, String token, AllPostDao allPostDao) {
+    AllRepo(PointAPI api, String token, AllPostDao allPostDao, Mapper<AllPost, MetaPost> mapper) {
         this.api = api;
         this.allPostDao = allPostDao;
         this.token = token;
+        this.mapper = mapper;
     }
 
     @Override
@@ -36,7 +39,7 @@ class AllRepo implements Repository<AllPost> {
         });
         return source.observeOn(Schedulers.io())
                 .flatMap(reply -> Observable.fromIterable(reply.getPosts()))
-                .map(PostMapper::mapAllPost)
+                .map(mapper::map)
                 .toList()
                 .doOnSuccess(allPosts -> allPostDao.insertAll(allPosts));
     }
