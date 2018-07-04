@@ -7,12 +7,12 @@ import im.point.dotty.model.Gender;
 import im.point.dotty.model.User;
 import im.point.dotty.network.RawUser;
 
-public final class UserMapper {
+public final class UserMapper implements Mapper<User, RawUser> {
     private final static SimpleDateFormat birthFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     // TODO fix nano seconds since actual format is 2014-02-03T08:47:45.109228+00:00
     private final static SimpleDateFormat regFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
-    public static User map(RawUser user) {
+    public User map(RawUser user) {
         User result = new User();
         try {
             result.id = user.getId();
