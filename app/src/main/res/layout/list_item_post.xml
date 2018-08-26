@@ -1,30 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="4dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:layout_marginStart="8dp"
     android:layout_marginTop="4dp"
-    android:background="@android:color/background_light"
-    android:columnCount="2"
-    android:padding="8dp">
+    android:layout_marginEnd="8dp">
 
-    <TextView android:id="@+id/post_author"
-        android:layout_gravity="left"
-        android:text="author"/>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/background_light">
 
-    <TextView android:id="@+id/post_id"
-        android:layout_gravity="right"
-        android:text="axhc"/>
+        <TextView
+            android:id="@+id/post_author"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toStartOf="@+id/post_id"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="author" />
 
-    <TextView android:id="@+id/post_text"
-        android:layout_columnSpan="2"
-        android:layout_gravity="fill"
-        android:layout_marginBottom="8dp"
-        android:layout_marginTop="8dp"
-        android:text="text"/>
+        <TextView
+            android:id="@+id/post_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="axhc" />
 
-    <TextView android:id="@+id/post_tags"
-        android:layout_columnSpan="2"
-        android:layout_gravity="left"
-        android:text="tag1 tag2"/>
-</GridLayout>
+        <TextView
+            android:id="@+id/post_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:maxLines="8"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/post_author"
+            tools:text="text text text text text text text text text text text text text text text text" />
+
+        <TextView
+            android:id="@+id/post_tags"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/post_text"
+            tools:text="tag1 tag2" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>
