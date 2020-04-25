@@ -1,6 +1,6 @@
 package im.point.dotty.model;
 
-import android.arch.persistence.room.Entity;
+import androidx.room.Entity;
 
 @Entity(tableName = "recent_posts")
 public class RecentPost extends Post {

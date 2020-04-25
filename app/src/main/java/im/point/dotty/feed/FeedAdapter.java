@@ -1,6 +1,6 @@
 package im.point.dotty.feed;
 
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +10,6 @@ import java.util.List;
 
 import im.point.dotty.R;
 import im.point.dotty.model.Post;
-import im.point.dotty.network.MetaPost;
 
 public class FeedAdapter<T extends Post> extends RecyclerView.Adapter<PostHolder> {
     private List<T> list;

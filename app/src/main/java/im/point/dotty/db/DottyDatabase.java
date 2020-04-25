@@ -1,8 +1,8 @@
 package im.point.dotty.db;
 
-import android.arch.persistence.room.Database;
-import android.arch.persistence.room.RoomDatabase;
-import android.arch.persistence.room.TypeConverters;
+import androidx.room.Database;
+import androidx.room.RoomDatabase;
+import androidx.room.TypeConverters;
 
 import im.point.dotty.model.AllPost;
 import im.point.dotty.model.Comment;
