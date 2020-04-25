@@ -5,8 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 
 import im.point.dotty.domain.AppState;
-import im.point.dotty.domain.AuthInteractor;
-import im.point.dotty.domain.InteractorManager;
 import im.point.dotty.login.LoginActivity;
 import im.point.dotty.main.MainActivity;
 
@@ -23,17 +21,5 @@ public final class DottyApplication extends Application {
         }
         intent.setFlags(flags);
         context.startActivity(intent);
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        InteractorManager.getInstance(getApplicationContext());
-    }
-
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-        InteractorManager.getInstance(getApplicationContext()).clear();
     }
 }

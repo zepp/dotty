@@ -1,6 +1,12 @@
 package im.point.dotty.domain;
 
+import android.app.Application;
 import android.content.Context;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -15,24 +21,21 @@ import io.reactivex.observers.DisposableSingleObserver;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public final class AuthInteractor extends Interactor {
-    private AppState state;
+public final class AuthViewModel extends AndroidViewModel {
+    private final AppState state;
     private final Gson gson;
     private final Retrofit retrofit;
     private final AuthAPI api;
 
-    public AuthInteractor() {
+    public AuthViewModel(@NonNull Application application) {
+        super(application);
         this.gson = new GsonBuilder().setLenient().create();
         this.retrofit = new Retrofit.Builder()
                 .baseUrl(AuthAPI.BASE)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
         this.api = retrofit.create(AuthAPI.class);
-    }
-
-    @Override
-    public void onCreate(Context applicationContext) {
-        this.state = AppState.getInstance(applicationContext);
+        this.state = AppState.getInstance(application);
     }
 
     public Single<LoginReply> login(String name, String password) {

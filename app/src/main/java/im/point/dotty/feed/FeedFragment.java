@@ -4,6 +4,7 @@ package im.point.dotty.feed;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -13,21 +14,22 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import im.point.dotty.R;
-import im.point.dotty.domain.InteractorManager;
-import im.point.dotty.domain.MainInteractor;
+import im.point.dotty.domain.MainViewModel;
+import im.point.dotty.domain.ViewModelFactory;
 import im.point.dotty.model.Post;
 
 public abstract class FeedFragment<T extends Post> extends Fragment {
     protected RecyclerView posts;
-    protected MainInteractor interactor;
+    protected MainViewModel viewModel;
     protected FeedAdapter<T> adapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        interactor = InteractorManager.from(this).get(MainInteractor.class);
-        adapter = new FeedAdapter();
+        viewModel = new ViewModelProvider(this,
+                new ViewModelFactory(getActivity().getApplication())).get(MainViewModel.class);
+        adapter = new FeedAdapter<>();
     }
 
     @Override

@@ -24,7 +24,7 @@ public final class AppState {
         if (state == null) {
             synchronized (AppState.class) {
                 if (state == null) {
-                    state = new AppState(context);
+                    state = new AppState(context.getApplicationContext());
                 }
             }
         }

@@ -18,7 +18,7 @@ public final class CommentedFragment extends FeedFragment<CommentedPost> {
     @Override
     public void onStart() {
         super.onStart();
-        interactor.getCommented().subscribe(new DisposableSubscriber<List<CommentedPost>>() {
+        viewModel.getCommented().subscribe(new DisposableSubscriber<List<CommentedPost>>() {
             @Override
             public void onNext(List<CommentedPost> commentedPosts) {
                 adapter.setList(commentedPosts);
@@ -39,7 +39,7 @@ public final class CommentedFragment extends FeedFragment<CommentedPost> {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.main_refresh) {
-            interactor.fetchCommented().subscribe(new DisposableCompletableObserver() {
+            viewModel.fetchCommented().subscribe(new DisposableCompletableObserver() {
                 @Override
                 public void onComplete() {
                 }

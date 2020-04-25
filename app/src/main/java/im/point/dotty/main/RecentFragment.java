@@ -18,7 +18,7 @@ public final class RecentFragment extends FeedFragment<RecentPost> {
     @Override
     public void onStart() {
         super.onStart();
-        interactor.getRecent().subscribe(new DisposableSubscriber<List<RecentPost>>() {
+        viewModel.getRecent().subscribe(new DisposableSubscriber<List<RecentPost>>() {
             @Override
             public void onNext(List<RecentPost> recentPosts) {
                 adapter.setList(recentPosts);
@@ -39,7 +39,7 @@ public final class RecentFragment extends FeedFragment<RecentPost> {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.main_refresh) {
-            interactor.fetchRecent().subscribe(new DisposableCompletableObserver() {
+            viewModel.fetchRecent().subscribe(new DisposableCompletableObserver() {
                 @Override
                 public void onComplete() {
                 }

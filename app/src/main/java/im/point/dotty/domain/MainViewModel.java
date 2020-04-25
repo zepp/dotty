@@ -1,6 +1,10 @@
 package im.point.dotty.domain;
 
-import android.content.Context;
+import android.app.Application;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.ViewModelProvider;
 
 import java.util.List;
 
@@ -13,18 +17,15 @@ import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
-public final class MainInteractor extends Interactor {
+public final class MainViewModel extends AndroidViewModel {
     private RepoFactory repoFactory;
     private Repository<RecentPost> recentPostRepository;
     private Repository<CommentedPost> commentedPostRepository;
     private Repository<AllPost> allPostRepository;
 
-    public MainInteractor() {
-    }
-
-    @Override
-    public void onCreate(Context applicationContext) {
-        repoFactory = new RepoFactory(applicationContext);
+    public MainViewModel(@NonNull Application application) {
+        super(application);
+        repoFactory = new RepoFactory(application.getBaseContext());
         recentPostRepository = repoFactory.getRecentRepo();
         commentedPostRepository = repoFactory.getCommentedRepo();
         allPostRepository = repoFactory.getAllRepo();
@@ -53,4 +54,5 @@ public final class MainInteractor extends Interactor {
     public Flowable<List<CommentedPost>> getCommented() {
         return commentedPostRepository.getAll().observeOn(AndroidSchedulers.mainThread());
     }
+
 }

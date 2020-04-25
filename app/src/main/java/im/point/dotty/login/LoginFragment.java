@@ -1,9 +1,14 @@
 package im.point.dotty.login;
 
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.google.android.material.textfield.TextInputEditText;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
+
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -14,8 +19,8 @@ import android.widget.Toast;
 
 import im.point.dotty.DottyApplication;
 import im.point.dotty.R;
-import im.point.dotty.domain.AuthInteractor;
-import im.point.dotty.domain.InteractorManager;
+import im.point.dotty.domain.AuthViewModel;
+import im.point.dotty.domain.ViewModelFactory;
 import im.point.dotty.network.LoginReply;
 import io.reactivex.observers.DisposableSingleObserver;
 
@@ -24,7 +29,7 @@ public class LoginFragment extends Fragment {
     private TextInputEditText userName;
     private TextInputEditText password;
     private Button login;
-    private AuthInteractor interactor;
+    private AuthViewModel viewModel;
 
     private String userNameText = "";
     private String passwordText = "";
@@ -39,7 +44,8 @@ public class LoginFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        interactor = InteractorManager.from(this).get(AuthInteractor.class);
+        viewModel = new ViewModelProvider(this,
+                new ViewModelFactory(getActivity().getApplication())).get(AuthViewModel.class);
     }
 
     @Override
@@ -71,7 +77,7 @@ public class LoginFragment extends Fragment {
     private class OnLogin implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            interactor.login(userNameText, passwordText)
+            viewModel.login(userNameText, passwordText)
                     .subscribe(new DisposableSingleObserver<LoginReply>() {
                         @Override
                         public void onSuccess(LoginReply loginReply) {
