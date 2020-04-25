@@ -1,14 +1,6 @@
 package im.point.dotty.login;
 
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import com.google.android.material.textfield.TextInputEditText;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModel;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -17,15 +9,23 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputEditText;
+
 import im.point.dotty.DottyApplication;
 import im.point.dotty.R;
+import im.point.dotty.common.RxFragment;
 import im.point.dotty.domain.AuthViewModel;
 import im.point.dotty.domain.ViewModelFactory;
 import im.point.dotty.network.LoginReply;
 import io.reactivex.observers.DisposableSingleObserver;
 
 
-public class LoginFragment extends Fragment {
+public class LoginFragment extends RxFragment {
     private TextInputEditText userName;
     private TextInputEditText password;
     private Button login;
@@ -77,8 +77,9 @@ public class LoginFragment extends Fragment {
     private class OnLogin implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            viewModel.login(userNameText, passwordText)
-                    .subscribe(new DisposableSingleObserver<LoginReply>() {
+            v.setEnabled(false);
+            addDisposable(viewModel.login(userNameText, passwordText)
+                    .subscribeWith(new DisposableSingleObserver<LoginReply>() {
                         @Override
                         public void onSuccess(LoginReply loginReply) {
                             DottyApplication.resetActivityBackStack(getActivity().getApplicationContext());
@@ -86,9 +87,10 @@ public class LoginFragment extends Fragment {
 
                         @Override
                         public void onError(Throwable e) {
+                            v.setEnabled(true);
                             Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
-                    });
+                    }));
         }
     }
 

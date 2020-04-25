@@ -18,7 +18,7 @@ public final class AllFragment extends FeedFragment<AllPost> {
     @Override
     public void onStart() {
         super.onStart();
-        viewModel.getAll().subscribe(new DisposableSubscriber<List<AllPost>>() {
+        addDisposable(viewModel.getAll().subscribeWith(new DisposableSubscriber<List<AllPost>>() {
             @Override
             public void onNext(List<AllPost> allPosts) {
                 adapter.setList(allPosts);
@@ -33,23 +33,22 @@ public final class AllFragment extends FeedFragment<AllPost> {
             public void onComplete() {
 
             }
-        });
+        }));
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.main_refresh) {
-            viewModel.fetchAll().subscribe(new DisposableCompletableObserver() {
+            addDisposable(viewModel.fetchAll().subscribeWith(new DisposableCompletableObserver() {
                 @Override
                 public void onComplete() {
-
                 }
 
                 @Override
                 public void onError(Throwable e) {
                     Toast.makeText(getContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
                 }
-            });
+            }));
             return true;
         } else {
             return super.onOptionsItemSelected(item);

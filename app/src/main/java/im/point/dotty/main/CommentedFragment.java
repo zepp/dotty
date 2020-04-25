@@ -18,7 +18,7 @@ public final class CommentedFragment extends FeedFragment<CommentedPost> {
     @Override
     public void onStart() {
         super.onStart();
-        viewModel.getCommented().subscribe(new DisposableSubscriber<List<CommentedPost>>() {
+        addDisposable(viewModel.getCommented().subscribeWith(new DisposableSubscriber<List<CommentedPost>>() {
             @Override
             public void onNext(List<CommentedPost> commentedPosts) {
                 adapter.setList(commentedPosts);
@@ -33,13 +33,13 @@ public final class CommentedFragment extends FeedFragment<CommentedPost> {
             public void onComplete() {
 
             }
-        });
+        }));
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.main_refresh) {
-            viewModel.fetchCommented().subscribe(new DisposableCompletableObserver() {
+            addDisposable(viewModel.fetchCommented().subscribeWith(new DisposableCompletableObserver() {
                 @Override
                 public void onComplete() {
                 }
@@ -48,7 +48,7 @@ public final class CommentedFragment extends FeedFragment<CommentedPost> {
                 public void onError(Throwable e) {
                     Toast.makeText(getContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
                 }
-            });
+            }));
             return true;
         } else {
             return super.onOptionsItemSelected(item);

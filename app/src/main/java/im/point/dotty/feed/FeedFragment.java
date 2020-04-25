@@ -14,11 +14,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import im.point.dotty.R;
+import im.point.dotty.common.RxFragment;
 import im.point.dotty.domain.MainViewModel;
 import im.point.dotty.domain.ViewModelFactory;
 import im.point.dotty.model.Post;
 
-public abstract class FeedFragment<T extends Post> extends Fragment {
+public abstract class FeedFragment<T extends Post> extends RxFragment {
     protected RecyclerView posts;
     protected MainViewModel viewModel;
     protected FeedAdapter<T> adapter;

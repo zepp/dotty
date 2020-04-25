@@ -18,7 +18,7 @@ public final class RecentFragment extends FeedFragment<RecentPost> {
     @Override
     public void onStart() {
         super.onStart();
-        viewModel.getRecent().subscribe(new DisposableSubscriber<List<RecentPost>>() {
+        addDisposable(viewModel.getRecent().subscribeWith(new DisposableSubscriber<List<RecentPost>>() {
             @Override
             public void onNext(List<RecentPost> recentPosts) {
                 adapter.setList(recentPosts);
@@ -33,13 +33,13 @@ public final class RecentFragment extends FeedFragment<RecentPost> {
             public void onComplete() {
 
             }
-        });
+        }));
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.main_refresh) {
-            viewModel.fetchRecent().subscribe(new DisposableCompletableObserver() {
+            addDisposable(viewModel.fetchRecent().subscribeWith(new DisposableCompletableObserver() {
                 @Override
                 public void onComplete() {
                 }
@@ -48,7 +48,7 @@ public final class RecentFragment extends FeedFragment<RecentPost> {
                 public void onError(Throwable e) {
                     Toast.makeText(getContext(), e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                 }
-            });
+            }));
             return true;
         } else {
             return super.onOptionsItemSelected(item);
