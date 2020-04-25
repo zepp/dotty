@@ -2,6 +2,7 @@ package im.point.dotty.domain;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -11,6 +12,8 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import im.point.dotty.login.LoginActivity;
+import im.point.dotty.main.MainActivity;
 import im.point.dotty.network.AuthAPI;
 import im.point.dotty.network.LoginReply;
 import im.point.dotty.network.LogoutReply;
@@ -75,5 +78,18 @@ public final class AuthViewModel extends AndroidViewModel {
             }
         });
         return single.observeOn(AndroidSchedulers.mainThread());
+    }
+
+    public void resetActivityBackStack() {
+        int flags = Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK;
+        Intent intent;
+
+        if (state.isLoggedIn()) {
+            intent = MainActivity.getIntent(getApplication().getBaseContext());
+        } else {
+            intent = LoginActivity.getIntent(getApplication().getBaseContext());
+        }
+        intent.setFlags(flags);
+        getApplication().startActivity(intent);
     }
 }

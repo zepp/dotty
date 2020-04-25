@@ -82,7 +82,7 @@ public class LoginFragment extends RxFragment {
                     .subscribeWith(new DisposableSingleObserver<LoginReply>() {
                         @Override
                         public void onSuccess(LoginReply loginReply) {
-                            DottyApplication.resetActivityBackStack(getActivity().getApplicationContext());
+                            viewModel.resetActivityBackStack();
                         }
 
                         @Override
