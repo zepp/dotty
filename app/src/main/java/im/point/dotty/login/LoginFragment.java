@@ -45,7 +45,7 @@ public class LoginFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(this,
-                new ViewModelFactory(getActivity().getApplication())).get(AuthViewModel.class);
+                new ViewModelFactory(requireActivity().getApplication())).get(AuthViewModel.class);
     }
 
     @Override

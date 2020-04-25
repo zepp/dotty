@@ -28,7 +28,7 @@ public abstract class FeedFragment<T extends Post> extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         viewModel = new ViewModelProvider(this,
-                new ViewModelFactory(getActivity().getApplication())).get(MainViewModel.class);
+                new ViewModelFactory(requireActivity().getApplication())).get(MainViewModel.class);
         adapter = new FeedAdapter<>();
     }
 
