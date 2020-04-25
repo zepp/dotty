@@ -18,12 +18,12 @@ import io.reactivex.Flowable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
 public final class MainViewModel extends AndroidViewModel {
-    private RepoFactory repoFactory;
-    private Repository<RecentPost> recentPostRepository;
-    private Repository<CommentedPost> commentedPostRepository;
-    private Repository<AllPost> allPostRepository;
+    private final RepoFactory repoFactory;
+    private final Repository<RecentPost> recentPostRepository;
+    private final Repository<CommentedPost> commentedPostRepository;
+    private final Repository<AllPost> allPostRepository;
 
-    public MainViewModel(@NonNull Application application) {
+    MainViewModel(@NonNull Application application) {
         super(application);
         repoFactory = new RepoFactory(application.getBaseContext());
         recentPostRepository = repoFactory.getRecentRepo();

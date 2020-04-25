@@ -30,7 +30,7 @@ public final class AuthViewModel extends AndroidViewModel {
     private final Retrofit retrofit;
     private final AuthAPI api;
 
-    public AuthViewModel(@NonNull Application application) {
+    AuthViewModel(@NonNull Application application) {
         super(application);
         this.gson = new GsonBuilder().setLenient().create();
         this.retrofit = new Retrofit.Builder()
