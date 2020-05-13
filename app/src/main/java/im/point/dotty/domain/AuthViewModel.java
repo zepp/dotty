@@ -25,6 +25,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public final class AuthViewModel extends AndroidViewModel {
+    private final static String BASE = "https://point.im";
     private final AppState state;
     private final Gson gson;
     private final Retrofit retrofit;
@@ -34,7 +35,7 @@ public final class AuthViewModel extends AndroidViewModel {
         super(application);
         this.gson = new GsonBuilder().setLenient().create();
         this.retrofit = new Retrofit.Builder()
-                .baseUrl(AuthAPI.BASE)
+                .baseUrl(BASE)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
         this.api = retrofit.create(AuthAPI.class);
@@ -50,8 +51,8 @@ public final class AuthViewModel extends AndroidViewModel {
             public void onSuccess(LoginReply reply) {
                 state.setIsLoggedIn(true);
                 state.setUserName(name);
-                state.setCsrfToken(reply.getCsrfToken());
-                state.setToken(reply.getToken());
+                state.setCsrfToken(reply.csrfToken);
+                state.setToken(reply.token);
             }
 
             @Override

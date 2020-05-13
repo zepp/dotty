@@ -11,13 +11,13 @@ class PostMapper {
 
     protected static <T extends Post> T map(T result, MetaPost post) {
         try {
-            result.id = post.getUid();
-            result.textId = post.getPost().getId();
-            result.userId = post.getPost().getAuthor().getId();
-            result.login = post.getPost().getAuthor().getLogin();
-            result.name = post.getPost().getAuthor().getName();
-            result.text = post.getPost().getText();
-            result.timestamp = format.parse(post.getPost().getCreated());
+            result.id = post.uid;
+            result.textId = post.post.id;
+            result.userId = post.post.author.id;
+            result.login = post.post.author.login;
+            result.name = post.post.author.name;
+            result.text = post.post.text;
+            result.timestamp = format.parse(post.post.created);
         } catch (ParseException e) {
             return null;
         }

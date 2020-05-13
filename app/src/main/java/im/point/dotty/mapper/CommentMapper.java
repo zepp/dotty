@@ -12,11 +12,11 @@ public final class CommentMapper implements Mapper<Comment, RawComment> {
     public Comment map(RawComment comment) {
         Comment result = new Comment();
         try {
-            result.postId = comment.getPostId();
-            result.id = comment.getId();
-            result.parentId = comment.getToCommentId();
-            result.text = comment.getText();
-            result.timestamp = format.parse(comment.getCreated());
+            result.postId = comment.postId;
+            result.id = comment.id;
+            result.parentId = comment.toCommentId;
+            result.text = comment.text;
+            result.timestamp = format.parse(comment.created);
         } catch (ParseException e) {
             return null;
         }

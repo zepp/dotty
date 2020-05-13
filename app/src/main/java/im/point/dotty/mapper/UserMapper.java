@@ -15,21 +15,21 @@ public final class UserMapper implements Mapper<User, RawUser> {
     public User map(RawUser user) {
         User result = new User();
         try {
-            result.id = user.getId();
-            result.login = user.getLogin();
-            result.name = user.getName();
-            result.registrationDate = regFormat.parse(user.getCreated());
-            result.birthDate = birthFormat.parse(user.getBirthdate());
-            if (user.getGender() == null) {
+            result.id = user.id;
+            result.login = user.login;
+            result.name = user.name;
+            result.registrationDate = regFormat.parse(user.created);
+            result.birthDate = birthFormat.parse(user.birthdate);
+            if (user.gender == null) {
                 result.gender = Gender.ROBOT;
             } else {
-                if (user.getGender().equals(true)) {
+                if (user.gender.equals(true)) {
                     result.gender = Gender.MALE;
                 } else {
                     result.gender = Gender.FEMALE;
                 }
             }
-            result.about = user.getAbout();
+            result.about = user.about;
         } catch (ParseException e){
             return null;
         }
