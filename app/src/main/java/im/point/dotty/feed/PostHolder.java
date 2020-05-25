@@ -22,8 +22,8 @@ class PostHolder extends RecyclerView.ViewHolder {
     }
 
     void bind(Post post) {
-        author.setText(post.name.length() == 0 ? post.login : post.name);
-        id.setText("#" + post.textId);
-        text.setText(post.text);
+        author.setText(post.getName().length() == 0 ? post.getLogin() : post.getName());
+        id.setText("#" + post.getPageId());
+        text.setText(post.getText());
     }
 }

@@ -13,7 +13,7 @@ import io.reactivex.schedulers.Schedulers
 internal class AllRepo(private val api: PointAPI,
                        private val token: String,
                        private val allPostDao: AllPostDao,
-                       private val mapper: Mapper<AllPost, MetaPost?>)
+                       private val mapper: Mapper<AllPost, MetaPost>)
     : Repository<AllPost> {
 
     override fun getAll(): Flowable<List<AllPost>> {
@@ -26,7 +26,7 @@ internal class AllRepo(private val api: PointAPI,
         return source
                 .observeOn(Schedulers.io())
                 .flatMap { reply: PostsReply -> Observable.fromIterable(reply.posts) }
-                .map { entry: MetaPost? -> mapper.map(entry) }
+                .map { entry: MetaPost -> mapper.map(entry) }
                 .toList()
                 .doOnSuccess { allPosts: List<AllPost> -> allPostDao.insertAll(allPosts) }
     }

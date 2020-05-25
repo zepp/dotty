@@ -16,7 +16,7 @@ import io.reactivex.schedulers.Schedulers
 internal class CommentedRepo(private val api: PointAPI,
                              private val token: String,
                              private val commentedPostDao: CommentedPostDao,
-                             private val mapper: Mapper<CommentedPost, MetaPost?>)
+                             private val mapper: Mapper<CommentedPost, MetaPost>)
     : Repository<CommentedPost> {
 
     override fun getAll(): Flowable<List<CommentedPost>> {
@@ -28,7 +28,7 @@ internal class CommentedRepo(private val api: PointAPI,
         return source
                 .observeOn(Schedulers.io())
                 .flatMap { reply: PostsReply -> Observable.fromIterable(reply.posts) }
-                .map { entry: MetaPost? -> mapper.map(entry) }
+                .map { entry: MetaPost -> mapper.map(entry) }
                 .toList()
                 .doOnSuccess { commentedPosts: List<CommentedPost> -> commentedPostDao.insertAll(commentedPosts) }
     }

@@ -46,6 +46,6 @@ public class FeedAdapter<T extends Post> extends RecyclerView.Adapter<PostHolder
 
     @Override
     public long getItemId(int position) {
-        return list.get(position).id;
+        return list.get(position).getPageId();
     }
 }
