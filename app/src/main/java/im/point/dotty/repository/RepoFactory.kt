@@ -25,15 +25,15 @@ class RepoFactory(context: Context) {
     private val state: AppState
 
     fun getRecentRepo(): Repository<RecentPost> {
-        return RecentRepo(api, state.token, database.recentPostDao, RecentPostMapper())
+        return RecentRepo(api, state.token, database.getRecentPostDao(), RecentPostMapper())
     }
 
     fun getCommentedRepo(): Repository<CommentedPost> {
-        return CommentedRepo(api, state.token, database.commentedPostDao, CommentedPostMapper())
+        return CommentedRepo(api, state.token, database.getCommentedPostDao(), CommentedPostMapper())
     }
 
     fun getAllRepo(): Repository<AllPost> {
-        return AllRepo(api, state.token, database.allPostDao, AllPostMapper())
+        return AllRepo(api, state.token, database.getAllPostDao(), AllPostMapper())
     }
 
     init {

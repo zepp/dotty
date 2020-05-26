@@ -20,7 +20,7 @@ internal class CommentedRepo(private val api: PointAPI,
     : Repository<CommentedPost> {
 
     override fun getAll(): Flowable<List<CommentedPost>> {
-        return commentedPostDao.all
+        return commentedPostDao.getAll()
     }
 
     override fun fetch(): Single<List<CommentedPost>> {

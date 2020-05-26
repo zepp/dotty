@@ -17,7 +17,7 @@ internal class AllRepo(private val api: PointAPI,
     : Repository<AllPost> {
 
     override fun getAll(): Flowable<List<AllPost>> {
-        return allPostDao.all
+        return allPostDao.getAll()
     }
 
     override fun fetch(): Single<List<AllPost>> {

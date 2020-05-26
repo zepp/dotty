@@ -7,7 +7,6 @@ import androidx.room.TypeConverters
 import java.util.*
 
 @Entity(tableName = "users")
-@TypeConverters(GenderConverter::class)
 data class User (@PrimaryKey
                  val id: Long) {
     var login: String? = null

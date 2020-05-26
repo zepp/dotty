@@ -1,0 +1,20 @@
+package im.point.dotty.db
+
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import im.point.dotty.model.RecentPost
+import io.reactivex.Flowable
+
+@Dao
+interface RecentPostDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAll(posts: List<RecentPost>)
+
+    @Query("SELECT * FROM recent_posts ORDER BY timestamp DESC")
+    fun getAll(): Flowable<List<RecentPost>>
+
+    @Query("SELECT * FROM recent_posts WHERE id = :id")
+    fun getPost(id: Long): Flowable<RecentPost>
+}

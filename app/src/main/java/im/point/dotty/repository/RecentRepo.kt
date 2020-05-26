@@ -20,7 +20,7 @@ internal class RecentRepo(private val api: PointAPI,
     : Repository<RecentPost> {
 
     override fun getAll(): Flowable<List<RecentPost>> {
-        return recentPostDao.all
+        return recentPostDao.getAll()
     }
 
     override fun fetch(): Single<List<RecentPost>> {
