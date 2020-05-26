@@ -2,13 +2,13 @@ package im.point.dotty.network
 
 import com.google.gson.annotations.SerializedName
 
-data class RawComment(@JvmField var created: String? = null,
-                      @JvmField var text: String? = null,
-                      @JvmField var author: Author? = null,
-                      @JvmField var id : Int? = null,
-                      @JvmField @SerializedName("post id")
+data class RawComment(var created: String? = null,
+                      var text: String? = null,
+                      var author: Author? = null,
+                      var id : Int? = null,
+                      @SerializedName("post_id")
                       var postId: String? = null,
-                      @JvmField @SerializedName("to comment id")
+                      @SerializedName("to_comment_id")
                       var toCommentId : Int? = null,
-                      @JvmField @SerializedName("is rec")
+                      @SerializedName("is_rec")
                       var isRecommendation : Boolean? = null)

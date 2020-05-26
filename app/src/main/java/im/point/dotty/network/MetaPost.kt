@@ -2,18 +2,13 @@ package im.point.dotty.network
 
 import com.google.gson.annotations.SerializedName
 
-data class MetaPost(@JvmField @SerializedName("bookmarked")
-                    var isBookmarked : Boolean? = false,
-                    @JvmField
+data class MetaPost(@SerializedName("bookmarked")
+                    var isBookmarked : Boolean? = null,
                     var uid: Long? = null,
-
-                    @JvmField @SerializedName("subscribed")
+                    @SerializedName("subscribed")
                     var isSubscribed : Boolean? = null,
-
-                    @JvmField @SerializedName("editable")
+                    @SerializedName("editable")
                     var isEditable : Boolean? = null,
-
-                    @JvmField @SerializedName("recommended")
+                    @SerializedName("recommended")
                     var isRecommended : Boolean? = null,
-                    @JvmField
                     var post: RawPost? = null)

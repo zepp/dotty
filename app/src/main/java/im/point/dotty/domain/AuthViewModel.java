@@ -51,8 +51,8 @@ public final class AuthViewModel extends AndroidViewModel {
             public void onSuccess(LoginReply reply) {
                 state.setIsLoggedIn(true);
                 state.setUserName(name);
-                state.setCsrfToken(reply.csrfToken);
-                state.setToken(reply.token);
+                state.setCsrfToken(reply.getCsrfToken());
+                state.setToken(reply.getToken());
             }
 
             @Override

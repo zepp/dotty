@@ -2,43 +2,17 @@ package im.point.dotty.network
 
 import com.google.gson.annotations.SerializedName
 
-open class RawUser(@JvmField
-                   var about: String? = null,
-                   @JvmField
-                   var xmpp: String? = null,
-                   @JvmField
-                   var name: String? = null,
-                   @JvmField @SerializedName("deny anonymous")
-                   var isDenyAnonymous: Boolean? = null,
-                   @JvmField @SerializedName("private")
-                   var isPrivate: Boolean? = null,
-                   @JvmField @SerializedName("subscribed")
-                   var isSubscribed: Boolean? = null,
-                   @JvmField
-                   var created: String? = null,
-                   @JvmField @SerializedName("bl")
-                   var isBlackListed: Boolean? = null,
-                   @JvmField
-                   var gender: Boolean? = null,
-                   @JvmField @SerializedName("wl")
-                   var isWhiteListed: Boolean? = null,
-                   @JvmField
-                   var birthdate: String? = null,
-                   @JvmField
-                   var id: Long? = null,
-                   @JvmField @SerializedName("rec sub")
-                   var isSubscribedToRecommendations: Boolean? = null,
-                   @JvmField
-                   var avatar: String? = null,
-                   @JvmField
-                   var skype: String? = null,
-                   @JvmField
-                   var login: String? = null,
-                   @JvmField
-                   var icq: String? = null,
-                   @JvmField
-                   var homepage: String? = null,
-                   @JvmField
-                   var email: String? = null,
-                   @JvmField
-                   var location: String? = null) : Envelope()
+abstract class RawUser() : Envelope() {
+    var about: String?= null
+    var xmpp: String?= null
+    var name: String?= null
+    var created: String?= null
+    var gender: Boolean?= null
+    var birthdate: String?= null
+    var avatar: String?= null
+    var skype: String?= null
+    var icq: String?= null
+    var homepage: String?= null
+    var email: String?= null
+    var location: String? = null
+}
