@@ -5,8 +5,8 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class SingleCallbackAdapter<T : Envelope>(private val emitter: SingleEmitter<T>) : Callback<T> {
-    override fun onResponse(call: Call<T>, response: Response<T>) {
+class SingleCallbackAdapter<T : Envelope>(private val emitter: SingleEmitter<T>) : Callback<T?> {
+    override fun onResponse(call: Call<T?>, response: Response<T?>) {
         if (!response.isSuccessful) {
             emitter.onError(RuntimeException("request failed with error code: " + response.code()))
         }
@@ -27,7 +27,7 @@ class SingleCallbackAdapter<T : Envelope>(private val emitter: SingleEmitter<T>)
         }
     }
 
-    override fun onFailure(call: Call<T>, t: Throwable) {
+    override fun onFailure(call: Call<T?>, t: Throwable) {
         emitter.onError(t)
     }
 }
