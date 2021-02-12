@@ -28,10 +28,10 @@ class AuthViewModel internal constructor(application: Application) : AndroidView
 
     fun login(name: String, password: String): Single<LoginReply> {
         val single = Single.create { emitter: SingleEmitter<LoginReply> -> api.login(name, password).enqueue(SingleCallbackAdapter(emitter)) }
-        single.subscribe({value -> state.isLoggedIn = true
+        single.subscribe { value -> state.isLoggedIn = true
             state.userName = name
             state.csrfToken = value.csrfToken ?: throw Exception("CSRF token is empty")
-            state.token = value.token ?: throw Exception("token is empty")})
+            state.token = value.token ?: throw Exception("token is empty")}
         return single.observeOn(AndroidSchedulers.mainThread())
     }
 
@@ -51,14 +51,12 @@ class AuthViewModel internal constructor(application: Application) : AndroidView
     }
 
     fun resetActivityBackStack() {
-        val flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        val intent: Intent
-        intent = if (state.isLoggedIn == true) {
+        val intent: Intent = if (state.isLoggedIn == true) {
             MainActivity.getIntent(getApplication<Application>().baseContext)
         } else {
             LoginActivity.getIntent(getApplication<Application>().baseContext)
         }
-        intent.flags = flags
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         getApplication<Application>().startActivity(intent)
     }
 
