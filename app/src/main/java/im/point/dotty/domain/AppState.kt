@@ -5,7 +5,7 @@ import android.content.SharedPreferences
 import android.content.res.Resources
 import im.point.dotty.R
 
-class AppState private constructor(context: Context) {
+class AppState (context: Context) {
     private val IS_LOGGED_IN = "is-logged-in"
     private val USER_NAME = "user-name"
     private val TOKEN = "token"
@@ -45,22 +45,6 @@ class AppState private constructor(context: Context) {
                 if (value == null) remove(CSRF_TOKEN).apply() else putString(CSRF_TOKEN, value).apply()
             }
         }
-
-    companion object {
-        @Volatile
-        private var state: AppState? = null
-
-        fun getInstance(context: Context): AppState {
-            if (state == null) {
-                synchronized(this) {
-                    if (state == null) {
-                        state = AppState(context.applicationContext)
-                    }
-                }
-            }
-            return state!!
-        }
-    }
 
     init {
         preferences = context.getSharedPreferences(this::class.simpleName, Context.MODE_PRIVATE)

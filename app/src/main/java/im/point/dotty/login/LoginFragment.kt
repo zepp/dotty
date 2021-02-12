@@ -29,7 +29,7 @@ class LoginFragment : RxFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProvider(this,
-                ViewModelFactory(requireActivity().application)).get(AuthViewModel::class.java)
+                ViewModelFactory(requireActivity())).get(AuthViewModel::class.java)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

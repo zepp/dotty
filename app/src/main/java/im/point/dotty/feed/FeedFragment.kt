@@ -21,7 +21,7 @@ abstract class FeedFragment<T : Post> : RxFragment() {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
         viewModel = ViewModelProvider(this,
-                ViewModelFactory(requireActivity().application)).get(MainViewModel::class.java)
+                ViewModelFactory(requireActivity())).get(MainViewModel::class.java)
         adapter = FeedAdapter()
     }
 

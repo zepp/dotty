@@ -11,7 +11,7 @@ class SplashActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(this, ViewModelFactory(application))
+        viewModel = ViewModelProvider(this, ViewModelFactory(this))
                 .get(AuthViewModel::class.java)
     }
 

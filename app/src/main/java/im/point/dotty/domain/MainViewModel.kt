@@ -1,7 +1,7 @@
 package im.point.dotty.domain
 
-import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import im.point.dotty.DottyApplication
 import im.point.dotty.model.AllPost
 import im.point.dotty.model.CommentedPost
 import im.point.dotty.model.RecentPost
@@ -11,7 +11,7 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 
-class MainViewModel internal constructor(application: Application) : AndroidViewModel(application) {
+class MainViewModel internal constructor(application: DottyApplication) : AndroidViewModel(application) {
     private val repoFactory: RepoFactory
     private val recentPostRepository: Repository<RecentPost>
     private val commentedPostRepository: Repository<CommentedPost>
@@ -42,7 +42,7 @@ class MainViewModel internal constructor(application: Application) : AndroidView
     }
 
     init {
-        repoFactory = RepoFactory(application.baseContext)
+        repoFactory = application.repoFactory
         recentPostRepository = repoFactory.getRecentRepo()
         commentedPostRepository = repoFactory.getCommentedRepo()
         allPostRepository = repoFactory.getAllRepo()

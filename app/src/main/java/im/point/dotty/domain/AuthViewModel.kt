@@ -4,8 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
+import im.point.dotty.DottyApplication
 import im.point.dotty.login.LoginActivity
 import im.point.dotty.main.MainActivity
 import im.point.dotty.network.AuthAPI
@@ -16,14 +15,10 @@ import io.reactivex.Single
 import io.reactivex.SingleEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableSingleObserver
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 @SuppressLint("CheckResult")
-class AuthViewModel internal constructor(application: Application) : AndroidViewModel(application) {
+class AuthViewModel internal constructor(application: DottyApplication) : AndroidViewModel(application) {
     private val state: AppState
-    private val gson: Gson
-    private val retrofit: Retrofit
     private val api: AuthAPI
 
     fun login(name: String, password: String): Single<LoginReply> {
@@ -60,17 +55,8 @@ class AuthViewModel internal constructor(application: Application) : AndroidView
         getApplication<Application>().startActivity(intent)
     }
 
-    companion object {
-        private const val BASE = "https://point.im"
-    }
-
     init {
-        gson = GsonBuilder().setLenient().create()
-        retrofit = Retrofit.Builder()
-                .baseUrl(BASE)
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build()
-        api = retrofit.create(AuthAPI::class.java)
-        state = AppState.getInstance(application)
+        api = application.authApi
+        state = application.state
     }
 }
