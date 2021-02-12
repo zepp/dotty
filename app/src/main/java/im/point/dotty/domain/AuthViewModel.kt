@@ -28,18 +28,19 @@ class AuthViewModel internal constructor(application: Application) : AndroidView
 
     fun login(name: String, password: String): Single<LoginReply> {
         val single = Single.create { emitter: SingleEmitter<LoginReply> -> api.login(name, password).enqueue(SingleCallbackAdapter(emitter)) }
-        single.subscribe({value -> state.setIsLoggedIn(true)
+        single.subscribe({value -> state.isLoggedIn = true
             state.userName = name
-            state.csrfToken = value.csrfToken
-            state.token = value.token})
+            state.csrfToken = value.csrfToken ?: throw Exception("CSRF token is empty")
+            state.token = value.token ?: throw Exception("token is empty")})
         return single.observeOn(AndroidSchedulers.mainThread())
     }
 
     fun logout(): Single<LogoutReply> {
-        val single = Single.create { emitter: SingleEmitter<LogoutReply> -> api.logout(state.csrfToken).enqueue(SingleCallbackAdapter(emitter)) }
+        val single = Single.create { emitter: SingleEmitter<LogoutReply> ->
+            api.logout(state.csrfToken ?: throw Exception("invalid CSRF token")).enqueue(SingleCallbackAdapter(emitter)) }
         single.subscribe(object  : DisposableSingleObserver<LogoutReply>() {
             override fun onSuccess(logoutReply: LogoutReply) {
-                state.setIsLoggedIn(false)
+                state.isLoggedIn = false
                 state.csrfToken = null
                 state.token = null
             }
@@ -52,7 +53,7 @@ class AuthViewModel internal constructor(application: Application) : AndroidView
     fun resetActivityBackStack() {
         val flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         val intent: Intent
-        intent = if (state.isLoggedIn) {
+        intent = if (state.isLoggedIn == true) {
             MainActivity.getIntent(getApplication<Application>().baseContext)
         } else {
             LoginActivity.getIntent(getApplication<Application>().baseContext)
