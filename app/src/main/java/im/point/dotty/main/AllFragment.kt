@@ -14,13 +14,8 @@ class AllFragment : FeedFragment<AllPost>() {
                 {error -> Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()}))
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return if (item.itemId == R.id.main_refresh) {
-            addDisposable(viewModel.fetchAll(false).subscribe({},
-                    {error -> Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()}))
-            true
-        } else {
-            super.onOptionsItemSelected(item)
-        }
+    override fun onFeedUpdate() {
+        addDisposable(viewModel.fetchAll(false).subscribe(this::finishUpdate,
+                {error -> Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()}))
     }
 }

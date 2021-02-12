@@ -14,13 +14,8 @@ class CommentedFragment : FeedFragment<CommentedPost>() {
                 {error -> Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()}))
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return if (item.itemId == R.id.main_refresh) {
-            addDisposable(viewModel.fetchCommented(false).subscribe({},
-                    {error -> Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()}))
-            true
-        } else {
-            super.onOptionsItemSelected(item)
-        }
+    override fun onFeedUpdate() {
+        addDisposable(viewModel.fetchCommented(false).subscribe(this::finishUpdate,
+                {error -> Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()}))
     }
 }

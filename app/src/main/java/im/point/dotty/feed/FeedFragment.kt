@@ -19,7 +19,6 @@ abstract class FeedFragment<T : Post> : RxFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
         viewModel = ViewModelProvider(this,
                 ViewModelFactory(requireActivity())).get(MainViewModel::class.java)
         adapter = FeedAdapter()
@@ -33,12 +32,13 @@ abstract class FeedFragment<T : Post> : RxFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.feedPosts.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         binding.feedPosts.adapter = adapter
+        binding.feedRefreshLayout.setOnRefreshListener(this::onFeedUpdate)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        inflater.inflate(R.menu.main_menu, menu)
+    protected fun finishUpdate() {
+        binding.feedRefreshLayout.isRefreshing = false
     }
+
+    protected abstract fun onFeedUpdate()
 }
