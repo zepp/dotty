@@ -1,6 +1,8 @@
 package im.point.dotty.repository
 
+import android.annotation.SuppressLint
 import im.point.dotty.db.RecentPostDao
+import im.point.dotty.domain.AppState
 import im.point.dotty.mapper.Mapper
 import im.point.dotty.model.RecentPost
 import im.point.dotty.network.MetaPost
@@ -13,24 +15,36 @@ import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 
-internal class RecentRepo(private val api: PointAPI,
-                          private val token: String,
-                          private val recentPostDao: RecentPostDao,
-                          private val mapper: Mapper<RecentPost, MetaPost>)
-    : Repository<RecentPost> {
+class RecentRepo(private val api: PointAPI,
+                 private val state: AppState,
+                 private val recentPostDao: RecentPostDao,
+                 private val mapper: Mapper<RecentPost, MetaPost>) : Repository<RecentPost> {
+
+    @SuppressLint("CheckResult")
+    private fun fetch(isBefore: Boolean): Single<List<RecentPost>> {
+        val source = Observable.create { emitter: ObservableEmitter<PostsReply> ->
+            api.getRecent(state.token  ?: throw Exception("invalid token"),
+                    if (isBefore) state.recentLastId else null)
+                    .enqueue(ObservableCallBackAdapter(emitter))}
+                .observeOn(Schedulers.io())
+                .flatMap { postsReply: PostsReply -> Observable.fromIterable(postsReply.posts) }
+                .map { entry: MetaPost -> mapper.map(entry)}
+        if (isBefore || state.recentLastId == null) {
+            source.lastElement().subscribe { post -> state.recentLastId = post.id }
+        }
+        return source.toList()
+                .doOnSuccess { recentPosts: List<RecentPost> -> recentPostDao.insertAll(recentPosts)}
+    }
 
     override fun getAll(): Flowable<List<RecentPost>> {
         return recentPostDao.getAll()
     }
 
     override fun fetch(): Single<List<RecentPost>> {
-        val source = Observable.create { emitter: ObservableEmitter<PostsReply> -> api.getRecent(token, "").enqueue(ObservableCallBackAdapter(emitter)) }
-        return source
-                .observeOn(Schedulers.io())
-                .flatMap { postsReply: PostsReply -> Observable.fromIterable(postsReply.posts) }
-                .map { entry: MetaPost -> mapper.map(entry) }
-                .toList()
-                .doOnSuccess { recentPosts: List<RecentPost> -> recentPostDao.insertAll(recentPosts) }
+        return fetch(false)
     }
 
+    fun fetchBefore(): Single<List<RecentPost>> {
+        return fetch(true)
+    }
 }

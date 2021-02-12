@@ -5,8 +5,6 @@ import android.widget.Toast
 import im.point.dotty.R
 import im.point.dotty.feed.FeedFragment
 import im.point.dotty.model.CommentedPost
-import io.reactivex.observers.DisposableCompletableObserver
-import io.reactivex.subscribers.DisposableSubscriber
 
 class CommentedFragment : FeedFragment<CommentedPost>() {
     override fun onStart() {
@@ -18,7 +16,7 @@ class CommentedFragment : FeedFragment<CommentedPost>() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return if (item.itemId == R.id.main_refresh) {
-            addDisposable(viewModel.fetchCommented().subscribe({},
+            addDisposable(viewModel.fetchCommented(false).subscribe({},
                     {error -> Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()}))
             true
         } else {

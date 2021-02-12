@@ -10,6 +10,9 @@ class AppState (context: Context) {
     private val USER_NAME = "user-name"
     private val TOKEN = "token"
     private val CSRF_TOKEN = "csrf-token"
+    private val RECENT_LAST_ID = "recent-last-id"
+    private val COMMENTED_LAST_ID = "comment-last-id"
+    private val ALL_LAST_ID = "all-last-id"
 
     private val preferences: SharedPreferences
     private val resources: Resources
@@ -43,6 +46,33 @@ class AppState (context: Context) {
         set(value) {
             with (preferences.edit()) {
                 if (value == null) remove(CSRF_TOKEN).apply() else putString(CSRF_TOKEN, value).apply()
+            }
+        }
+
+    var commentedLastId: String?
+        get() = preferences.getString(COMMENTED_LAST_ID, null)
+        set(value) {
+            with (preferences.edit()) {
+                if (value == null) remove(COMMENTED_LAST_ID).apply()
+                else putString(COMMENTED_LAST_ID, value).apply()
+            }
+        }
+
+    var recentLastId: String?
+        get() = preferences.getString(RECENT_LAST_ID, null)
+        set(value) {
+            with (preferences.edit()) {
+                if (value == null) remove(RECENT_LAST_ID).apply()
+                else putString(RECENT_LAST_ID, value).apply()
+            }
+        }
+
+    var allLastId: String?
+        get() = preferences.getString(ALL_LAST_ID, null)
+        set(value) {
+            with (preferences.edit()) {
+                if (value == null) remove(ALL_LAST_ID).apply()
+                else putString(ALL_LAST_ID, value).apply()
             }
         }
 
