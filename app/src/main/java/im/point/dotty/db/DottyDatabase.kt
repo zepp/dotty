@@ -13,4 +13,5 @@ abstract class DottyDatabase : RoomDatabase() {
     abstract fun getCommentedPostDao(): CommentedPostDao
     abstract fun getAllPostDao(): AllPostDao
     abstract fun getUserPostsDao(): UserPostDao
+    abstract fun getCommentDao() : CommentDao
 }
