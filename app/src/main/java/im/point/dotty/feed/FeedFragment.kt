@@ -5,7 +5,6 @@ import android.view.*
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import im.point.dotty.R
 import im.point.dotty.common.RxFragment
 import im.point.dotty.databinding.FragmentFeedBinding
 import im.point.dotty.domain.MainViewModel
@@ -16,6 +15,7 @@ abstract class FeedFragment<T : Post> : RxFragment() {
     protected lateinit var binding: FragmentFeedBinding
     protected lateinit var viewModel: MainViewModel
     protected lateinit var adapter: FeedAdapter<T>
+    protected lateinit var feedPosts : RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,7 +32,19 @@ abstract class FeedFragment<T : Post> : RxFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.feedPosts.adapter = adapter
+        feedPosts = binding.feedPosts
+        feedPosts.adapter = adapter
+        feedPosts.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            val manager = feedPosts.layoutManager as LinearLayoutManager
+            override fun onScrolled(view: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(view, dx, dy)
+                if (view.scrollState == RecyclerView.SCROLL_STATE_SETTLING && dy > 0
+                        && manager.findLastCompletelyVisibleItemPosition() == adapter.itemCount - 1) {
+                    binding.feedRefreshLayout.isRefreshing = true
+                    onFeedUpdateBefore()
+                }
+            }
+        })
         binding.feedRefreshLayout.setOnRefreshListener(this::onFeedUpdate)
     }
 
@@ -41,4 +53,6 @@ abstract class FeedFragment<T : Post> : RxFragment() {
     }
 
     protected abstract fun onFeedUpdate()
+
+    protected abstract fun onFeedUpdateBefore()
 }

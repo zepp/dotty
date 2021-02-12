@@ -25,14 +25,12 @@ class CommentedRepo(private val api: PointAPI,
     fun fetch(isBefore : Boolean): Single<List<CommentedPost>> {
         val source = Observable.create { emitter: ObservableEmitter<PostsReply> ->
             api.getComments(state.token ?: throw Exception("invalid token"),
-                    if (isBefore) state.commentedLastId else null)
+                    if (isBefore) state.commentedPageId else null)
                     .enqueue(ObservableCallBackAdapter(emitter)) }
                 .observeOn(Schedulers.io())
                 .flatMap { reply: PostsReply -> Observable.fromIterable(reply.posts) }
                 .map { entry: MetaPost -> mapper.map(entry) }
-        if (isBefore || state.commentedLastId == null) {
-            source.lastElement().subscribe{post -> state.commentedLastId =post.id}
-        }
+        source.lastElement().subscribe{post -> state.commentedPageId = post.pageId}
         return source.toList()
                 .doOnSuccess { commentedPosts: List<CommentedPost> -> commentedPostDao.insertAll(commentedPosts) }
     }

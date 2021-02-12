@@ -3,16 +3,15 @@ package im.point.dotty.domain
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Resources
-import im.point.dotty.R
 
 class AppState (context: Context) {
     private val IS_LOGGED_IN = "is-logged-in"
     private val USER_NAME = "user-name"
     private val TOKEN = "token"
     private val CSRF_TOKEN = "csrf-token"
-    private val RECENT_LAST_ID = "recent-last-id"
-    private val COMMENTED_LAST_ID = "comment-last-id"
-    private val ALL_LAST_ID = "all-last-id"
+    private val RECENT_PAGE_ID = "recent-last-id"
+    private val COMMENTED_PAGE_ID = "comment-last-id"
+    private val ALL_PAGE_ID = "all-last-id"
 
     private val preferences: SharedPreferences
     private val resources: Resources
@@ -49,30 +48,42 @@ class AppState (context: Context) {
             }
         }
 
-    var commentedLastId: String?
-        get() = preferences.getString(COMMENTED_LAST_ID, null)
+    var commentedPageId: Long?
+        get() {
+            return with(preferences.getLong(COMMENTED_PAGE_ID, -1L)) {
+                if (this == -1L) null else this
+            }
+        }
         set(value) {
             with (preferences.edit()) {
-                if (value == null) remove(COMMENTED_LAST_ID).apply()
-                else putString(COMMENTED_LAST_ID, value).apply()
+                if (value == null) remove(COMMENTED_PAGE_ID).apply()
+                else putLong(COMMENTED_PAGE_ID, value).apply()
             }
         }
 
-    var recentLastId: String?
-        get() = preferences.getString(RECENT_LAST_ID, null)
+    var recentPageId: Long?
+        get() {
+            return with(preferences.getLong(RECENT_PAGE_ID, -1L)) {
+                if (this == -1L) null else this
+            }
+        }
         set(value) {
             with (preferences.edit()) {
-                if (value == null) remove(RECENT_LAST_ID).apply()
-                else putString(RECENT_LAST_ID, value).apply()
+                if (value == null) remove(RECENT_PAGE_ID).apply()
+                else putLong(RECENT_PAGE_ID, value).apply()
             }
         }
 
-    var allLastId: String?
-        get() = preferences.getString(ALL_LAST_ID, null)
+    var allPageId: Long?
+        get() {
+            return with(preferences.getLong(ALL_PAGE_ID, -1L)) {
+                if (this == -1L) return null else this
+            }
+        }
         set(value) {
             with (preferences.edit()) {
-                if (value == null) remove(ALL_LAST_ID).apply()
-                else putString(ALL_LAST_ID, value).apply()
+                if (value == null) remove(ALL_PAGE_ID).apply()
+                else putLong(ALL_PAGE_ID, value).apply()
             }
         }
 

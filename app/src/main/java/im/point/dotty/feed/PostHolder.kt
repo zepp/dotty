@@ -13,8 +13,8 @@ class PostHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val tags: TextView
 
     fun bind(post: Post) {
-        author.text = if (post.name!!.length == 0) post.login else post.name
-        id.text = "#" + post.pageId
+        author.text = if (post.name == null || post.name?.isEmpty() == true) post.login else post.name
+        id.text = "#" + post.postId
         text.text = post.text
     }
 

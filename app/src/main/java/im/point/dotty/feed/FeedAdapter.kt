@@ -29,7 +29,7 @@ class FeedAdapter<T : Post> internal constructor() : RecyclerView.Adapter<PostHo
     }
 
     override fun getItemId(position: Int): Long {
-        return list[position].pageId!!
+        return list[position].postId.hashCode().toLong()
     }
 
     init {

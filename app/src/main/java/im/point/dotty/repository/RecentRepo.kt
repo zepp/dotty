@@ -24,14 +24,12 @@ class RecentRepo(private val api: PointAPI,
     private fun fetch(isBefore: Boolean): Single<List<RecentPost>> {
         val source = Observable.create { emitter: ObservableEmitter<PostsReply> ->
             api.getRecent(state.token  ?: throw Exception("invalid token"),
-                    if (isBefore) state.recentLastId else null)
+                    if (isBefore) state.recentPageId else null)
                     .enqueue(ObservableCallBackAdapter(emitter))}
                 .observeOn(Schedulers.io())
                 .flatMap { postsReply: PostsReply -> Observable.fromIterable(postsReply.posts) }
                 .map { entry: MetaPost -> mapper.map(entry)}
-        if (isBefore || state.recentLastId == null) {
-            source.lastElement().subscribe { post -> state.recentLastId = post.id }
-        }
+        source.lastElement().subscribe { post -> state.recentPageId = post.pageId }
         return source.toList()
                 .doOnSuccess { recentPosts: List<RecentPost> -> recentPostDao.insertAll(recentPosts)}
     }

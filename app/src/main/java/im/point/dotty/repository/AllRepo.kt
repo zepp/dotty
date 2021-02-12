@@ -21,14 +21,12 @@ class AllRepo(private val api: PointAPI,
     @SuppressLint("CheckResult")
     fun fetch(isBefore: Boolean): Single<List<AllPost>> {
         val source = Observable.create { emitter: ObservableEmitter<PostsReply> ->
-            api.getAll(state.token ?: throw Exception("invalid token"), if (isBefore) state.allLastId else null)
+            api.getAll(state.token ?: throw Exception("invalid token"), if (isBefore) state.allPageId else null)
                     .enqueue(ObservableCallBackAdapter(emitter)) }
                 .observeOn(Schedulers.io())
                 .flatMap { reply: PostsReply -> Observable.fromIterable(reply.posts) }
                 .map { entry: MetaPost -> mapper.map(entry) }
-        if (isBefore || state.allLastId == null) {
-            source.lastElement().subscribe{post -> state.allLastId == post.id}
-        }
+        source.lastElement().subscribe{post -> state.allPageId = post.pageId}
         return source.toList()
                 .doOnSuccess { allPosts: List<AllPost> -> allPostDao.insertAll(allPosts) }
     }

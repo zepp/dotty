@@ -1,6 +1,7 @@
 package im.point.dotty
 
 import android.app.Application
+import android.util.Log
 import androidx.room.Room
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -9,10 +10,12 @@ import im.point.dotty.domain.AppState
 import im.point.dotty.network.AuthAPI
 import im.point.dotty.network.PointAPI
 import im.point.dotty.repository.RepoFactory
+import io.reactivex.plugins.RxJavaPlugins
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class DottyApplication : Application() {
+    private val tag = this::class.simpleName
     private val gson = GsonBuilder().setLenient().create()
     private val BASE = "https://point.im"
     private val retrofit = Retrofit.Builder().baseUrl(BASE)
@@ -37,5 +40,10 @@ class DottyApplication : Application() {
 
     val repoFactory by lazy {
         RepoFactory(mainApi, database, state)
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        RxJavaPlugins.setErrorHandler{error -> Log.e(tag, "RxError:", error)}
     }
 }
