@@ -12,7 +12,7 @@ interface AllPostDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(posts: List<AllPost>)
 
-    @Query("SELECT * FROM all_posts ORDER BY timestamp DESC")
+    @Query("SELECT * FROM all_posts ORDER BY page_id DESC")
     fun getAll() : Flowable<List<AllPost>>
 
     @Query("SELECT * FROM all_posts WHERE id = :id")

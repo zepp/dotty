@@ -12,7 +12,7 @@ interface RecentPostDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(posts: List<RecentPost>)
 
-    @Query("SELECT * FROM recent_posts ORDER BY timestamp DESC")
+    @Query("SELECT * FROM recent_posts ORDER BY page_id DESC")
     fun getAll(): Flowable<List<RecentPost>>
 
     @Query("SELECT * FROM recent_posts WHERE id = :id")

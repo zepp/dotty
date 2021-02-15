@@ -15,12 +15,14 @@ class AllFragment : FeedFragment<AllPost>() {
     }
 
     override fun onFeedUpdate() {
-        addDisposable(viewModel.fetchAll(false).subscribe(this::finishUpdate,
-                {error -> Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()}))
+        addDisposable(viewModel.fetchAll(false).subscribe(this::finishUpdate)
+        { error -> finishUpdate()
+            Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()})
     }
 
     override fun onFeedUpdateBefore() {
-        addDisposable(viewModel.fetchAll(true).subscribe(this::finishUpdate,
-                {error -> Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()}))
+        addDisposable(viewModel.fetchAll(true).subscribe(this::finishUpdate)
+        { error -> finishUpdate()
+            Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()})
     }
 }

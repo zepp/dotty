@@ -15,12 +15,14 @@ class CommentedFragment : FeedFragment<CommentedPost>() {
     }
 
     override fun onFeedUpdate() {
-        addDisposable(viewModel.fetchCommented(false).subscribe(this::finishUpdate,
-                {error -> Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()}))
+        addDisposable(viewModel.fetchCommented(false).subscribe(this::finishUpdate)
+        { error -> finishUpdate()
+            Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()})
     }
 
     override fun onFeedUpdateBefore() {
-        addDisposable(viewModel.fetchCommented(true).subscribe(this::finishUpdate,
-                {error -> Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()}))
+        addDisposable(viewModel.fetchCommented(true).subscribe(this::finishUpdate)
+        { error -> finishUpdate()
+            Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()})
     }
 }

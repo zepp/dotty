@@ -12,7 +12,7 @@ interface CommentedPostDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(posts: List<CommentedPost>)
 
-    @Query("SELECT * FROM commented_posts ORDER BY timestamp DESC")
+    @Query("SELECT * FROM commented_posts ORDER BY page_id DESC")
     fun getAll(): Flowable<List<CommentedPost>>
 
     @Query("SELECT * FROM commented_posts WHERE id = :id")

@@ -15,12 +15,14 @@ class RecentFragment : FeedFragment<RecentPost>() {
     }
 
     override fun onFeedUpdate() {
-        addDisposable(viewModel.fetchRecent(false).subscribe(this::finishUpdate,
-                {error -> Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()}))
+        addDisposable(viewModel.fetchRecent(false).subscribe(this::finishUpdate)
+        { error -> finishUpdate()
+            Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()})
     }
 
     override fun onFeedUpdateBefore() {
-        addDisposable(viewModel.fetchRecent(true).subscribe(this::finishUpdate,
-                {error -> Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()}))
+        addDisposable(viewModel.fetchRecent(true).subscribe(this::finishUpdate)
+        { error -> finishUpdate()
+            Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()})
     }
 }
