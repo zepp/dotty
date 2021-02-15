@@ -1,8 +1,6 @@
 package im.point.dotty.db
 
 import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import im.point.dotty.model.CommentedPost
 import io.reactivex.Flowable
@@ -13,5 +11,5 @@ interface CommentedPostDao : PostDao<CommentedPost>{
     fun getAll(): Flowable<List<CommentedPost>>
 
     @Query("SELECT * FROM commented_posts WHERE id = :id")
-    fun getPost(id: Long): Flowable<CommentedPost>
+    fun getPost(id: String): Flowable<CommentedPost>
 }

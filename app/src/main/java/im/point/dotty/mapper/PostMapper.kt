@@ -18,6 +18,7 @@ open class PostMapper <T : Post> {
         model.text = post.text
         model.timestamp = post.created?.let { format.parse(it) }
         model.tags = post.tags
+        model.commentCount = post.commentsCount
         return model
     }
 

@@ -22,10 +22,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity android:name=".main.MainActivity" />
-
         <activity android:name=".login.LoginActivity" />
+        <activity android:name=".post.PostActivity" />
     </application>
 
 </manifest>

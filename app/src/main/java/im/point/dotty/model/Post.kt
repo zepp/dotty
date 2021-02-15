@@ -1,20 +1,23 @@
 package im.point.dotty.model
 
 import androidx.room.ColumnInfo
-import androidx.room.Entity
 import androidx.room.Ignore
-import androidx.room.PrimaryKey
 import java.util.*
 
 abstract class Post {
     var login: String? = null
     var name: String? = null
+
     @ColumnInfo(name = "page_id")
     var pageId: Long? = null
     var text: String? = null
     var tags: List<String>? = null
     var timestamp: Date? = null
+    var commentCount: Int? = null
 
     @Ignore
-    open val postId:String = ""
+    open val postId: String = ""
+
+    val nameOrLogin: String?
+        get() = if (name.isNullOrEmpty()) login else name
 }

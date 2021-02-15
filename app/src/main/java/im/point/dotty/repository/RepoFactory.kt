@@ -2,11 +2,7 @@ package im.point.dotty.repository
 
 import im.point.dotty.db.DottyDatabase
 import im.point.dotty.domain.AppState
-import im.point.dotty.mapper.CommentMapper
-import im.point.dotty.model.AllPost
 import im.point.dotty.model.Comment
-import im.point.dotty.model.CommentedPost
-import im.point.dotty.model.RecentPost
 import im.point.dotty.network.PointAPI
 
 class RepoFactory(private val api: PointAPI, private val database: DottyDatabase, private val state: AppState) {
@@ -23,15 +19,18 @@ class RepoFactory(private val api: PointAPI, private val database: DottyDatabase
         return AllRepo(api, state, database.getAllPostDao())
     }
 
-    fun getRecentCommentRepo(post: RecentPost): Repository<Comment> {
-        return CommentRepo(api, state, database.getCommentDao(), database.getRecentPostDao(), post)
+    fun getRecentCommentRepo(id: String): Repository<Comment> {
+        val dao = database.getRecentPostDao()
+        return CommentRepo(api, state, database.getCommentDao(), dao, dao.getPost(id))
     }
 
-    fun getCommentedCommentRepo(post: CommentedPost): Repository<Comment> {
-        return CommentRepo(api, state, database.getCommentDao(), database.getCommentedPostDao(), post)
+    fun getCommentedCommentRepo(id: String): Repository<Comment> {
+        val dao = database.getCommentedPostDao()
+        return CommentRepo(api, state, database.getCommentDao(), dao, dao.getPost(id))
     }
 
-    fun getAllCommentRepo(post: AllPost): Repository<Comment> {
-        return CommentRepo(api, state, database.getCommentDao(), database.getAllPostDao(), post)
+    fun getAllCommentRepo(id: String): Repository<Comment> {
+        val dao = database.getAllPostDao()
+        return CommentRepo(api, state, database.getCommentDao(), dao, dao.getPost(id))
     }
 }

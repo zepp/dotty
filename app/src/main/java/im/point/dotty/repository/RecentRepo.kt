@@ -29,14 +29,18 @@ class RecentRepo(private val api: PointAPI,
                     .enqueue(ObservableCallBackAdapter(emitter))}
                 .observeOn(Schedulers.io())
                 .flatMap { postsReply: PostsReply -> Observable.fromIterable(postsReply.posts) }
-                .map { entry: MetaPost -> mapper.map(entry)}
+                .map { entry: MetaPost -> mapper.map(entry) }
         source.lastElement().subscribe { post -> state.recentPageId = post.pageId }
         return source.toList()
-                .doOnSuccess { recentPosts: List<RecentPost> -> recentPostDao.insertAll(recentPosts)}
+                .doOnSuccess { recentPosts: List<RecentPost> -> recentPostDao.insertAll(recentPosts) }
     }
 
     override fun getAll(): Flowable<List<RecentPost>> {
         return recentPostDao.getAll()
+    }
+
+    override fun getItem(id: String): Flowable<RecentPost> {
+        return recentPostDao.getPost(id)
     }
 
     override fun fetch(): Single<List<RecentPost>> {

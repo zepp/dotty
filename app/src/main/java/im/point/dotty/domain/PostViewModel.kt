@@ -7,21 +7,50 @@ import im.point.dotty.model.Comment
 import im.point.dotty.model.CommentedPost
 import im.point.dotty.model.RecentPost
 import im.point.dotty.repository.RepoFactory
+import io.reactivex.Completable
 import io.reactivex.Flowable
+import io.reactivex.android.schedulers.AndroidSchedulers
 
 class PostViewModel(application: DottyApplication) : ViewModel() {
     private val repoFactory: RepoFactory
 
-    fun getRecentPostComments(post: RecentPost): Flowable<List<Comment>> {
-        return repoFactory.getRecentCommentRepo(post).getAll();
+    fun getRecentPost(id: String): Flowable<RecentPost> {
+        return repoFactory.getRecentRepo().getItem(id).observeOn(AndroidSchedulers.mainThread())
     }
 
-    fun getCommentedPostComments(post: CommentedPost): Flowable<List<Comment>> {
-        return repoFactory.getCommentedCommentRepo(post).getAll();
+    fun getCommentedPost(id: String): Flowable<CommentedPost> {
+        return repoFactory.getCommentedRepo().getItem(id).observeOn(AndroidSchedulers.mainThread())
     }
 
-    fun getAllPostComments(post: AllPost): Flowable<List<Comment>> {
-        return repoFactory.getAllCommentRepo(post).getAll();
+    fun getAllPost(id: String): Flowable<AllPost> {
+        return repoFactory.getAllRepo().getItem(id).observeOn(AndroidSchedulers.mainThread())
+    }
+
+    fun getRecentPostComments(id: String): Flowable<List<Comment>> {
+        return repoFactory.getRecentCommentRepo(id).getAll().observeOn(AndroidSchedulers.mainThread())
+    }
+
+    fun getCommentedPostComments(id: String): Flowable<List<Comment>> {
+        return repoFactory.getCommentedCommentRepo(id).getAll().observeOn(AndroidSchedulers.mainThread())
+    }
+
+    fun getAllPostComments(id: String): Flowable<List<Comment>> {
+        return repoFactory.getAllCommentRepo(id).getAll().observeOn(AndroidSchedulers.mainThread())
+    }
+
+    fun fetchRecentPostComments(id: String): Completable {
+        return Completable.fromSingle(repoFactory.getRecentCommentRepo(id).fetch())
+                .observeOn(AndroidSchedulers.mainThread())
+    }
+
+    fun fetchCommentedPostComments(id: String): Completable {
+        return Completable.fromSingle(repoFactory.getCommentedCommentRepo(id).fetch())
+                .observeOn(AndroidSchedulers.mainThread())
+    }
+
+    fun fetchAllPostComments(id: String): Completable {
+        return Completable.fromSingle(repoFactory.getAllCommentRepo(id).fetch())
+                .observeOn(AndroidSchedulers.mainThread())
     }
 
     init {

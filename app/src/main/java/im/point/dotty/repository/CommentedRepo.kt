@@ -31,7 +31,7 @@ class CommentedRepo(private val api: PointAPI,
                 .observeOn(Schedulers.io())
                 .flatMap { reply: PostsReply -> Observable.fromIterable(reply.posts) }
                 .map { entry: MetaPost -> mapper.map(entry) }
-        source.lastElement().subscribe{post -> state.commentedPageId = post.pageId}
+        source.lastElement().subscribe { post -> state.commentedPageId = post.pageId }
         return source.toList()
                 .doOnSuccess { commentedPosts: List<CommentedPost> -> commentedPostDao.insertAll(commentedPosts) }
     }
@@ -40,11 +40,15 @@ class CommentedRepo(private val api: PointAPI,
         return commentedPostDao.getAll()
     }
 
+    override fun getItem(id: String): Flowable<CommentedPost> {
+        return commentedPostDao.getPost(id)
+    }
+
     override fun fetch(): Single<List<CommentedPost>> {
         return fetch(false)
     }
 
-    fun fetchBefore() : Single<List<CommentedPost>> {
+    fun fetchBefore(): Single<List<CommentedPost>> {
         return fetch(true)
     }
 }

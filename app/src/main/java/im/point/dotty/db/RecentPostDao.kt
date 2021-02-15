@@ -1,8 +1,6 @@
 package im.point.dotty.db
 
 import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import im.point.dotty.model.RecentPost
 import io.reactivex.Flowable
@@ -13,5 +11,5 @@ interface RecentPostDao : PostDao<RecentPost> {
     fun getAll(): Flowable<List<RecentPost>>
 
     @Query("SELECT * FROM recent_posts WHERE id = :id")
-    fun getPost(id: Long): Flowable<RecentPost>
+    fun getPost(id: String): Flowable<RecentPost>
 }

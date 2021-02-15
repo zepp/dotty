@@ -13,9 +13,9 @@ class ViewModelFactory(activity: Activity) : ViewModelProvider.Factory {
             MainViewModel(application) as T
         } else if (modelClass.isAssignableFrom(AuthViewModel::class.java)) {
             AuthViewModel(application) as T
-        } else if (modelClass.isAssignableFrom(AuthViewModel::class.java)) {
+        } else if (modelClass.isAssignableFrom(PostViewModel::class.java)) {
             PostViewModel(application) as T
-        }else {
+        } else {
             throw IllegalArgumentException(modelClass.simpleName + " can not be constructed by this factory")
         }
     }

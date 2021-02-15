@@ -6,7 +6,10 @@ import im.point.dotty.domain.AppState
 import im.point.dotty.mapper.AllPostMapper
 import im.point.dotty.mapper.Mapper
 import im.point.dotty.model.AllPost
-import im.point.dotty.network.*
+import im.point.dotty.network.MetaPost
+import im.point.dotty.network.ObservableCallBackAdapter
+import im.point.dotty.network.PointAPI
+import im.point.dotty.network.PostsReply
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
@@ -27,13 +30,17 @@ class AllRepo(private val api: PointAPI,
                 .observeOn(Schedulers.io())
                 .flatMap { reply: PostsReply -> Observable.fromIterable(reply.posts) }
                 .map { entry: MetaPost -> mapper.map(entry) }
-        source.lastElement().subscribe{post -> state.allPageId = post.pageId}
+        source.lastElement().subscribe { post -> state.allPageId = post.pageId }
         return source.toList()
                 .doOnSuccess { allPosts: List<AllPost> -> allPostDao.insertAll(allPosts) }
     }
 
     override fun getAll(): Flowable<List<AllPost>> {
         return allPostDao.getAll()
+    }
+
+    override fun getItem(id: String): Flowable<AllPost> {
+        return allPostDao.getPost(id)
     }
 
     override fun fetch(): Single<List<AllPost>> {

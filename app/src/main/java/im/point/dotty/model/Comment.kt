@@ -12,7 +12,15 @@ data class Comment(@ColumnInfo(name = "post_id")
                    val userId: Long) {
 
     @ColumnInfo(name = "parent_id")
-    var parentId: Int? = 0
+    var replyTo: Int? = 0
     var text: String? = null
     var timestamp: Date? = null
+    var login: String? = null
+    var name: String? = null
+
+    val fullId: String
+        get() = "$postId/$id"
+
+    val nameOrLogin: String?
+        get() = if (name.isNullOrEmpty()) login else name
 }
