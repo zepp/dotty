@@ -12,6 +12,7 @@ abstract class Post {
     @ColumnInfo(name = "page_id")
     var pageId: Long? = null
     var text: String? = null
+    var tags: List<String>? = null
     var timestamp: Date? = null
 
     @Ignore

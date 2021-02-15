@@ -14,6 +14,7 @@ open class PostMapper <T : Post> {
         result.name = post.post?.author?.name
         result.text = post.post?.text
         result.timestamp = post.post?.created?.let {format.parse(it)}
+        result.tags = post.post?.tags
         return result
     }
 }

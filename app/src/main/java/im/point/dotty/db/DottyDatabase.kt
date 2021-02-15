@@ -6,7 +6,7 @@ import androidx.room.TypeConverters
 import im.point.dotty.model.*
 
 @Database(entities = [User::class, RecentPost::class, CommentedPost::class, AllPost::class, UserPost::class, Comment::class], version = 1)
-@TypeConverters(value = [DateConverter::class, GenderConverter::class])
+@TypeConverters(value = [DateConverter::class, GenderConverter::class, StringListConverter::class])
 abstract class DottyDatabase : RoomDatabase() {
     abstract fun getUserDao(): UserDao
     abstract fun getRecentPostDao(): RecentPostDao
