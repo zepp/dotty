@@ -8,10 +8,7 @@ import im.point.dotty.model.AllPost
 import io.reactivex.Flowable
 
 @Dao
-interface AllPostDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll(posts: List<AllPost>)
-
+interface AllPostDao : PostDao<AllPost>{
     @Query("SELECT * FROM all_posts ORDER BY page_id DESC")
     fun getAll() : Flowable<List<AllPost>>
 

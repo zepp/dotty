@@ -8,10 +8,7 @@ import im.point.dotty.model.CommentedPost
 import io.reactivex.Flowable
 
 @Dao
-interface CommentedPostDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll(posts: List<CommentedPost>)
-
+interface CommentedPostDao : PostDao<CommentedPost>{
     @Query("SELECT * FROM commented_posts ORDER BY page_id DESC")
     fun getAll(): Flowable<List<CommentedPost>>
 
