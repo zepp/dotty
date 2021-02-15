@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import im.point.dotty.db.RecentPostDao
 import im.point.dotty.domain.AppState
 import im.point.dotty.mapper.Mapper
+import im.point.dotty.mapper.RecentPostMapper
 import im.point.dotty.model.RecentPost
 import im.point.dotty.network.MetaPost
 import im.point.dotty.network.ObservableCallBackAdapter
@@ -18,7 +19,7 @@ import io.reactivex.schedulers.Schedulers
 class RecentRepo(private val api: PointAPI,
                  private val state: AppState,
                  private val recentPostDao: RecentPostDao,
-                 private val mapper: Mapper<RecentPost, MetaPost>) : Repository<RecentPost> {
+                 private val mapper: Mapper<RecentPost, MetaPost> = RecentPostMapper()) : Repository<RecentPost> {
 
     @SuppressLint("CheckResult")
     private fun fetch(isBefore: Boolean): Single<List<RecentPost>> {

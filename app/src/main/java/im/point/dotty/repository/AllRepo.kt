@@ -3,6 +3,7 @@ package im.point.dotty.repository
 import android.annotation.SuppressLint
 import im.point.dotty.db.AllPostDao
 import im.point.dotty.domain.AppState
+import im.point.dotty.mapper.AllPostMapper
 import im.point.dotty.mapper.Mapper
 import im.point.dotty.model.AllPost
 import im.point.dotty.network.*
@@ -15,7 +16,7 @@ import io.reactivex.schedulers.Schedulers
 class AllRepo(private val api: PointAPI,
                        private val state: AppState,
                        private val allPostDao: AllPostDao,
-                       private val mapper: Mapper<AllPost, MetaPost>)
+                       private val mapper: Mapper<AllPost, MetaPost> = AllPostMapper())
     : Repository<AllPost> {
 
     @SuppressLint("CheckResult")

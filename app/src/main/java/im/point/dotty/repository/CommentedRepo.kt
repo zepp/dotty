@@ -3,6 +3,7 @@ package im.point.dotty.repository
 import android.annotation.SuppressLint
 import im.point.dotty.db.CommentedPostDao
 import im.point.dotty.domain.AppState
+import im.point.dotty.mapper.CommentedPostMapper
 import im.point.dotty.mapper.Mapper
 import im.point.dotty.model.CommentedPost
 import im.point.dotty.network.MetaPost
@@ -18,7 +19,7 @@ import io.reactivex.schedulers.Schedulers
 class CommentedRepo(private val api: PointAPI,
                              private val state: AppState,
                              private val commentedPostDao: CommentedPostDao,
-                             private val mapper: Mapper<CommentedPost, MetaPost>)
+                             private val mapper: Mapper<CommentedPost, MetaPost> = CommentedPostMapper())
     : Repository<CommentedPost> {
 
     @SuppressLint("CheckResult")
