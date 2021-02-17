@@ -15,6 +15,12 @@ class CommentAdapter : RecyclerView.Adapter<CommentHolder>() {
             notifyDataSetChanged()
         }
 
+    var onIdClicked: (id: Int, pos: Int) -> Unit = { _: Int, _: Int -> }
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommentHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.list_item_comment, parent, false)
         return CommentHolder(view)
@@ -22,9 +28,10 @@ class CommentAdapter : RecyclerView.Adapter<CommentHolder>() {
 
     override fun getItemCount(): Int = list.size
 
-    override fun onBindViewHolder(holder: CommentHolder, position: Int) = holder.bind(list[position])
+    override fun onBindViewHolder(holder: CommentHolder, position: Int) =
+            holder.bind(list[position], position, onIdClicked)
 
-    override fun getItemId(position: Int): Long = list[position].fullId.hashCode().toLong()
+    override fun getItemId(position: Int): Long = list[position].id.toLong()
 
     init {
         setHasStableIds(true)
@@ -38,15 +45,16 @@ class CommentHolder(view: View) : RecyclerView.ViewHolder(view) {
     val replyTo: TextView = view.findViewById(R.id.comment_reply_to)
     val arrow: TextView = view.findViewById(R.id.comment_arrow)
 
-    fun bind(comment: Comment) {
+    fun bind(comment: Comment, pos: Int, onIdClicked: (id: Int, pos: Int) -> Unit) {
         author.text = comment.nameOrLogin
         text.text = comment.text
         id.text = comment.id.toString()
-        if (comment.replyTo == null) {
-            arrow.visibility = View.GONE
-            replyTo.visibility = View.GONE
-        } else {
-            replyTo.text = comment.replyTo.toString()
+        id.setOnClickListener { v -> onIdClicked(comment.id, pos) }
+        arrow.visibility = if (comment.replyTo == null) View.GONE else View.VISIBLE
+        replyTo.visibility = if (comment.replyTo == null) View.GONE else View.VISIBLE
+        comment.replyTo?.let {
+            replyTo.text = it.toString()
+            replyTo.setOnClickListener { v -> onIdClicked(it, pos) }
         }
     }
 }
