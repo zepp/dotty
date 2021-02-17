@@ -1,10 +1,14 @@
 package im.point.dotty.feed
 
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
+import im.point.dotty.R
 import im.point.dotty.common.RxFragment
 import im.point.dotty.databinding.FragmentFeedBinding
 import im.point.dotty.domain.MainViewModel
@@ -55,4 +59,8 @@ abstract class FeedFragment<T : Post> : RxFragment() {
     protected abstract fun onFeedUpdate()
 
     protected abstract fun onFeedUpdateBefore()
+
+    protected fun showSnackbar(text: String) {
+        Snackbar.make(requireActivity().findViewById(R.id.main_layout), text, Snackbar.LENGTH_LONG).show()
+    }
 }
