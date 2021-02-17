@@ -5,14 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.material.snackbar.Snackbar
+import im.point.dotty.R
 import im.point.dotty.common.RxFragment
-import im.point.dotty.common.TagsAdapter
 import im.point.dotty.databinding.FragmentPostBinding
 import im.point.dotty.domain.PostViewModel
 import im.point.dotty.domain.ViewModelFactory
-import im.point.dotty.model.Post
 
 class PostFragment : RxFragment() {
     private val adapter: CommentAdapter = CommentAdapter()
@@ -21,7 +20,6 @@ class PostFragment : RxFragment() {
     private lateinit var layout: SwipeRefreshLayout
     private lateinit var postId: String
     private lateinit var from: From
-    private val tagsAdapter: TagsAdapter = TagsAdapter()
 
     companion object {
         const val POST_ID = "post-id"
@@ -47,8 +45,6 @@ class PostFragment : RxFragment() {
                               savedInstanceState: Bundle?): View? {
         binding = FragmentPostBinding.inflate(layoutInflater, container, false);
         binding.postComments.adapter = adapter
-        binding.post.postTags.adapter = tagsAdapter
-        binding.post.postTags.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         layout = binding.postSwipeLayout
         layout.setOnRefreshListener {
             addDisposable(when (from) {
@@ -56,8 +52,12 @@ class PostFragment : RxFragment() {
                 From.FROM_COMMENTED -> viewModel.fetchCommentedPostComments(postId)
                 From.FROM_RECENT -> viewModel.fetchRecentPostComments(postId)
             }.subscribe({ layout.isRefreshing = false },
-                    { error -> layout.isRefreshing = false }))
+                    { error ->
+                        layout.isRefreshing = false
+                        error.message?.let { showSnackbar(it) }
+                    }))
         }
+        adapter.onIdClicked = { id, pos -> binding.postComments.smoothScrollToPosition(pos) }
         return binding.root
     }
 
@@ -67,7 +67,7 @@ class PostFragment : RxFragment() {
             From.FROM_ALL -> viewModel.fetchAllPostComments(postId)
             From.FROM_COMMENTED -> viewModel.fetchCommentedPostComments(postId)
             From.FROM_RECENT -> viewModel.fetchRecentPostComments(postId)
-        }.subscribe {})
+        }.subscribe({}, { error -> error.message?.let { showSnackbar(it) } }))
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -75,24 +75,13 @@ class PostFragment : RxFragment() {
         viewModel = ViewModelProvider(this, ViewModelFactory(requireActivity()))
                 .get(PostViewModel::class.java)
         addDisposable(when (from) {
-            From.FROM_RECENT -> viewModel.getRecentPost(postId)
-            From.FROM_COMMENTED -> viewModel.getCommentedPost(postId)
-            From.FROM_ALL -> viewModel.getAllPost(postId)
-        }.subscribe { post: Post ->
-            binding.post.postText.text = post.text
-            binding.post.postAuthor.text = post.nameOrLogin
-            binding.post.postId.text = '#' + post.postId
-            if (post.tags.isNullOrEmpty()) {
-                binding.post.postTags.visibility = View.GONE
-            } else {
-                tagsAdapter.list = post.tags!!
-            }
-        })
-        addDisposable(when (from) {
             From.FROM_ALL -> viewModel.getAllPostComments(postId)
             From.FROM_COMMENTED -> viewModel.getCommentedPostComments(postId)
             From.FROM_RECENT -> viewModel.getRecentPostComments(postId)
         }.subscribe { list -> adapter.list = list })
     }
 
+    private fun showSnackbar(text: String) {
+        Snackbar.make(requireActivity().findViewById(R.id.post_layout), text, Snackbar.LENGTH_LONG).show()
+    }
 }
