@@ -72,7 +72,7 @@ class PostFragment : RxFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(this, ViewModelFactory(requireActivity()))
+        viewModel = ViewModelProvider(requireActivity(), ViewModelFactory(requireActivity()))
                 .get(PostViewModel::class.java)
         addDisposable(when (from) {
             From.FROM_ALL -> viewModel.getAllPostComments(postId)

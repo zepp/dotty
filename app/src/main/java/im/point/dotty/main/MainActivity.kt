@@ -24,8 +24,8 @@ class MainActivity : RxActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        viewModel = ViewModelProvider(this,
-                ViewModelFactory(this)).get(AuthViewModel::class.java)
+        viewModel = ViewModelProvider(this, ViewModelFactory(this))
+                .get(AuthViewModel::class.java)
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {

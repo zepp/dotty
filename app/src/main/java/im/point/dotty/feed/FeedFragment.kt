@@ -23,8 +23,8 @@ abstract class FeedFragment<T : Post> : RxFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(this,
-                ViewModelFactory(requireActivity())).get(MainViewModel::class.java)
+        viewModel = ViewModelProvider(requireActivity(), ViewModelFactory(requireActivity()))
+                .get(MainViewModel::class.java)
         adapter = FeedAdapter()
     }
 
