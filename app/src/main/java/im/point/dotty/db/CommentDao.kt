@@ -17,4 +17,7 @@ interface CommentDao {
 
     @Query("SELECT * FROM comments WHERE post_id = :postId AND id = :id")
     fun geComment(postId: String, id: Long): Flowable<Comment>
+
+    @Query("DELETE FROM comments")
+    fun deleteAll()
 }

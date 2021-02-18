@@ -17,4 +17,7 @@ interface UserPostDao {
 
     @Query("SELECT * FROM user_posts WHERE id = :id")
     fun getPost(id: Long): Flowable<UserPost>
+
+    @Query("DELETE FROM user_posts")
+    fun deleteAll()
 }

@@ -5,6 +5,10 @@ import android.app.Application
 import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import im.point.dotty.DottyApplication
+import im.point.dotty.db.AllPostDao
+import im.point.dotty.db.CommentDao
+import im.point.dotty.db.CommentedPostDao
+import im.point.dotty.db.RecentPostDao
 import im.point.dotty.login.LoginActivity
 import im.point.dotty.main.MainActivity
 import im.point.dotty.network.AuthAPI
@@ -14,35 +18,48 @@ import im.point.dotty.network.SingleCallbackAdapter
 import io.reactivex.Single
 import io.reactivex.SingleEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.observers.DisposableSingleObserver
+import io.reactivex.schedulers.Schedulers
 
 @SuppressLint("CheckResult")
 class AuthViewModel internal constructor(application: DottyApplication) : AndroidViewModel(application) {
     private val state: AppState
     private val api: AuthAPI
+    private val allPostDao: AllPostDao
+    private val recentPostDao: RecentPostDao
+    private val commentedPostDao: CommentedPostDao
+    private val commentDao: CommentDao
 
     fun login(name: String, password: String): Single<LoginReply> {
-        val single = Single.create { emitter: SingleEmitter<LoginReply> -> api.login(name, password).enqueue(SingleCallbackAdapter(emitter)) }
-        single.subscribe { value -> state.isLoggedIn = true
-            state.userName = name
-            state.csrfToken = value.csrfToken ?: throw Exception("CSRF token is empty")
-            state.token = value.token ?: throw Exception("token is empty")}
-        return single.observeOn(AndroidSchedulers.mainThread())
+        return Single.create { emitter: SingleEmitter<LoginReply> ->
+            api.login(name, password).enqueue(SingleCallbackAdapter(emitter))
+        }
+                .observeOn(Schedulers.io())
+                .doAfterSuccess { reply ->
+                    state.isLoggedIn = true
+                    state.userLogin = name
+                    state.csrfToken = reply.csrfToken ?: throw Exception("CSRF token is empty")
+                    state.token = reply.token ?: throw Exception("token is empty")
+                }
+                .observeOn(AndroidSchedulers.mainThread())
     }
 
     fun logout(): Single<LogoutReply> {
-        val single = Single.create { emitter: SingleEmitter<LogoutReply> ->
-            api.logout(state.csrfToken ?: throw Exception("invalid CSRF token")).enqueue(SingleCallbackAdapter(emitter)) }
-        single.subscribe(object  : DisposableSingleObserver<LogoutReply>() {
-            override fun onSuccess(logoutReply: LogoutReply) {
-                state.isLoggedIn = false
-                state.csrfToken = null
-                state.token = null
-            }
-
-            override fun onError(e: Throwable) {}
-        })
-        return single.observeOn(AndroidSchedulers.mainThread())
+        return Single.create { emitter: SingleEmitter<LogoutReply> ->
+            api.logout(state.token ?: throw Exception("invalid token"),
+                    state.csrfToken ?: throw Exception("invalid CSRF token"))
+                    .enqueue(SingleCallbackAdapter(emitter))
+        }
+                .observeOn(Schedulers.io())
+                .doFinally {
+                    state.isLoggedIn = false
+                    state.csrfToken = null
+                    state.token = null
+                    allPostDao.deleteAll()
+                    recentPostDao.deleteAll()
+                    commentedPostDao.deleteAll()
+                    commentDao.deleteAll()
+                }
+                .observeOn(AndroidSchedulers.mainThread())
     }
 
     fun resetActivityBackStack() {
@@ -58,5 +75,9 @@ class AuthViewModel internal constructor(application: DottyApplication) : Androi
     init {
         api = application.authApi
         state = application.state
+        allPostDao = application.database.getAllPostDao()
+        recentPostDao = application.database.getRecentPostDao()
+        commentedPostDao = application.database.getCommentedPostDao()
+        commentDao = application.database.getCommentDao()
     }
 }

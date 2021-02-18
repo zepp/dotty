@@ -1,24 +1,17 @@
 package im.point.dotty.login
 
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.material.textfield.TextInputEditText
-import im.point.dotty.R
 import im.point.dotty.common.RxFragment
 import im.point.dotty.databinding.FragmentLoginBinding
 import im.point.dotty.domain.AuthViewModel
 import im.point.dotty.domain.ViewModelFactory
-import im.point.dotty.network.LoginReply
-import io.reactivex.observers.DisposableSingleObserver
 
 class LoginFragment : RxFragment() {
     private lateinit var binding: FragmentLoginBinding
@@ -50,10 +43,11 @@ class LoginFragment : RxFragment() {
         binding.loginLogin.setOnClickListener { v ->
             v.isEnabled = false
             addDisposable(viewModel.login(userNameText, passwordText)
-                    .subscribe({reply -> viewModel.resetActivityBackStack()},
-                            {error ->
+                    .subscribe({ viewModel.resetActivityBackStack() },
+                            { error ->
                                 v.isEnabled = true
-                                Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()}))
+                                Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()
+                            }))
         }
         updateLogin()
     }

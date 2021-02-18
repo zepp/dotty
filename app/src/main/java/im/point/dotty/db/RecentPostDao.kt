@@ -12,4 +12,7 @@ interface RecentPostDao : PostDao<RecentPost> {
 
     @Query("SELECT * FROM recent_posts WHERE id = :id")
     fun getPost(id: String): Flowable<RecentPost>
+
+    @Query("DELETE FROM recent_posts")
+    fun deleteAll()
 }

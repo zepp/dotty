@@ -6,7 +6,7 @@ import android.content.res.Resources
 
 class AppState (context: Context) {
     private val IS_LOGGED_IN = "is-logged-in"
-    private val USER_NAME = "user-name"
+    private val USER_LOGIN = "user-name"
     private val TOKEN = "token"
     private val CSRF_TOKEN = "csrf-token"
     private val RECENT_PAGE_ID = "recent-last-id"
@@ -19,16 +19,16 @@ class AppState (context: Context) {
     var isLoggedIn: Boolean?
         get() = preferences.getBoolean(IS_LOGGED_IN, false)
         set(value) {
-            with (preferences.edit()) {
+            with(preferences.edit()) {
                 if (value == null) remove(IS_LOGGED_IN).apply() else putBoolean(IS_LOGGED_IN, value).apply()
             }
         }
 
-    var userName: String?
-        get() = preferences.getString(USER_NAME, null)
+    var userLogin: String?
+        get() = preferences.getString(USER_LOGIN, null)
         set(value) {
             with(preferences.edit()) {
-                if (value == null) remove(USER_NAME).apply() else putString(USER_NAME, value).apply()
+                if (value == null) remove(USER_LOGIN).apply() else putString(USER_LOGIN, value).apply()
             }
         }
 

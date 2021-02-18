@@ -12,4 +12,7 @@ interface CommentedPostDao : PostDao<CommentedPost>{
 
     @Query("SELECT * FROM commented_posts WHERE id = :id")
     fun getPost(id: String): Flowable<CommentedPost>
+
+    @Query("DELETE FROM commented_posts")
+    fun deleteAll()
 }

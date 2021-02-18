@@ -8,8 +8,11 @@ import io.reactivex.Flowable
 @Dao
 interface AllPostDao : PostDao<AllPost>{
     @Query("SELECT * FROM all_posts ORDER BY page_id DESC")
-    fun getAll() : Flowable<List<AllPost>>
+    fun getAll(): Flowable<List<AllPost>>
 
     @Query("SELECT * FROM all_posts WHERE id = :id")
     fun getPost(id: String): Flowable<AllPost>
+
+    @Query("DELETE FROM all_posts")
+    fun deleteAll()
 }

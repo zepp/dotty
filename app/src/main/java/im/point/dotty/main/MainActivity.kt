@@ -3,23 +3,29 @@ package im.point.dotty.main
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
-import androidx.viewpager.widget.ViewPager
-import com.google.android.material.tabs.TabLayout
+import androidx.lifecycle.ViewModelProvider
 import im.point.dotty.R
+import im.point.dotty.common.RxActivity
 import im.point.dotty.databinding.ActivityMainBinding
+import im.point.dotty.domain.AuthViewModel
+import im.point.dotty.domain.ViewModelFactory
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : RxActivity() {
     protected lateinit var binding: ActivityMainBinding
+    protected lateinit var viewModel: AuthViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        viewModel = ViewModelProvider(this,
+                ViewModelFactory(this)).get(AuthViewModel::class.java)
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
@@ -27,6 +33,25 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
         binding.mainTabLayout.setupWithViewPager(binding.mainPager)
         binding.mainPager.adapter = Adapter(supportFragmentManager)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.main_logout) {
+            addDisposable(viewModel.logout()
+                    .subscribe({ reply -> viewModel.resetActivityBackStack() },
+                            { error ->
+                                Toast.makeText(this, error.message, Toast.LENGTH_LONG).show()
+                                viewModel.resetActivityBackStack()
+                            }))
+            return true
+        } else {
+            return super.onOptionsItemSelected(item)
+        }
     }
 
     private inner class Adapter internal constructor(fm: FragmentManager?) : FragmentStatePagerAdapter(fm!!) {
