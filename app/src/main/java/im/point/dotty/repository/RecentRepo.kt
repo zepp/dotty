@@ -14,7 +14,6 @@ import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.Single
-import io.reactivex.schedulers.Schedulers
 
 class RecentRepo(private val api: PointAPI,
                  private val state: AppState,
@@ -29,7 +28,6 @@ class RecentRepo(private val api: PointAPI,
                     if (isBefore) state.recentPageId else null)
                     .enqueue(ObservableCallBackAdapter(emitter))
         }
-                .observeOn(Schedulers.io())
                 .flatMap { postsReply: PostsReply -> Observable.fromIterable(postsReply.posts) }
                 .map { entry: MetaPost -> mapper.map(entry) }
         source.lastElement().subscribe { post -> state.recentPageId = post.pageId }

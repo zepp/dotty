@@ -10,7 +10,6 @@ import im.point.dotty.network.UserReply
 import io.reactivex.Flowable
 import io.reactivex.Single
 import io.reactivex.SingleEmitter
-import io.reactivex.schedulers.Schedulers
 
 class UserRepo(private val api: PointAPI,
                private val state: AppState,
@@ -33,7 +32,6 @@ class UserRepo(private val api: PointAPI,
             api.getUser(state.token ?: throw Exception("invalid token"), id)
                     .enqueue(SingleCallbackAdapter(emitter))
         }
-                .observeOn(Schedulers.io())
                 .map { user -> mapper.map(user) }
                 .doOnSuccess { user -> dao.insertUser(user) }
     }
@@ -43,7 +41,6 @@ class UserRepo(private val api: PointAPI,
             api.getMe(state.token ?: throw Exception("invalid token"))
                     .enqueue(SingleCallbackAdapter(emitter))
         }
-                .observeOn(Schedulers.io())
                 .map { user -> mapper.map(user) }
                 .doOnSuccess { user ->
                     state.id = user.id

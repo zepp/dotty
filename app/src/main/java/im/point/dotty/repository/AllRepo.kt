@@ -14,7 +14,6 @@ import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.Single
-import io.reactivex.schedulers.Schedulers
 
 class AllRepo(private val api: PointAPI,
               private val state: AppState,
@@ -29,7 +28,6 @@ class AllRepo(private val api: PointAPI,
                     ?: throw Exception("invalid token"), if (isBefore) state.allPageId else null)
                     .enqueue(ObservableCallBackAdapter(emitter))
         }
-                .observeOn(Schedulers.io())
                 .flatMap { reply: PostsReply -> Observable.fromIterable(reply.posts) }
                 .map { entry: MetaPost -> mapper.map(entry) }
         source.lastElement().subscribe { post -> state.allPageId = post.pageId }

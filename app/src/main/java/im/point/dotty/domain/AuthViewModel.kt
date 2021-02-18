@@ -15,7 +15,6 @@ import im.point.dotty.network.SingleCallbackAdapter
 import io.reactivex.Single
 import io.reactivex.SingleEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 
 @SuppressLint("CheckResult")
 class AuthViewModel internal constructor(application: DottyApplication) : AndroidViewModel(application) {
@@ -31,7 +30,6 @@ class AuthViewModel internal constructor(application: DottyApplication) : Androi
         return Single.create { emitter: SingleEmitter<LoginReply> ->
             api.login(name, password).enqueue(SingleCallbackAdapter(emitter))
         }
-                .observeOn(Schedulers.io())
                 .doAfterSuccess { reply ->
                     state.isLoggedIn = true
                     state.userLogin = name
@@ -47,7 +45,6 @@ class AuthViewModel internal constructor(application: DottyApplication) : Androi
                     state.csrfToken ?: throw Exception("invalid CSRF token"))
                     .enqueue(SingleCallbackAdapter(emitter))
         }
-                .observeOn(Schedulers.io())
                 .doFinally {
                     state.isLoggedIn = false
                     state.csrfToken = null

@@ -3,7 +3,6 @@ package im.point.dotty
 import android.app.Application
 import android.util.Log
 import androidx.room.Room
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import im.point.dotty.db.DottyDatabase
 import im.point.dotty.domain.AppState
@@ -13,17 +12,24 @@ import im.point.dotty.repository.RepoFactory
 import io.reactivex.plugins.RxJavaPlugins
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 class DottyApplication : Application() {
+    private val executor: ExecutorService = Executors.newCachedThreadPool()
     private val tag = this::class.simpleName
     private val gson = GsonBuilder().setLenient().create()
     private val BASE = "https://point.im"
     private val retrofit = Retrofit.Builder().baseUrl(BASE)
             .addConverterFactory(GsonConverterFactory.create(gson))
+            .callbackExecutor(executor)
             .build()
 
     val database by lazy {
-        Room.databaseBuilder(applicationContext, DottyDatabase::class.java, "main").build()
+        Room.databaseBuilder(applicationContext, DottyDatabase::class.java, "main")
+                .setQueryExecutor(executor)
+                .setTransactionExecutor(executor)
+                .build()
     }
 
     val state by lazy {

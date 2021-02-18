@@ -16,7 +16,6 @@ import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.Single
-import io.reactivex.schedulers.Schedulers
 
 class CommentRepo<in T : Post>(private val api: PointAPI,
                                private val state: AppState,
@@ -40,11 +39,10 @@ class CommentRepo<in T : Post>(private val api: PointAPI,
             Observable.create { emitter: ObservableEmitter<PostReply> ->
                 api.getPost(state.token ?: throw Exception("invalid token"), model.postId)
                         .enqueue(ObservableCallBackAdapter(emitter))
-            }.observeOn(Schedulers.io())
-                    .doOnNext { postReply ->
-                        postDao.insertItem(postMapper.merge(model, postReply.post
-                                ?: throw Exception("invalid raw post")))
-                    }
+            }.doOnNext { postReply ->
+                postDao.insertItem(postMapper.merge(model, postReply.post
+                        ?: throw Exception("invalid raw post")))
+            }
                     .flatMap { postReply -> Observable.fromIterable(postReply.comments) }
                     .map { entry: RawComment -> mapper.map(entry) }
                     .toList()
