@@ -10,14 +10,25 @@ class ViewModelFactory(activity: Activity) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
-            MainViewModel(application) as T
+            mainViewModel as T
         } else if (modelClass.isAssignableFrom(AuthViewModel::class.java)) {
-            AuthViewModel(application) as T
-        } else if (modelClass.isAssignableFrom(PostViewModel::class.java)) {
-            PostViewModel(application) as T
+            authViewModel as T
+        } else if (modelClass.isAssignableFrom(postViewModel::class.java)) {
+            postViewModel as T
         } else {
             throw IllegalArgumentException(modelClass.simpleName + " can not be constructed by this factory")
         }
     }
 
+    private val mainViewModel by lazy {
+        MainViewModel(application)
+    }
+
+    private val authViewModel by lazy {
+        AuthViewModel(application)
+    }
+
+    private val postViewModel by lazy {
+        PostViewModel(application)
+    }
 }
