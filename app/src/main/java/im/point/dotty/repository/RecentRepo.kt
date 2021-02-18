@@ -19,14 +19,16 @@ import io.reactivex.schedulers.Schedulers
 class RecentRepo(private val api: PointAPI,
                  private val state: AppState,
                  private val recentPostDao: RecentPostDao,
-                 private val mapper: Mapper<RecentPost, MetaPost> = RecentPostMapper()) : Repository<RecentPost> {
+                 private val mapper: Mapper<RecentPost, MetaPost> = RecentPostMapper()) :
+        Repository<RecentPost, String> {
 
     @SuppressLint("CheckResult")
     private fun fetch(isBefore: Boolean): Single<List<RecentPost>> {
         val source = Observable.create { emitter: ObservableEmitter<PostsReply> ->
-            api.getRecent(state.token  ?: throw Exception("invalid token"),
+            api.getRecent(state.token ?: throw Exception("invalid token"),
                     if (isBefore) state.recentPageId else null)
-                    .enqueue(ObservableCallBackAdapter(emitter))}
+                    .enqueue(ObservableCallBackAdapter(emitter))
+        }
                 .observeOn(Schedulers.io())
                 .flatMap { postsReply: PostsReply -> Observable.fromIterable(postsReply.posts) }
                 .map { entry: MetaPost -> mapper.map(entry) }

@@ -17,16 +17,18 @@ import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 
 class AllRepo(private val api: PointAPI,
-                       private val state: AppState,
-                       private val allPostDao: AllPostDao,
-                       private val mapper: Mapper<AllPost, MetaPost> = AllPostMapper())
-    : Repository<AllPost> {
+              private val state: AppState,
+              private val allPostDao: AllPostDao,
+              private val mapper: Mapper<AllPost, MetaPost> = AllPostMapper())
+    : Repository<AllPost, String> {
 
     @SuppressLint("CheckResult")
     fun fetch(isBefore: Boolean): Single<List<AllPost>> {
         val source = Observable.create { emitter: ObservableEmitter<PostsReply> ->
-            api.getAll(state.token ?: throw Exception("invalid token"), if (isBefore) state.allPageId else null)
-                    .enqueue(ObservableCallBackAdapter(emitter)) }
+            api.getAll(state.token
+                    ?: throw Exception("invalid token"), if (isBefore) state.allPageId else null)
+                    .enqueue(ObservableCallBackAdapter(emitter))
+        }
                 .observeOn(Schedulers.io())
                 .flatMap { reply: PostsReply -> Observable.fromIterable(reply.posts) }
                 .map { entry: MetaPost -> mapper.map(entry) }

@@ -15,21 +15,25 @@ class RepoFactory(private val api: PointAPI, private val database: DottyDatabase
         return CommentedRepo(api, state, database.getCommentedPostDao())
     }
 
+    fun getUserRepo(): UserRepo {
+        return UserRepo(api, state, database.getUserDao())
+    }
+
     fun getAllRepo(): AllRepo {
         return AllRepo(api, state, database.getAllPostDao())
     }
 
-    fun getRecentCommentRepo(id: String): Repository<Comment> {
+    fun getRecentCommentRepo(id: String): Repository<Comment, String> {
         val dao = database.getRecentPostDao()
         return CommentRepo(api, state, database.getCommentDao(), dao, dao.getPost(id))
     }
 
-    fun getCommentedCommentRepo(id: String): Repository<Comment> {
+    fun getCommentedCommentRepo(id: String): Repository<Comment, String> {
         val dao = database.getCommentedPostDao()
         return CommentRepo(api, state, database.getCommentDao(), dao, dao.getPost(id))
     }
 
-    fun getAllCommentRepo(id: String): Repository<Comment> {
+    fun getAllCommentRepo(id: String): Repository<Comment, String> {
         val dao = database.getAllPostDao()
         return CommentRepo(api, state, database.getCommentDao(), dao, dao.getPost(id))
     }

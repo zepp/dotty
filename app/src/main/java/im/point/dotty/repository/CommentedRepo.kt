@@ -17,17 +17,18 @@ import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 
 class CommentedRepo(private val api: PointAPI,
-                             private val state: AppState,
-                             private val commentedPostDao: CommentedPostDao,
-                             private val mapper: Mapper<CommentedPost, MetaPost> = CommentedPostMapper())
-    : Repository<CommentedPost> {
+                    private val state: AppState,
+                    private val commentedPostDao: CommentedPostDao,
+                    private val mapper: Mapper<CommentedPost, MetaPost> = CommentedPostMapper())
+    : Repository<CommentedPost, String> {
 
     @SuppressLint("CheckResult")
-    fun fetch(isBefore : Boolean): Single<List<CommentedPost>> {
+    fun fetch(isBefore: Boolean): Single<List<CommentedPost>> {
         val source = Observable.create { emitter: ObservableEmitter<PostsReply> ->
             api.getComments(state.token ?: throw Exception("invalid token"),
                     if (isBefore) state.commentedPageId else null)
-                    .enqueue(ObservableCallBackAdapter(emitter)) }
+                    .enqueue(ObservableCallBackAdapter(emitter))
+        }
                 .observeOn(Schedulers.io())
                 .flatMap { reply: PostsReply -> Observable.fromIterable(reply.posts) }
                 .map { entry: MetaPost -> mapper.map(entry) }

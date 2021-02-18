@@ -24,7 +24,7 @@ class CommentRepo<in T : Post>(private val api: PointAPI,
                                private val postDao: PostDao<T>,
                                private var model: Flowable<T>,
                                private val mapper: Mapper<Comment, RawComment> = CommentMapper(),
-                               private val postMapper: RawPostMapper<T> = RawPostMapper()) : Repository<Comment> {
+                               private val postMapper: RawPostMapper<T> = RawPostMapper()) : Repository<Comment, String> {
 
     override fun getAll(): Flowable<List<Comment>> {
         return model.firstElement().flatMapPublisher { model -> commentDao.getPostComments(model.postId) }

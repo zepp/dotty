@@ -6,6 +6,7 @@ import android.content.res.Resources
 
 class AppState (context: Context) {
     private val IS_LOGGED_IN = "is-logged-in"
+    private val USER_ID = "user-id"
     private val USER_LOGIN = "user-name"
     private val TOKEN = "token"
     private val CSRF_TOKEN = "csrf-token"
@@ -43,8 +44,20 @@ class AppState (context: Context) {
     var csrfToken: String?
         get() = preferences.getString(CSRF_TOKEN, null)
         set(value) {
-            with (preferences.edit()) {
+            with(preferences.edit()) {
                 if (value == null) remove(CSRF_TOKEN).apply() else putString(CSRF_TOKEN, value).apply()
+            }
+        }
+
+    var id: Long?
+        get() {
+            return with(preferences.getLong(USER_ID, -1)) {
+                if (this == -1L) null else this
+            }
+        }
+        set(value) {
+            with(preferences.edit()) {
+                if (value == null) remove(USER_ID).apply() else putLong(USER_ID, value).apply()
             }
         }
 
@@ -55,7 +68,7 @@ class AppState (context: Context) {
             }
         }
         set(value) {
-            with (preferences.edit()) {
+            with(preferences.edit()) {
                 if (value == null) remove(COMMENTED_PAGE_ID).apply()
                 else putLong(COMMENTED_PAGE_ID, value).apply()
             }

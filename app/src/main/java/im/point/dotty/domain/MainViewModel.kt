@@ -5,9 +5,11 @@ import im.point.dotty.DottyApplication
 import im.point.dotty.model.AllPost
 import im.point.dotty.model.CommentedPost
 import im.point.dotty.model.RecentPost
+import im.point.dotty.model.User
 import im.point.dotty.repository.*
 import io.reactivex.Completable
 import io.reactivex.Flowable
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 
 class MainViewModel internal constructor(application: DottyApplication) : AndroidViewModel(application) {
@@ -15,6 +17,7 @@ class MainViewModel internal constructor(application: DottyApplication) : Androi
     private val recentRepo : RecentRepo
     private val commentedPostRepo: CommentedRepo
     private val allPostRepo: AllRepo
+    private val userRepo: UserRepo
 
     fun fetchRecent(isBefore: Boolean): Completable {
         return Completable.fromSingle(if (isBefore) recentRepo.fetchBefore() else recentRepo.fetch())
@@ -43,10 +46,23 @@ class MainViewModel internal constructor(application: DottyApplication) : Androi
         return commentedPostRepo.getAll().observeOn(AndroidSchedulers.mainThread())
     }
 
+    fun getMe(): Flowable<User> {
+        return userRepo.getMe().observeOn(AndroidSchedulers.mainThread())
+    }
+
+    fun getUser(id: Long): Flowable<User> {
+        return userRepo.getItem(id).observeOn(AndroidSchedulers.mainThread())
+    }
+
+    fun fetchUser(id: Long): Single<User> {
+        return userRepo.fetchUser(id).observeOn(AndroidSchedulers.mainThread())
+    }
+
     init {
         repoFactory = application.repoFactory
         recentRepo = repoFactory.getRecentRepo()
         commentedPostRepo = repoFactory.getCommentedRepo()
         allPostRepo = repoFactory.getAllRepo()
+        userRepo = repoFactory.getUserRepo()
     }
 }

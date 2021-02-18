@@ -5,10 +5,7 @@ import android.app.Application
 import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import im.point.dotty.DottyApplication
-import im.point.dotty.db.AllPostDao
-import im.point.dotty.db.CommentDao
-import im.point.dotty.db.CommentedPostDao
-import im.point.dotty.db.RecentPostDao
+import im.point.dotty.db.*
 import im.point.dotty.login.LoginActivity
 import im.point.dotty.main.MainActivity
 import im.point.dotty.network.AuthAPI
@@ -28,6 +25,7 @@ class AuthViewModel internal constructor(application: DottyApplication) : Androi
     private val recentPostDao: RecentPostDao
     private val commentedPostDao: CommentedPostDao
     private val commentDao: CommentDao
+    private val userDao: UserDao
 
     fun login(name: String, password: String): Single<LoginReply> {
         return Single.create { emitter: SingleEmitter<LoginReply> ->
@@ -58,8 +56,8 @@ class AuthViewModel internal constructor(application: DottyApplication) : Androi
                     recentPostDao.deleteAll()
                     commentedPostDao.deleteAll()
                     commentDao.deleteAll()
-                }
-                .observeOn(AndroidSchedulers.mainThread())
+                    userDao.deleteAll()
+                }.observeOn(AndroidSchedulers.mainThread())
     }
 
     fun resetActivityBackStack() {
@@ -79,5 +77,6 @@ class AuthViewModel internal constructor(application: DottyApplication) : Androi
         recentPostDao = application.database.getRecentPostDao()
         commentedPostDao = application.database.getCommentedPostDao()
         commentDao = application.database.getCommentDao()
+        userDao = application.database.getUserDao()
     }
 }

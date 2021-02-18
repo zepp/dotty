@@ -38,8 +38,8 @@ interface PointAPI {
     fun getUser(@Header("Authorization") token: String, @Path("login") login: String): Call<UserReply>
 
     @GET("/api/user/id/{id}")
-    fun getUser(@Header("Authorization") token: String, @Path("id") id: Int): Call<UserReply>
+    fun getUser(@Header("Authorization") token: String, @Path("id") id: Long): Call<UserReply>
 
     @GET("/api/me")
-    fun getMyself(@Header("Authorization") token: String): Call<UserReply>
+    fun getMe(@Header("Authorization") token: String): Call<UserReply>
 }
