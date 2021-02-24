@@ -122,7 +122,9 @@ class AppState (context: Context) {
     val unreadComments: Observable<Int> =
             with(Producer(preferences, UNREAD_COMMENTS, preferences::getInt, 0)) {
                 Observable.create(this)
-                        .share()
+                        .distinctUntilChanged()
+                        .replay(1)
+                        .refCount()
                         .doOnDispose(this::dispose)
             }
 
@@ -131,7 +133,9 @@ class AppState (context: Context) {
     val privateUnreadPosts: Observable<Int> =
             with(Producer(preferences, PRIVATE_UNREAD_POSTS, preferences::getInt, 0)) {
                 Observable.create(this)
-                        .share()
+                        .distinctUntilChanged()
+                        .replay(1)
+                        .refCount()
                         .doOnDispose(this::dispose)
             }
 
@@ -140,7 +144,9 @@ class AppState (context: Context) {
     val privateUnreadComments: Observable<Int> =
             with(Producer(preferences, PRIVATE_UNREAD_COMMENTS, preferences::getInt, 0)) {
                 Observable.create(this)
-                        .share()
+                        .distinctUntilChanged()
+                        .replay(1)
+                        .refCount()
                         .doOnDispose(this::dispose)
             }
 
@@ -158,6 +164,7 @@ internal class Producer<T>(private val prefs: SharedPreferences,
     override fun subscribe(emitter: ObservableEmitter<T>) {
         this.emitter = emitter
         prefs.registerOnSharedPreferenceChangeListener(this)
+        emitter.onNext(getter(key, defValue))
     }
 
     override fun onSharedPreferenceChanged(prefs: SharedPreferences?, key: String?) {
