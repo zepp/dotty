@@ -7,7 +7,7 @@ import io.reactivex.Flowable
 
 @Dao
 interface CommentedPostDao : PostDao<CommentedPost>{
-    @Query("SELECT * FROM commented_posts ORDER BY page_id DESC")
+    @Query("SELECT * FROM commented_posts ORDER BY page_id ASC")
     fun getAll(): Flowable<List<CommentedPost>>
 
     @Query("SELECT * FROM commented_posts WHERE id = :id")
