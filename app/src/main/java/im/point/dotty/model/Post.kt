@@ -15,6 +15,9 @@ abstract class Post {
     var timestamp: Date? = null
     var commentCount: Int? = null
 
+    var bookmarked: Boolean? = null
+    var recommended: Boolean? = null
+
     @Ignore
     open val postId: String = ""
 

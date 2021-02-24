@@ -9,6 +9,8 @@ import java.util.*
 open class PostMapper <T : Post> {
     protected fun mergeMetaPost(result: T, post: MetaPost): T {
         result.pageId = post.uid
+        result.bookmarked = post.isBookmarked
+        result.recommended = post.isRecommended
         return mergeRawPost(result, post.post ?: throw Exception("invalid raw post"))
     }
 

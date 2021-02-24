@@ -18,8 +18,11 @@ class PostHolder<T : Post>(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val adapter: TagsAdapter
     private val bookmarked: ImageView
     private val recommended: ImageView
+    private val commentsCount: TextView
 
     fun bind(post: T, onItemClicked: (item: T) -> Unit) {
+        bookmarked.visibility = if (post.bookmarked == true) View.VISIBLE else View.GONE
+        recommended.visibility = if (post.recommended == true) View.VISIBLE else View.GONE
         author.text = post.nameOrLogin
         id.text = "#" + post.postId
         text.text = post.text
@@ -28,9 +31,8 @@ class PostHolder<T : Post>(itemView: View) : RecyclerView.ViewHolder(itemView) {
         } else {
             adapter.replaceList(post.tags!!)
         }
+        commentsCount.text = post.commentCount.toString()
         itemView.setOnClickListener { onItemClicked(post) }
-        bookmarked.visibility = View.GONE
-        recommended.visibility = View.GONE
     }
 
     init {
@@ -39,6 +41,7 @@ class PostHolder<T : Post>(itemView: View) : RecyclerView.ViewHolder(itemView) {
         id = itemView.findViewById(R.id.post_id)
         text = itemView.findViewById(R.id.post_text)
         tags = itemView.findViewById(R.id.post_tags)
+        commentsCount = itemView.findViewById(R.id.post_comments_count)
         recommended = itemView.findViewById(R.id.post_recommended)
         bookmarked = itemView.findViewById(R.id.post_bookmarked)
         tags.adapter = adapter
