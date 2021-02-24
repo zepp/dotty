@@ -7,6 +7,16 @@
     android:layout_height="wrap_content"
     android:background="@android:color/background_light">
 
+    <ImageView
+        android:id="@+id/post_bookmarked"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/ic_bookmarked"
+        app:layout_constraintBottom_toBottomOf="@id/post_author"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/post_author" />
+
     <TextView
         android:id="@+id/post_author"
         android:layout_width="0dp"
@@ -14,20 +24,32 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
-        app:layout_constraintEnd_toStartOf="@+id/post_id"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
+        android:ellipsize="end"
+        android:lines="1"
+        app:layout_constraintEnd_toStartOf="@+id/post_recommended"
+        app:layout_constraintStart_toEndOf="@id/post_bookmarked"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="author" />
+
+    <ImageView
+        android:id="@+id/post_recommended"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/ic_recommended"
+        app:layout_constraintBottom_toBottomOf="@+id/post_author"
+        app:layout_constraintEnd_toStartOf="@id/post_id"
+        app:layout_constraintStart_toEndOf="@id/post_author"
+        app:layout_constraintTop_toTopOf="@+id/post_author" />
 
     <TextView
         android:id="@+id/post_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/post_author"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/post_author"
         tools:text="axhc" />
 
     <TextView

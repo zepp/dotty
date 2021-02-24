@@ -1,6 +1,7 @@
 package im.point.dotty.feed
 
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -15,6 +16,8 @@ class PostHolder<T : Post>(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val text: TextView
     private val tags: RecyclerView
     private val adapter: TagsAdapter
+    private val bookmarked: ImageView
+    private val recommended: ImageView
 
     fun bind(post: T, onItemClicked: (item: T) -> Unit) {
         author.text = post.nameOrLogin
@@ -26,6 +29,8 @@ class PostHolder<T : Post>(itemView: View) : RecyclerView.ViewHolder(itemView) {
             adapter.replaceList(post.tags!!)
         }
         itemView.setOnClickListener { onItemClicked(post) }
+        bookmarked.visibility = View.GONE
+        recommended.visibility = View.GONE
     }
 
     init {
@@ -34,6 +39,8 @@ class PostHolder<T : Post>(itemView: View) : RecyclerView.ViewHolder(itemView) {
         id = itemView.findViewById(R.id.post_id)
         text = itemView.findViewById(R.id.post_text)
         tags = itemView.findViewById(R.id.post_tags)
+        recommended = itemView.findViewById(R.id.post_recommended)
+        bookmarked = itemView.findViewById(R.id.post_bookmarked)
         tags.adapter = adapter
         tags.layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
     }
