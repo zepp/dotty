@@ -69,10 +69,10 @@ class MainViewModel internal constructor(application: DottyApplication) : Androi
                     .enqueue(SingleCallbackAdapter(emitter))
         }
                 .doOnSuccess { reply ->
-                    state.updateUnreadPosts(reply.unreadPosts)
-                    state.updatePrivateUnreadComments(reply.unreadComments)
-                    state.updatePrivateUnreadPosts(reply.privateUnreadPosts)
-                    state.updatePrivateUnreadComments(reply.privateUnreadComments)
+                    state.updateUnreadPosts(reply.posts)
+                    state.updateUnreadComments(reply.comments)
+                    state.updatePrivateUnreadPosts(reply.privatePosts)
+                    state.updatePrivateUnreadComments(reply.privateComments)
                 }).observeOn(AndroidSchedulers.mainThread())
     }
 
