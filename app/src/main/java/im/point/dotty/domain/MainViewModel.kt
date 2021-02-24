@@ -6,6 +6,9 @@ import im.point.dotty.model.AllPost
 import im.point.dotty.model.CommentedPost
 import im.point.dotty.model.RecentPost
 import im.point.dotty.model.User
+import im.point.dotty.network.PointAPI
+import im.point.dotty.network.SingleCallbackAdapter
+import im.point.dotty.network.UnreadCounters
 import im.point.dotty.repository.*
 import io.reactivex.Completable
 import io.reactivex.Flowable
@@ -14,10 +17,12 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 
 class MainViewModel internal constructor(application: DottyApplication) : AndroidViewModel(application) {
     private val repoFactory: RepoFactory
-    private val recentRepo : RecentRepo
+    private val recentRepo: RecentRepo
     private val commentedPostRepo: CommentedRepo
     private val allPostRepo: AllRepo
     private val userRepo: UserRepo
+    private val state: AppState = application.state
+    private val api: PointAPI = application.mainApi
 
     fun fetchRecent(isBefore: Boolean): Completable {
         return Completable.fromSingle(if (isBefore) recentRepo.fetchBefore() else recentRepo.fetch())
@@ -57,6 +62,27 @@ class MainViewModel internal constructor(application: DottyApplication) : Androi
     fun fetchUser(id: Long): Single<User> {
         return userRepo.fetchUser(id).observeOn(AndroidSchedulers.mainThread())
     }
+
+    fun fetchUnreadCounters(): Completable {
+        return Completable.fromSingle(Single.create<UnreadCounters> { emitter ->
+            api.getUnreadCounters(state.token ?: throw Exception("invalid token"))
+                    .enqueue(SingleCallbackAdapter(emitter))
+        }
+                .doOnSuccess { reply ->
+                    state.updateUnreadPosts(reply.unreadPosts)
+                    state.updatePrivateUnreadComments(reply.unreadComments)
+                    state.updatePrivateUnreadPosts(reply.privateUnreadPosts)
+                    state.updatePrivateUnreadComments(reply.privateUnreadComments)
+                }).observeOn(AndroidSchedulers.mainThread())
+    }
+
+    fun getUnreadPosts() = state.unreadPosts
+
+    fun getUnreadComments() = state.unreadComments
+
+    fun getUnreadPrivatePosts() = state.privateUnreadPosts
+
+    fun getUnreadPrivateComments() = state.privateUnreadComments
 
     init {
         repoFactory = application.repoFactory
