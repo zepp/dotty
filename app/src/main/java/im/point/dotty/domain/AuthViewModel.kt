@@ -12,9 +12,12 @@ import im.point.dotty.network.AuthAPI
 import im.point.dotty.network.LoginReply
 import im.point.dotty.network.LogoutReply
 import im.point.dotty.network.SingleCallbackAdapter
+import io.reactivex.Observable
+import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 import io.reactivex.SingleEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
+import java.util.concurrent.TimeUnit
 
 @SuppressLint("CheckResult")
 class AuthViewModel internal constructor(application: DottyApplication) : AndroidViewModel(application) {
@@ -25,16 +28,47 @@ class AuthViewModel internal constructor(application: DottyApplication) : Androi
     private val commentedPostDao: CommentedPostDao
     private val commentDao: CommentDao
     private val userDao: UserDao
+    private lateinit var isLoginEnabledEmitter: ObservableEmitter<Boolean>
 
-    fun login(name: String, password: String): Single<LoginReply> {
-        return Single.create { emitter: SingleEmitter<LoginReply> ->
-            api.login(name, password).enqueue(SingleCallbackAdapter(emitter))
+    val isLoginEnabled: Observable<Boolean> =
+            Observable.create<Boolean> { emitter ->
+                isLoginEnabledEmitter = emitter
+                emitter.onNext(false)
+            }
+                    .distinctUntilChanged()
+                    .debounce(200, TimeUnit.MILLISECONDS)
+                    .publish()
+                    .autoConnect()
+                    .observeOn(AndroidSchedulers.mainThread())
+
+    var login: String = ""
+        set(value) {
+            field = value.trim()
+            updateLoginEnabled()
         }
+
+    var password: String = ""
+        set(value) {
+            field = value
+            updateLoginEnabled()
+        }
+
+    private fun updateLoginEnabled() {
+        isLoginEnabledEmitter.onNext(!(login.isBlank() || password.isBlank()))
+    }
+
+    fun login(): Single<LoginReply> {
+        return Single.create { emitter: SingleEmitter<LoginReply> ->
+            isLoginEnabledEmitter.onNext(false)
+            api.login(login, password).enqueue(SingleCallbackAdapter(emitter))
+        }
+                .doOnEvent { _, _ -> updateLoginEnabled() }
                 .doAfterSuccess { reply ->
                     state.isLoggedIn = true
-                    state.userLogin = name
+                    state.userLogin = login
                     state.csrfToken = reply.csrfToken ?: throw Exception("CSRF token is empty")
                     state.token = reply.token ?: throw Exception("token is empty")
+                    resetActivityBackStack()
                 }
                 .observeOn(AndroidSchedulers.mainThread())
     }
@@ -54,6 +88,7 @@ class AuthViewModel internal constructor(application: DottyApplication) : Androi
                     commentedPostDao.deleteAll()
                     commentDao.deleteAll()
                     userDao.deleteAll()
+                    resetActivityBackStack()
                 }.observeOn(AndroidSchedulers.mainThread())
     }
 
@@ -75,5 +110,7 @@ class AuthViewModel internal constructor(application: DottyApplication) : Androi
         commentedPostDao = application.database.getCommentedPostDao()
         commentDao = application.database.getCommentDao()
         userDao = application.database.getUserDao()
+        isLoginEnabled.subscribe()
+        login = state.userLogin ?: ""
     }
 }

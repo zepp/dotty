@@ -16,8 +16,6 @@ import im.point.dotty.domain.ViewModelFactory
 class LoginFragment : RxFragment() {
     private lateinit var binding: FragmentLoginBinding
     private lateinit var viewModel: AuthViewModel
-    private var userNameText = ""
-    private var passwordText = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,28 +30,21 @@ class LoginFragment : RxFragment() {
 
     override fun onStart() {
         super.onStart()
+        binding.loginUserName.setText(viewModel.login)
         binding.loginUserName.addTextChangedListener({ s: CharSequence?, i: Int, i1: Int, i2: Int -> },
                 { s: CharSequence?, i: Int, i1: Int, i2: Int -> },
-                { e -> userNameText = e.toString().trim { it <= ' ' }
-                    updateLogin()})
+                { e -> viewModel.login = e.toString() })
+        binding.loginPassword.setText(viewModel.password)
         binding.loginPassword.addTextChangedListener({ s: CharSequence?, i: Int, i1: Int, i2: Int -> },
                 { s: CharSequence?, i: Int, i1: Int, i2: Int -> },
-                { e -> passwordText = e.toString().trim { it <= ' ' }
-                    updateLogin()})
-        binding.loginLogin.setOnClickListener { v ->
-            v.isEnabled = false
-            addDisposable(viewModel.login(userNameText, passwordText)
-                    .subscribe({ viewModel.resetActivityBackStack() },
-                            { error ->
-                                v.isEnabled = true
-                                Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()
-                            }))
+                { e -> viewModel.password = e.toString() })
+        addDisposable(viewModel.isLoginEnabled.subscribe { value -> binding.loginLogin.isEnabled = value })
+        binding.loginLogin.setOnClickListener {
+            addDisposable(viewModel.login()
+                    .subscribe { _, error ->
+                        Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()
+                    })
         }
-        updateLogin()
-    }
-
-    private fun updateLogin() {
-        binding.loginLogin.isEnabled = binding.loginUserName.length() > 0 && binding.loginPassword.length() > 0
     }
 
     companion object {

@@ -60,11 +60,7 @@ class MainActivity : RxActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.main_logout) {
             addDisposable(viewModel.logout()
-                    .subscribe({ reply -> viewModel.resetActivityBackStack() },
-                            { error ->
-                                Toast.makeText(this, error.message, Toast.LENGTH_LONG).show()
-                                viewModel.resetActivityBackStack()
-                            }))
+                    .subscribe { _, error -> Toast.makeText(this, error.message, Toast.LENGTH_LONG).show() })
             return true
         } else {
             return super.onOptionsItemSelected(item)
