@@ -42,4 +42,7 @@ interface PointAPI {
 
     @GET("/api/me")
     fun getMe(@Header("Authorization") token: String): Call<UserReply>
+
+    @GET("/api/unread-counters")
+    fun getUnreadCounters(@Header("Authorization") token: String): Call<UnreadCounters>
 }
