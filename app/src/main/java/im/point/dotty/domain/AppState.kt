@@ -3,19 +3,29 @@ package im.point.dotty.domain
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.Resources
+import io.reactivex.Observable
+import io.reactivex.ObservableEmitter
+import io.reactivex.ObservableOnSubscribe
 
 class AppState (context: Context) {
-    private val IS_LOGGED_IN = "is-logged-in"
-    private val USER_ID = "user-id"
-    private val USER_LOGIN = "user-name"
-    private val TOKEN = "token"
-    private val CSRF_TOKEN = "csrf-token"
-    private val RECENT_PAGE_ID = "recent-last-id"
-    private val COMMENTED_PAGE_ID = "comment-last-id"
-    private val ALL_PAGE_ID = "all-last-id"
+    companion object {
+        private val IS_LOGGED_IN = "is-logged-in"
+        private val USER_ID = "user-id"
+        private val USER_LOGIN = "user-name"
+        private val TOKEN = "token"
+        private val CSRF_TOKEN = "csrf-token"
+        private val RECENT_PAGE_ID = "recent-last-id"
+        private val COMMENTED_PAGE_ID = "comment-last-id"
+        private val ALL_PAGE_ID = "all-last-id"
+        private val UNREAD_POSTS = "unread-posts"
+        private val UNREAD_COMMENTS = "unread-comments"
+        private val PRIVATE_UNREAD_POSTS = "private-unread-posts"
+        private val PRIVATE_UNREAD_COMMENTS = "private-unread-comments"
+    }
 
-    private val preferences: SharedPreferences
-    private val resources: Resources
+    private val preferences: SharedPreferences = context.getSharedPreferences(this::class.simpleName,
+            Context.MODE_PRIVATE)
+    private val resources: Resources = context.resources
 
     var isLoggedIn: Boolean?
         get() = preferences.getBoolean(IS_LOGGED_IN, false)
@@ -94,14 +104,69 @@ class AppState (context: Context) {
             }
         }
         set(value) {
-            with (preferences.edit()) {
+            with(preferences.edit()) {
                 if (value == null) remove(ALL_PAGE_ID).apply()
                 else putLong(ALL_PAGE_ID, value).apply()
             }
         }
 
-    init {
-        preferences = context.getSharedPreferences(this::class.simpleName, Context.MODE_PRIVATE)
-        resources = context.resources
+    val unreadPosts: Observable<Int> =
+            with(Producer(preferences, UNREAD_POSTS, preferences::getInt, 0)) {
+                Observable.create(this)
+                        .share()
+                        .doOnDispose(this::dispose)
+            }
+
+    fun updateUnreadPosts(value: Int) = preferences.edit().putInt(UNREAD_POSTS, value).apply()
+
+    val unreadComments: Observable<Int> =
+            with(Producer(preferences, UNREAD_COMMENTS, preferences::getInt, 0)) {
+                Observable.create(this)
+                        .share()
+                        .doOnDispose(this::dispose)
+            }
+
+    fun updateUnreadComments(value: Int) = preferences.edit().putInt(UNREAD_COMMENTS, value).apply()
+
+    val privateUnreadPosts: Observable<Int> =
+            with(Producer(preferences, PRIVATE_UNREAD_POSTS, preferences::getInt, 0)) {
+                Observable.create(this)
+                        .share()
+                        .doOnDispose(this::dispose)
+            }
+
+    fun updatePrivateUnreadPosts(value: Int) = preferences.edit().putInt(PRIVATE_UNREAD_POSTS, value).apply()
+
+    val privateUnreadComments: Observable<Int> =
+            with(Producer(preferences, PRIVATE_UNREAD_COMMENTS, preferences::getInt, 0)) {
+                Observable.create(this)
+                        .share()
+                        .doOnDispose(this::dispose)
+            }
+
+    fun updatePrivateUnreadComments(value: Int) = preferences.edit().putInt(PRIVATE_UNREAD_COMMENTS, value).apply()
+}
+
+internal class Producer<T>(private val prefs: SharedPreferences,
+                           private val key: String,
+                           private val getter: (key: String, value: T) -> T,
+                           private val defValue: T) :
+        ObservableOnSubscribe<T>,
+        SharedPreferences.OnSharedPreferenceChangeListener {
+    private lateinit var emitter: ObservableEmitter<T>
+
+    override fun subscribe(emitter: ObservableEmitter<T>) {
+        this.emitter = emitter
+        prefs.registerOnSharedPreferenceChangeListener(this)
+    }
+
+    override fun onSharedPreferenceChanged(prefs: SharedPreferences?, key: String?) {
+        if (key == this.key) {
+            emitter.onNext(getter(key, defValue))
+        }
+    }
+
+    fun dispose() {
+        prefs.unregisterOnSharedPreferenceChangeListener(this)
     }
 }
