@@ -13,6 +13,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 
 class PostViewModel(application: DottyApplication) : ViewModel() {
     private val repoFactory: RepoFactory
+    private val shared: Shared = Shared(application.state, application.mainApi)
 
     fun getRecentPost(id: String): Flowable<RecentPost> {
         return repoFactory.getRecentRepo().getItem(id).observeOn(AndroidSchedulers.mainThread())
@@ -39,17 +40,20 @@ class PostViewModel(application: DottyApplication) : ViewModel() {
     }
 
     fun fetchRecentPostComments(id: String): Completable {
-        return Completable.fromSingle(repoFactory.getRecentCommentRepo(id).fetch())
+        return Completable.fromSingle(repoFactory.getRecentCommentRepo(id).fetch()
+                .flatMap { shared.fetchUnreadCounters() })
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
     fun fetchCommentedPostComments(id: String): Completable {
-        return Completable.fromSingle(repoFactory.getCommentedCommentRepo(id).fetch())
+        return Completable.fromSingle(repoFactory.getCommentedCommentRepo(id).fetch()
+                .flatMap { shared.fetchUnreadCounters() })
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
     fun fetchAllPostComments(id: String): Completable {
-        return Completable.fromSingle(repoFactory.getAllCommentRepo(id).fetch())
+        return Completable.fromSingle(repoFactory.getAllCommentRepo(id).fetch()
+                .flatMap { shared.fetchUnreadCounters() })
                 .observeOn(AndroidSchedulers.mainThread())
     }
 

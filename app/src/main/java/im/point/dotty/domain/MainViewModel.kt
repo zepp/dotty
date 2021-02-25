@@ -6,9 +6,6 @@ import im.point.dotty.model.AllPost
 import im.point.dotty.model.CommentedPost
 import im.point.dotty.model.RecentPost
 import im.point.dotty.model.User
-import im.point.dotty.network.PointAPI
-import im.point.dotty.network.SingleCallbackAdapter
-import im.point.dotty.network.UnreadCounters
 import im.point.dotty.repository.*
 import io.reactivex.Completable
 import io.reactivex.Flowable
@@ -21,11 +18,12 @@ class MainViewModel internal constructor(application: DottyApplication) : Androi
     private val commentedPostRepo: CommentedRepo
     private val allPostRepo: AllRepo
     private val userRepo: UserRepo
+    private val shared: Shared = Shared(application.state, application.mainApi)
     private val state: AppState = application.state
-    private val api: PointAPI = application.mainApi
 
     fun fetchRecent(isBefore: Boolean): Completable {
-        return Completable.fromSingle(if (isBefore) recentRepo.fetchBefore() else recentRepo.fetch())
+        return Completable.fromSingle(if (isBefore) recentRepo.fetchBefore() else recentRepo.fetch()
+                .flatMap { shared.fetchUnreadCounters() })
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
@@ -64,16 +62,8 @@ class MainViewModel internal constructor(application: DottyApplication) : Androi
     }
 
     fun fetchUnreadCounters(): Completable {
-        return Completable.fromSingle(Single.create<UnreadCounters> { emitter ->
-            api.getUnreadCounters(state.token ?: throw Exception("invalid token"))
-                    .enqueue(SingleCallbackAdapter(emitter))
-        }
-                .doOnSuccess { reply ->
-                    state.updateUnreadPosts(reply.posts)
-                    state.updateUnreadComments(reply.comments)
-                    state.updatePrivateUnreadPosts(reply.privatePosts)
-                    state.updatePrivateUnreadComments(reply.privateComments)
-                }).observeOn(AndroidSchedulers.mainThread())
+        return Completable.fromSingle(shared.fetchUnreadCounters())
+                .observeOn(AndroidSchedulers.mainThread())
     }
 
     fun getUnreadPosts() = state.unreadPosts
