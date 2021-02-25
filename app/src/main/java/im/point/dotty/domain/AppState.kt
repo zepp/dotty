@@ -113,8 +113,10 @@ class AppState (context: Context) {
     val unreadPosts: Observable<Int> =
             with(Producer(preferences, UNREAD_POSTS, preferences::getInt, 0)) {
                 Observable.create(this)
-                        .share()
                         .doOnDispose(this::dispose)
+                        .distinctUntilChanged()
+                        .replay(1)
+                        .refCount()
             }
 
     fun updateUnreadPosts(value: Int) = preferences.edit().putInt(UNREAD_POSTS, value).apply()
@@ -122,10 +124,10 @@ class AppState (context: Context) {
     val unreadComments: Observable<Int> =
             with(Producer(preferences, UNREAD_COMMENTS, preferences::getInt, 0)) {
                 Observable.create(this)
+                        .doOnDispose(this::dispose)
                         .distinctUntilChanged()
                         .replay(1)
                         .refCount()
-                        .doOnDispose(this::dispose)
             }
 
     fun updateUnreadComments(value: Int) = preferences.edit().putInt(UNREAD_COMMENTS, value).apply()
@@ -133,10 +135,10 @@ class AppState (context: Context) {
     val privateUnreadPosts: Observable<Int> =
             with(Producer(preferences, PRIVATE_UNREAD_POSTS, preferences::getInt, 0)) {
                 Observable.create(this)
+                        .doOnDispose(this::dispose)
                         .distinctUntilChanged()
                         .replay(1)
                         .refCount()
-                        .doOnDispose(this::dispose)
             }
 
     fun updatePrivateUnreadPosts(value: Int) = preferences.edit().putInt(PRIVATE_UNREAD_POSTS, value).apply()
@@ -144,10 +146,10 @@ class AppState (context: Context) {
     val privateUnreadComments: Observable<Int> =
             with(Producer(preferences, PRIVATE_UNREAD_COMMENTS, preferences::getInt, 0)) {
                 Observable.create(this)
+                        .doOnDispose(this::dispose)
                         .distinctUntilChanged()
                         .replay(1)
                         .refCount()
-                        .doOnDispose(this::dispose)
             }
 
     fun updatePrivateUnreadComments(value: Int) = preferences.edit().putInt(PRIVATE_UNREAD_COMMENTS, value).apply()
