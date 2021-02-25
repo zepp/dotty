@@ -2,14 +2,15 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/post_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/post_layout"
     tools:context=".post.PostActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:expanded="true">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
@@ -18,41 +19,39 @@
             app:titleEnabled="false"
             app:toolbarId="@id/toolbar">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="?android:actionBarSize"
-                android:background="@android:color/background_light">
+                android:layout_marginTop="?attr/actionBarSize"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="8dp"
+                app:layout_collapseMode="parallax">
 
-                <TextView
-                    android:id="@+id/post_text"
-                    android:layout_width="0dp"
+                <ToggleButton
+                    android:id="@+id/post_subscribe"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:paddingBottom="16dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:text="text text text text text text text text text text text text text text text text" />
+                    android:drawableStart="@drawable/ic_post" />
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/post_tags"
-                    android:layout_width="0dp"
+                <ToggleButton
+                    android:id="@+id/post_recommend"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:orientation="vertical"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/post_text"
-                    tools:listitem="@layout/list_item_tag" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                    android:drawableStart="@drawable/ic_recommended" />
+
+                <ToggleButton
+                    android:id="@+id/post_bookmark"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableStart="@drawable/ic_bookmarked" />
+
+                <ToggleButton
+                    android:id="@+id/post_pin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableStart="@drawable/ic_pinned" />
+            </LinearLayout>
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"

@@ -5,13 +5,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
 import im.point.dotty.common.RxFragment
+import im.point.dotty.common.TagsAdapter
 import im.point.dotty.databinding.FragmentPostBinding
 import im.point.dotty.domain.PostViewModel
 import im.point.dotty.domain.ViewModelFactory
+import im.point.dotty.model.Post
 
 class PostFragment : RxFragment() {
     private val adapter: CommentAdapter = CommentAdapter()
@@ -20,6 +23,7 @@ class PostFragment : RxFragment() {
     private lateinit var layout: SwipeRefreshLayout
     private lateinit var postId: String
     private lateinit var from: From
+    private val tagsAdapter: TagsAdapter = TagsAdapter()
 
     companion object {
         const val POST_ID = "post-id"
@@ -45,6 +49,8 @@ class PostFragment : RxFragment() {
                               savedInstanceState: Bundle?): View? {
         binding = FragmentPostBinding.inflate(layoutInflater, container, false);
         binding.postComments.adapter = adapter
+        binding.postTags.adapter = tagsAdapter
+        binding.postTags.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         layout = binding.postSwipeLayout
         layout.setOnRefreshListener {
             addDisposable(when (from) {
@@ -74,6 +80,18 @@ class PostFragment : RxFragment() {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProvider(requireActivity(), ViewModelFactory(requireActivity()))
                 .get(PostViewModel::class.java)
+        addDisposable(when (from) {
+            From.FROM_RECENT -> viewModel.getRecentPost(postId)
+            From.FROM_COMMENTED -> viewModel.getCommentedPost(postId)
+            From.FROM_ALL -> viewModel.getAllPost(postId)
+        }.subscribe { post: Post ->
+            binding.postText.text = post.text
+            if (post.tags.isNullOrEmpty()) {
+                binding.postTags.visibility = View.GONE
+            } else {
+                tagsAdapter.list = post.tags!!
+            }
+        })
         addDisposable(when (from) {
             From.FROM_ALL -> viewModel.getAllPostComments(postId)
             From.FROM_COMMENTED -> viewModel.getCommentedPostComments(postId)

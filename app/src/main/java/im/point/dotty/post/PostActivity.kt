@@ -3,12 +3,9 @@ package im.point.dotty.post
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
 import im.point.dotty.R
 import im.point.dotty.common.RxActivity
-import im.point.dotty.common.TagsAdapter
 import im.point.dotty.databinding.ActivityPostBinding
 import im.point.dotty.domain.PostViewModel
 import im.point.dotty.domain.ViewModelFactory
@@ -19,7 +16,6 @@ class PostActivity : RxActivity() {
     private lateinit var postId: String
     private lateinit var from: From
     private lateinit var viewModel: PostViewModel
-    private val adapter: TagsAdapter = TagsAdapter()
 
     companion object {
         const val POST_ID = "post-id"
@@ -40,8 +36,6 @@ class PostActivity : RxActivity() {
         viewModel = ViewModelProvider(this, ViewModelFactory(this))
                 .get(PostViewModel::class.java)
         binding = ActivityPostBinding.inflate(layoutInflater)
-        binding.postTags.adapter = adapter
-        binding.postTags.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         setContentView(binding.root)
         if (supportFragmentManager.backStackEntryCount == 0) {
             val fragment = PostFragment.newInstance(intent.getSerializableExtra(POST_FROM) as From,
@@ -61,12 +55,6 @@ class PostActivity : RxActivity() {
             From.FROM_ALL -> viewModel.getAllPost(postId)
         }.subscribe { post: Post ->
             binding.toolbar.title = post.nameOrLogin
-            binding.postText.text = post.text
-            if (post.tags.isNullOrEmpty()) {
-                binding.postTags.visibility = View.GONE
-            } else {
-                adapter.list = post.tags!!
-            }
         })
     }
 
