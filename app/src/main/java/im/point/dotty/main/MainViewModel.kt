@@ -1,18 +1,24 @@
 /*
  * Copyright (c) 2019-2021 Pavel A. Sokolov
  */
-package im.point.dotty.domain
+package im.point.dotty.main
 
 import androidx.lifecycle.AndroidViewModel
 import im.point.dotty.DottyApplication
+import im.point.dotty.common.AppState
+import im.point.dotty.common.Shared
+import im.point.dotty.db.*
 import im.point.dotty.model.AllPost
 import im.point.dotty.model.CommentedPost
 import im.point.dotty.model.RecentPost
-import im.point.dotty.model.User
+import im.point.dotty.network.AuthAPI
+import im.point.dotty.network.LogoutReply
+import im.point.dotty.network.SingleCallbackAdapter
 import im.point.dotty.repository.*
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
+import io.reactivex.SingleEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
 
 class MainViewModel internal constructor(application: DottyApplication) : AndroidViewModel(application) {
@@ -21,8 +27,14 @@ class MainViewModel internal constructor(application: DottyApplication) : Androi
     private val commentedPostRepo: CommentedRepo
     private val allPostRepo: AllRepo
     private val userRepo: UserRepo
-    private val shared: Shared = Shared(application.state, application.mainApi)
+    private val shared: Shared = Shared(application.baseContext, application.state, application.mainApi)
     private val state: AppState = application.state
+    private val api: AuthAPI = application.authApi
+    private val allPostDao: AllPostDao
+    private val recentPostDao: RecentPostDao
+    private val commentedPostDao: CommentedPostDao
+    private val commentDao: CommentDao
+    private val userDao: UserDao
 
     fun fetchRecent(isBefore: Boolean): Completable {
         return Completable.fromSingle(if (isBefore) recentRepo.fetchBefore() else recentRepo.fetch()
@@ -52,30 +64,37 @@ class MainViewModel internal constructor(application: DottyApplication) : Androi
         return commentedPostRepo.getAll().observeOn(AndroidSchedulers.mainThread())
     }
 
-    fun getMe(): Flowable<User> {
-        return userRepo.getMe().observeOn(AndroidSchedulers.mainThread())
-    }
-
-    fun getUser(id: Long): Flowable<User> {
-        return userRepo.getItem(id).observeOn(AndroidSchedulers.mainThread())
-    }
-
-    fun fetchUser(id: Long): Single<User> {
-        return userRepo.fetchUser(id).observeOn(AndroidSchedulers.mainThread())
-    }
-
     fun fetchUnreadCounters(): Completable {
         return Completable.fromSingle(shared.fetchUnreadCounters())
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
-    fun getUnreadPosts() = state.unreadPosts
+    fun logout(): Completable {
+        return Completable.fromSingle(Single.create { emitter: SingleEmitter<LogoutReply> ->
+            api.logout(state.token ?: throw Exception("invalid token"),
+                    state.csrfToken ?: throw Exception("invalid CSRF token"))
+                    .enqueue(SingleCallbackAdapter(emitter))
+        }
+                .doFinally {
+                    state.isLoggedIn = false
+                    state.csrfToken = null
+                    state.token = null
+                    allPostDao.deleteAll()
+                    recentPostDao.deleteAll()
+                    commentedPostDao.deleteAll()
+                    commentDao.deleteAll()
+                    userDao.deleteAll()
+                    shared.resetActivityBackStack()
+                }.observeOn(AndroidSchedulers.mainThread()))
+    }
 
-    fun getUnreadComments() = state.unreadComments
+    fun unreadPosts() = state.unreadPosts
 
-    fun getUnreadPrivatePosts() = state.privateUnreadPosts
+    fun unreadComments() = state.unreadComments
 
-    fun getUnreadPrivateComments() = state.privateUnreadComments
+    fun unreadPrivatePosts() = state.privateUnreadPosts
+
+    fun unreadPrivateComments() = state.privateUnreadComments
 
     init {
         repoFactory = application.repoFactory
@@ -83,5 +102,10 @@ class MainViewModel internal constructor(application: DottyApplication) : Androi
         commentedPostRepo = repoFactory.getCommentedRepo()
         allPostRepo = repoFactory.getAllRepo()
         userRepo = repoFactory.getUserRepo()
+        allPostDao = application.database.getAllPostDao()
+        recentPostDao = application.database.getRecentPostDao()
+        commentedPostDao = application.database.getCommentedPostDao()
+        commentDao = application.database.getCommentDao()
+        userDao = application.database.getUserDao()
     }
 }

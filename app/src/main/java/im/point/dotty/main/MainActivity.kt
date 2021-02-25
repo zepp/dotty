@@ -15,23 +15,18 @@ import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.lifecycle.ViewModelProvider
 import im.point.dotty.R
 import im.point.dotty.common.RxActivity
+import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.ActivityMainBinding
-import im.point.dotty.domain.AuthViewModel
-import im.point.dotty.domain.MainViewModel
-import im.point.dotty.domain.ViewModelFactory
 
 class MainActivity : RxActivity() {
     private lateinit var binding: ActivityMainBinding
-    private lateinit var viewModel: AuthViewModel
-    private lateinit var mainViewModel: MainViewModel
+    private lateinit var viewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         viewModel = ViewModelProvider(this, ViewModelFactory(this))
-                .get(AuthViewModel::class.java)
-        mainViewModel = ViewModelProvider(this, ViewModelFactory(this))
                 .get(MainViewModel::class.java)
     }
 
@@ -44,14 +39,14 @@ class MainActivity : RxActivity() {
 
     override fun onStart() {
         super.onStart()
-        addDisposable(mainViewModel.fetchUnreadCounters().subscribe())
-        addDisposable(mainViewModel.getUnreadPosts()
+        addDisposable(viewModel.fetchUnreadCounters().subscribe())
+        addDisposable(viewModel.unreadPosts()
                 .subscribe { value -> binding.mainUnreadPosts.text = value.toString() })
-        addDisposable(mainViewModel.getUnreadComments()
+        addDisposable(viewModel.unreadComments()
                 .subscribe { value -> binding.mainUnreadComments.text = value.toString() })
-        addDisposable(mainViewModel.getUnreadPrivatePosts()
+        addDisposable(viewModel.unreadPrivatePosts()
                 .subscribe { value -> binding.mainPrivateUnreadPosts.text = value.toString() })
-        addDisposable(mainViewModel.getUnreadPrivateComments()
+        addDisposable(viewModel.unreadPrivateComments()
                 .subscribe { value -> binding.mainPrivateUnreadComments.text = value.toString() })
     }
 
@@ -63,7 +58,8 @@ class MainActivity : RxActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.main_logout) {
             addDisposable(viewModel.logout()
-                    .subscribe { _, error -> Toast.makeText(this, error.message, Toast.LENGTH_LONG).show() })
+                    .subscribe({},
+                            { error -> Toast.makeText(this, error.message, Toast.LENGTH_LONG).show() }))
             return true
         } else {
             return super.onOptionsItemSelected(item)

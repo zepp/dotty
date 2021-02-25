@@ -4,8 +4,8 @@
 package im.point.dotty.repository
 
 import android.annotation.SuppressLint
+import im.point.dotty.common.AppState
 import im.point.dotty.db.RecentPostDao
-import im.point.dotty.domain.AppState
 import im.point.dotty.mapper.Mapper
 import im.point.dotty.mapper.RecentPostMapper
 import im.point.dotty.model.RecentPost

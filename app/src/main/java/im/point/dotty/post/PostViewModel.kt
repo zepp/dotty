@@ -1,10 +1,11 @@
 /*
  * Copyright (c) 2019-2021 Pavel A. Sokolov
  */
-package im.point.dotty.domain
+package im.point.dotty.post
 
 import androidx.lifecycle.ViewModel
 import im.point.dotty.DottyApplication
+import im.point.dotty.common.Shared
 import im.point.dotty.model.AllPost
 import im.point.dotty.model.Comment
 import im.point.dotty.model.CommentedPost
@@ -16,7 +17,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 
 class PostViewModel(application: DottyApplication) : ViewModel() {
     private val repoFactory: RepoFactory
-    private val shared: Shared = Shared(application.state, application.mainApi)
+    private val shared: Shared = Shared(application.baseContext, application.state, application.mainApi)
 
     fun getRecentPost(id: String): Flowable<RecentPost> {
         return repoFactory.getRecentRepo().getItem(id).observeOn(AndroidSchedulers.mainThread())

@@ -3,8 +3,8 @@
  */
 package im.point.dotty.repository
 
+import im.point.dotty.common.AppState
 import im.point.dotty.db.UserDao
-import im.point.dotty.domain.AppState
 import im.point.dotty.mapper.UserMapper
 import im.point.dotty.model.User
 import im.point.dotty.network.PointAPI

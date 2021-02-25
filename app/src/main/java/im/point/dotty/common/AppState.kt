@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2019-2021 Pavel A. Sokolov
  */
-package im.point.dotty.domain
+package im.point.dotty.common
 
 import android.content.Context
 import android.content.SharedPreferences

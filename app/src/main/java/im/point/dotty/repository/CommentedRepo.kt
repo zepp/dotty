@@ -4,8 +4,8 @@
 package im.point.dotty.repository
 
 import android.annotation.SuppressLint
+import im.point.dotty.common.AppState
 import im.point.dotty.db.CommentedPostDao
-import im.point.dotty.domain.AppState
 import im.point.dotty.mapper.CommentedPostMapper
 import im.point.dotty.mapper.Mapper
 import im.point.dotty.model.CommentedPost

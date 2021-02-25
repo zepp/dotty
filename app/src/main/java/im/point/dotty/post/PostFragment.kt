@@ -14,9 +14,8 @@ import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
 import im.point.dotty.common.RxFragment
 import im.point.dotty.common.TagsAdapter
+import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.FragmentPostBinding
-import im.point.dotty.domain.PostViewModel
-import im.point.dotty.domain.ViewModelFactory
 import im.point.dotty.model.Post
 
 class PostFragment : RxFragment() {

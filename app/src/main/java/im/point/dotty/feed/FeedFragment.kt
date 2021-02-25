@@ -13,9 +13,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
 import im.point.dotty.common.RxFragment
+import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.FragmentFeedBinding
-import im.point.dotty.domain.MainViewModel
-import im.point.dotty.domain.ViewModelFactory
+import im.point.dotty.main.MainViewModel
 import im.point.dotty.model.Post
 
 abstract class FeedFragment<T : Post> : RxFragment() {

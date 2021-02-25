@@ -7,8 +7,8 @@ import android.app.Application
 import android.util.Log
 import androidx.room.Room
 import com.google.gson.GsonBuilder
+import im.point.dotty.common.AppState
 import im.point.dotty.db.DottyDatabase
-import im.point.dotty.domain.AppState
 import im.point.dotty.network.AuthAPI
 import im.point.dotty.network.PointAPI
 import im.point.dotty.repository.RepoFactory

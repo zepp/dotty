@@ -3,9 +3,9 @@
  */
 package im.point.dotty.repository
 
+import im.point.dotty.common.AppState
 import im.point.dotty.db.CommentDao
 import im.point.dotty.db.PostDao
-import im.point.dotty.domain.AppState
 import im.point.dotty.mapper.CommentMapper
 import im.point.dotty.mapper.Mapper
 import im.point.dotty.mapper.RawPostMapper

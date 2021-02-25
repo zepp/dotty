@@ -3,8 +3,8 @@
  */
 package im.point.dotty.repository
 
+import im.point.dotty.common.AppState
 import im.point.dotty.db.DottyDatabase
-import im.point.dotty.domain.AppState
 import im.point.dotty.model.Comment
 import im.point.dotty.network.PointAPI
 

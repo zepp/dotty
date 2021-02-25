@@ -12,18 +12,17 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import im.point.dotty.common.RxFragment
+import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.FragmentLoginBinding
-import im.point.dotty.domain.AuthViewModel
-import im.point.dotty.domain.ViewModelFactory
 
 class LoginFragment : RxFragment() {
     private lateinit var binding: FragmentLoginBinding
-    private lateinit var viewModel: AuthViewModel
+    private lateinit var viewModel: LoginViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProvider(requireActivity(), ViewModelFactory(requireActivity()))
-                .get(AuthViewModel::class.java)
+                .get(LoginViewModel::class.java)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

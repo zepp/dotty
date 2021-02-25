@@ -9,9 +9,8 @@ import android.os.Bundle
 import androidx.lifecycle.ViewModelProvider
 import im.point.dotty.R
 import im.point.dotty.common.RxActivity
+import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.ActivityPostBinding
-import im.point.dotty.domain.PostViewModel
-import im.point.dotty.domain.ViewModelFactory
 import im.point.dotty.model.Post
 
 class PostActivity : RxActivity() {
