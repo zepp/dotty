@@ -1,10 +1,11 @@
+/*
+ * Copyright (c) 2019-2021 Pavel A. Sokolov
+ */
 package im.point.dotty.db
 
-import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import im.point.dotty.model.Post
-import io.reactivex.Flowable
 
 interface PostDao<in T : Post> {
     @Insert(onConflict = OnConflictStrategy.REPLACE)

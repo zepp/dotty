@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) 2019-2021 Pavel A. Sokolov
+ */
 package im.point.dotty.main
 
 import android.content.Context
