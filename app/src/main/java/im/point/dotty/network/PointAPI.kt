@@ -1,10 +1,7 @@
 package im.point.dotty.network
 
 import retrofit2.Call
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.Path
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface PointAPI {
     @GET("/api/recent")
@@ -45,4 +42,28 @@ interface PointAPI {
 
     @GET("/api/unread-counters")
     fun getUnreadCounters(@Header("Authorization") token: String): Call<UnreadCounters>
+
+    @GET("api/post/{post}/r")
+    fun recommendPost(@Header("Authorization") token: String, @Path("post") id: String, @Query("text") text: String? = null): Call<Envelope>
+
+    @DELETE("api/post/{post}/r")
+    fun unrecommendPost(@Header("Authorization") token: String, @Path("post") id: String): Call<Envelope>
+
+    @GET("api/post/{post}/s")
+    fun subscribeToPost(@Header("Authorization") token: String, @Path("post") id: String): Call<Envelope>
+
+    @DELETE("api/post/{post}/s")
+    fun unsubscribeFromPost(@Header("Authorization") token: String, @Path("post") id: String): Call<Envelope>
+
+    @GET("api/post/{post}/b")
+    fun bookmarkPost(@Header("Authorization") token: String, @Path("post") id: String): Call<Envelope>
+
+    @DELETE("api/post/{post}/b")
+    fun unbookmarkPost(@Header("Authorization") token: String, @Path("post") id: String): Call<Envelope>
+
+    @GET("api/post/{post}/pin")
+    fun pinPost(@Header("Authorization") token: String, @Path("post") id: String, @Query("text") text: String? = null): Call<Envelope>
+
+    @DELETE("api/post/{post}/unpin")
+    fun unpinPost(@Header("Authorization") token: String, @Path("post") id: String): Call<Envelope>
 }
