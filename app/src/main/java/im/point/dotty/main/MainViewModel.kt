@@ -7,7 +7,6 @@ import androidx.lifecycle.AndroidViewModel
 import im.point.dotty.DottyApplication
 import im.point.dotty.common.AppState
 import im.point.dotty.common.Shared
-import im.point.dotty.db.*
 import im.point.dotty.model.AllPost
 import im.point.dotty.model.CommentedPost
 import im.point.dotty.model.RecentPost
@@ -30,11 +29,6 @@ class MainViewModel internal constructor(application: DottyApplication) : Androi
     private val shared: Shared = Shared(application.baseContext, application.state, application.mainApi)
     private val state: AppState = application.state
     private val api: AuthAPI = application.authApi
-    private val allPostDao: AllPostDao
-    private val recentPostDao: RecentPostDao
-    private val commentedPostDao: CommentedPostDao
-    private val commentDao: CommentDao
-    private val userDao: UserDao
 
     fun fetchRecent(isBefore: Boolean): Completable {
         return Completable.fromSingle(if (isBefore) recentRepo.fetchBefore() else recentRepo.fetch()
@@ -79,11 +73,10 @@ class MainViewModel internal constructor(application: DottyApplication) : Androi
                     state.isLoggedIn = false
                     state.csrfToken = null
                     state.token = null
-                    allPostDao.deleteAll()
-                    recentPostDao.deleteAll()
-                    commentedPostDao.deleteAll()
-                    commentDao.deleteAll()
-                    userDao.deleteAll()
+                    allPostRepo.purge()
+                    recentRepo.purge()
+                    commentedPostRepo.purge()
+                    userRepo.purge()
                     shared.resetActivityBackStack()
                 }.observeOn(AndroidSchedulers.mainThread()))
     }
@@ -102,10 +95,5 @@ class MainViewModel internal constructor(application: DottyApplication) : Androi
         commentedPostRepo = repoFactory.getCommentedRepo()
         allPostRepo = repoFactory.getAllRepo()
         userRepo = repoFactory.getUserRepo()
-        allPostDao = application.database.getAllPostDao()
-        recentPostDao = application.database.getRecentPostDao()
-        commentedPostDao = application.database.getCommentedPostDao()
-        commentDao = application.database.getCommentDao()
-        userDao = application.database.getUserDao()
     }
 }

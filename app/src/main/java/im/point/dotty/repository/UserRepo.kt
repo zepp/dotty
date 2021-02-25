@@ -30,6 +30,10 @@ class UserRepo(private val api: PointAPI,
         throw Exception("operation is not supported")
     }
 
+    override fun purge() {
+        dao.deleteAll()
+    }
+
     fun fetchUser(id: Long): Single<User> {
         return Single.create { emitter: SingleEmitter<UserReply> ->
             api.getUser(state.token ?: throw Exception("invalid token"), id)

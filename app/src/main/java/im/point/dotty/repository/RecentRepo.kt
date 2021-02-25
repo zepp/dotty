@@ -50,6 +50,10 @@ class RecentRepo(private val api: PointAPI,
         return fetch(false)
     }
 
+    override fun purge() {
+        recentPostDao.deleteAll()
+    }
+
     fun fetchBefore(): Single<List<RecentPost>> {
         return fetch(true)
     }

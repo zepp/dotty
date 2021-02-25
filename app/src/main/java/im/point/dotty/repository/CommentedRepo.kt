@@ -53,4 +53,8 @@ class CommentedRepo(private val api: PointAPI,
     fun fetchBefore(): Single<List<CommentedPost>> {
         return fetch(true)
     }
+
+    override fun purge() {
+        commentedPostDao.deleteAll()
+    }
 }

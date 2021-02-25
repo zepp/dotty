@@ -50,6 +50,10 @@ class AllRepo(private val api: PointAPI,
         return fetch(false)
     }
 
+    override fun purge() {
+        allPostDao.deleteAll()
+    }
+
     fun fetchBefore(): Single<List<AllPost>> {
         return fetch(true)
     }

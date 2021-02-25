@@ -52,4 +52,8 @@ class CommentRepo<in T : Post>(private val api: PointAPI,
                     .doOnSuccess { comments: List<Comment> -> commentDao.insertAll(comments) }
         }
     }
+
+    override fun purge() {
+        commentDao.deleteAll()
+    }
 }
