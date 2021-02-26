@@ -5,61 +5,100 @@ package im.point.dotty.post
 
 import androidx.lifecycle.ViewModel
 import im.point.dotty.DottyApplication
+import im.point.dotty.common.AppState
 import im.point.dotty.common.Shared
 import im.point.dotty.model.AllPost
 import im.point.dotty.model.Comment
 import im.point.dotty.model.CommentedPost
 import im.point.dotty.model.RecentPost
+import im.point.dotty.network.Envelope
+import im.point.dotty.network.PointAPI
+import im.point.dotty.network.SingleCallbackAdapter
 import im.point.dotty.repository.RepoFactory
 import io.reactivex.Completable
 import io.reactivex.Flowable
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 
 class PostViewModel(application: DottyApplication) : ViewModel() {
     private val repoFactory: RepoFactory
+    private val state: AppState = application.state
+    private val api: PointAPI = application.mainApi
     private val shared: Shared = Shared(application.baseContext, application.state, application.mainApi)
 
-    fun getRecentPost(id: String): Flowable<RecentPost> {
-        return repoFactory.getRecentRepo().getItem(id).observeOn(AndroidSchedulers.mainThread())
+    lateinit var postId: String
+
+    fun getRecentPost(): Flowable<RecentPost> {
+        return repoFactory.getRecentRepo().getItem(postId).observeOn(AndroidSchedulers.mainThread())
     }
 
-    fun getCommentedPost(id: String): Flowable<CommentedPost> {
-        return repoFactory.getCommentedRepo().getItem(id).observeOn(AndroidSchedulers.mainThread())
+    fun getCommentedPost(): Flowable<CommentedPost> {
+        return repoFactory.getCommentedRepo().getItem(postId).observeOn(AndroidSchedulers.mainThread())
     }
 
-    fun getAllPost(id: String): Flowable<AllPost> {
-        return repoFactory.getAllRepo().getItem(id).observeOn(AndroidSchedulers.mainThread())
+    fun getAllPost(): Flowable<AllPost> {
+        return repoFactory.getAllRepo().getItem(postId).observeOn(AndroidSchedulers.mainThread())
     }
 
-    fun getRecentPostComments(id: String): Flowable<List<Comment>> {
-        return repoFactory.getRecentCommentRepo(id).getAll().observeOn(AndroidSchedulers.mainThread())
+    fun getRecentPostComments(): Flowable<List<Comment>> {
+        return repoFactory.getRecentCommentRepo(postId).getAll().observeOn(AndroidSchedulers.mainThread())
     }
 
-    fun getCommentedPostComments(id: String): Flowable<List<Comment>> {
-        return repoFactory.getCommentedCommentRepo(id).getAll().observeOn(AndroidSchedulers.mainThread())
+    fun getCommentedPostComments(): Flowable<List<Comment>> {
+        return repoFactory.getCommentedCommentRepo(postId).getAll().observeOn(AndroidSchedulers.mainThread())
     }
 
-    fun getAllPostComments(id: String): Flowable<List<Comment>> {
-        return repoFactory.getAllCommentRepo(id).getAll().observeOn(AndroidSchedulers.mainThread())
+    fun getAllPostComments(): Flowable<List<Comment>> {
+        return repoFactory.getAllCommentRepo(postId).getAll().observeOn(AndroidSchedulers.mainThread())
     }
 
-    fun fetchRecentPostComments(id: String): Completable {
-        return Completable.fromSingle(repoFactory.getRecentCommentRepo(id).fetch()
+    fun fetchRecentPostComments(): Completable {
+        return Completable.fromSingle(repoFactory.getRecentCommentRepo(postId).fetch()
                 .flatMap { shared.fetchUnreadCounters() })
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
-    fun fetchCommentedPostComments(id: String): Completable {
-        return Completable.fromSingle(repoFactory.getCommentedCommentRepo(id).fetch()
+    fun fetchCommentedPostComments(): Completable {
+        return Completable.fromSingle(repoFactory.getCommentedCommentRepo(postId).fetch()
                 .flatMap { shared.fetchUnreadCounters() })
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
-    fun fetchAllPostComments(id: String): Completable {
-        return Completable.fromSingle(repoFactory.getAllCommentRepo(id).fetch()
+    fun fetchAllPostComments(): Completable {
+        return Completable.fromSingle(repoFactory.getAllCommentRepo(postId).fetch()
                 .flatMap { shared.fetchUnreadCounters() })
                 .observeOn(AndroidSchedulers.mainThread())
     }
+
+    fun subscribe() = Completable.fromSingle(Single.create<Envelope> { emitter ->
+        api.subscribeToPost(state.token ?: throw Exception("invalidToken"), postId)
+                .enqueue(SingleCallbackAdapter(emitter))
+    })
+
+    fun unsubscribe() = Completable.fromSingle(Single.create<Envelope> { emitter ->
+        api.unsubscribeFromPost(state.token ?: throw Exception("invalidToken"), postId)
+                .enqueue(SingleCallbackAdapter(emitter))
+    })
+
+    fun recommend() = Completable.fromSingle(Single.create<Envelope> { emitter ->
+        api.recommendPost(state.token ?: throw Exception("invalidToken"), postId)
+                .enqueue(SingleCallbackAdapter(emitter))
+    })
+
+    fun unrecommend() = Completable.fromSingle(Single.create<Envelope> { emitter ->
+        api.unrecommendPost(state.token ?: throw Exception("invalidToken"), postId)
+                .enqueue(SingleCallbackAdapter(emitter))
+    })
+
+    fun bookmark() = Completable.fromSingle(Single.create<Envelope> { emitter ->
+        api.bookmarkPost(state.token ?: throw Exception("invalidToken"), postId)
+                .enqueue(SingleCallbackAdapter(emitter))
+    })
+
+    fun unbookmark() = Completable.fromSingle(Single.create<Envelope> { emitter ->
+        api.unbookmarkPost(state.token ?: throw Exception("invalidToken"), postId)
+                .enqueue(SingleCallbackAdapter(emitter))
+    })
 
     init {
         repoFactory = application.repoFactory

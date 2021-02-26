@@ -20,6 +20,8 @@ abstract class Post {
 
     var bookmarked: Boolean? = null
     var recommended: Boolean? = null
+    var subscribed: Boolean? = null
+    var pinned: Boolean? = null
 
     @Ignore
     open val postId: String = ""

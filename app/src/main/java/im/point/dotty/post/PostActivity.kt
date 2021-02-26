@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
 import im.point.dotty.common.RxActivity
 import im.point.dotty.common.ViewModelFactory
@@ -37,6 +38,7 @@ class PostActivity : RxActivity() {
         from = intent.getSerializableExtra(POST_FROM) as From
         viewModel = ViewModelProvider(this, ViewModelFactory(this))
                 .get(PostViewModel::class.java)
+        viewModel.postId = postId
         binding = ActivityPostBinding.inflate(layoutInflater)
         setContentView(binding.root)
         if (supportFragmentManager.backStackEntryCount == 0) {
@@ -52,11 +54,27 @@ class PostActivity : RxActivity() {
     override fun onStart() {
         super.onStart()
         addDisposable(when (from) {
-            From.FROM_RECENT -> viewModel.getRecentPost(postId)
-            From.FROM_COMMENTED -> viewModel.getCommentedPost(postId)
-            From.FROM_ALL -> viewModel.getAllPost(postId)
+            From.FROM_RECENT -> viewModel.getRecentPost()
+            From.FROM_COMMENTED -> viewModel.getCommentedPost()
+            From.FROM_ALL -> viewModel.getAllPost()
         }.subscribe { post: Post ->
             binding.toolbar.title = post.nameOrLogin
+            binding.postBookmark.isChecked = post.bookmarked == true
+            binding.postRecommend.isChecked = post.recommended == true
+            binding.postSubscribe.isChecked = post.subscribed == true
+            binding.postPin.isChecked = post.pinned == true
+            binding.postBookmark.setOnCheckedChangeListener { view, isChecked ->
+                addDisposable((if (isChecked) viewModel.unbookmark() else viewModel.bookmark())
+                        .subscribe({}, { error -> error.message?.let { showSnackbar(it) } }))
+            }
+            binding.postRecommend.setOnCheckedChangeListener { view, isChecked ->
+                addDisposable((if (isChecked) viewModel.unrecommend() else viewModel.recommend())
+                        .subscribe({}, { error -> error.message?.let { showSnackbar(it) } }))
+            }
+            binding.postBookmark.setOnCheckedChangeListener { view, isChecked ->
+                addDisposable((if (isChecked) viewModel.unbookmark() else viewModel.bookmark())
+                        .subscribe({}, { error -> error.message?.let { showSnackbar(it) } }))
+            }
         })
     }
 
@@ -65,6 +83,10 @@ class PostActivity : RxActivity() {
         if (supportFragmentManager.backStackEntryCount == 0) {
             finish()
         }
+    }
+
+    private fun showSnackbar(text: String) {
+        Snackbar.make(this.findViewById(R.id.post_layout), text, Snackbar.LENGTH_LONG).show()
     }
 }
 

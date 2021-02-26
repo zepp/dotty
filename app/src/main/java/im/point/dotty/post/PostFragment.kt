@@ -23,7 +23,6 @@ class PostFragment : RxFragment() {
     private lateinit var binding: FragmentPostBinding
     private lateinit var viewModel: PostViewModel
     private lateinit var layout: SwipeRefreshLayout
-    private lateinit var postId: String
     private lateinit var from: From
     private val tagsAdapter: TagsAdapter = TagsAdapter()
 
@@ -43,7 +42,6 @@ class PostFragment : RxFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        postId = arguments?.getString(POST_ID)!!
         from = arguments?.get(POST_FROM) as From
     }
 
@@ -56,9 +54,9 @@ class PostFragment : RxFragment() {
         layout = binding.postSwipeLayout
         layout.setOnRefreshListener {
             addDisposable(when (from) {
-                From.FROM_ALL -> viewModel.fetchAllPostComments(postId)
-                From.FROM_COMMENTED -> viewModel.fetchCommentedPostComments(postId)
-                From.FROM_RECENT -> viewModel.fetchRecentPostComments(postId)
+                From.FROM_ALL -> viewModel.fetchAllPostComments()
+                From.FROM_COMMENTED -> viewModel.fetchCommentedPostComments()
+                From.FROM_RECENT -> viewModel.fetchRecentPostComments()
             }.subscribe({ layout.isRefreshing = false },
                     { error ->
                         layout.isRefreshing = false
@@ -72,9 +70,9 @@ class PostFragment : RxFragment() {
     override fun onStart() {
         super.onStart()
         addDisposable(when (from) {
-            From.FROM_ALL -> viewModel.fetchAllPostComments(postId)
-            From.FROM_COMMENTED -> viewModel.fetchCommentedPostComments(postId)
-            From.FROM_RECENT -> viewModel.fetchRecentPostComments(postId)
+            From.FROM_ALL -> viewModel.fetchAllPostComments()
+            From.FROM_COMMENTED -> viewModel.fetchCommentedPostComments()
+            From.FROM_RECENT -> viewModel.fetchRecentPostComments()
         }.subscribe({}, { error -> error.message?.let { showSnackbar(it) } }))
     }
 
@@ -83,9 +81,9 @@ class PostFragment : RxFragment() {
         viewModel = ViewModelProvider(requireActivity(), ViewModelFactory(requireActivity()))
                 .get(PostViewModel::class.java)
         addDisposable(when (from) {
-            From.FROM_RECENT -> viewModel.getRecentPost(postId)
-            From.FROM_COMMENTED -> viewModel.getCommentedPost(postId)
-            From.FROM_ALL -> viewModel.getAllPost(postId)
+            From.FROM_RECENT -> viewModel.getRecentPost()
+            From.FROM_COMMENTED -> viewModel.getCommentedPost()
+            From.FROM_ALL -> viewModel.getAllPost()
         }.subscribe { post: Post ->
             binding.postText.text = post.text
             if (post.tags.isNullOrEmpty()) {
@@ -95,9 +93,9 @@ class PostFragment : RxFragment() {
             }
         })
         addDisposable(when (from) {
-            From.FROM_ALL -> viewModel.getAllPostComments(postId)
-            From.FROM_COMMENTED -> viewModel.getCommentedPostComments(postId)
-            From.FROM_RECENT -> viewModel.getRecentPostComments(postId)
+            From.FROM_ALL -> viewModel.getAllPostComments()
+            From.FROM_COMMENTED -> viewModel.getCommentedPostComments()
+            From.FROM_RECENT -> viewModel.getRecentPostComments()
         }.subscribe { list -> adapter.list = list })
     }
 

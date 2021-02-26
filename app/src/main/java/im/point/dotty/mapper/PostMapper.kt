@@ -14,10 +14,12 @@ open class PostMapper <T : Post> {
         result.pageId = post.uid
         result.bookmarked = post.isBookmarked
         result.recommended = post.isRecommended
+        result.subscribed = post.isSubscribed
         return mergeRawPost(result, post.post ?: throw Exception("invalid raw post"))
     }
 
     protected fun mergeRawPost(model: T, post: RawPost): T {
+        model.pinned = post.isPinned
         model.login = post.author?.login
         model.name = post.author?.name
         model.text = post.text
