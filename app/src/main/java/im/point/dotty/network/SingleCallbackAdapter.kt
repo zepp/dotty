@@ -22,10 +22,14 @@ class SingleCallbackAdapter<T : Envelope>(private val emitter: SingleEmitter<T>)
         if (envelope == null) {
             emitter.onError(RuntimeException("empty body"))
         } else{
-            if (envelope.error == null) {
+            if (envelope.error == null || envelope.code == null) {
                 emitter.onSuccess(envelope)
             } else {
-                emitter.onError(RuntimeException(envelope.error))
+                if (envelope.code == null) {
+                    emitter.onError(RuntimeException(envelope.message))
+                } else {
+                    emitter.onError(RuntimeException(envelope.error))
+                }
             }
         }
     }
