@@ -11,18 +11,17 @@ import im.point.dotty.common.Shared
 import im.point.dotty.network.AuthAPI
 import im.point.dotty.network.LoginReply
 import im.point.dotty.network.SingleCallbackAdapter
-import io.reactivex.Observable
-import io.reactivex.ObservableEmitter
-import io.reactivex.Single
-import io.reactivex.SingleEmitter
+import im.point.dotty.repository.UserRepo
+import io.reactivex.*
 import io.reactivex.android.schedulers.AndroidSchedulers
 import java.util.concurrent.TimeUnit
 
 @SuppressLint("CheckResult")
 class LoginViewModel internal constructor(application: DottyApplication) : AndroidViewModel(application) {
-    private val state: AppState
-    private val api: AuthAPI
+    private val state: AppState = application.state
+    private val api: AuthAPI = application.authApi
     private val shared: Shared = Shared(application.baseContext, application.state, application.mainApi)
+    private val userRepo: UserRepo = UserRepo(application.mainApi, state, application.database.getUserDao())
     private lateinit var isLoginEnabledEmitter: ObservableEmitter<Boolean>
 
     val isLoginEnabled: Observable<Boolean> =
@@ -52,19 +51,22 @@ class LoginViewModel internal constructor(application: DottyApplication) : Andro
         isLoginEnabledEmitter.onNext(!(login.isBlank() || password.isBlank()))
     }
 
-    fun login(): Single<LoginReply> {
-        return Single.create { emitter: SingleEmitter<LoginReply> ->
-            isLoginEnabledEmitter.onNext(false)
-            api.login(login, password).enqueue(SingleCallbackAdapter(emitter))
-        }
-                .doOnEvent { _, _ -> updateLoginEnabled() }
-                .doAfterSuccess { reply ->
-                    state.isLoggedIn = true
-                    state.userLogin = login
-                    state.csrfToken = reply.csrfToken ?: throw Exception("CSRF token is empty")
-                    state.token = reply.token ?: throw Exception("token is empty")
-                    shared.resetActivityBackStack()
+    fun login(): Completable {
+        return Completable.fromSingle(
+                Single.create { emitter: SingleEmitter<LoginReply> ->
+                    isLoginEnabledEmitter.onNext(false)
+                    api.login(login, password).enqueue(SingleCallbackAdapter(emitter))
                 }
+                        .doOnEvent { _, _ -> updateLoginEnabled() }
+                        .doAfterSuccess { reply ->
+                            state.isLoggedIn = true
+                            state.userLogin = login
+                            state.csrfToken = reply.csrfToken
+                                    ?: throw Exception("CSRF token is empty")
+                            state.token = reply.token ?: throw Exception("token is empty")
+                            shared.resetActivityBackStack()
+                            userRepo.fetchMe()
+                        })
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
@@ -73,8 +75,6 @@ class LoginViewModel internal constructor(application: DottyApplication) : Andro
     }
 
     init {
-        api = application.authApi
-        state = application.state
         isLoginEnabled.subscribe()
         login = state.userLogin ?: ""
     }

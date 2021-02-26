@@ -43,9 +43,9 @@ class LoginFragment : RxFragment() {
         addDisposable(viewModel.isLoginEnabled.subscribe { value -> binding.loginLogin.isEnabled = value })
         binding.loginLogin.setOnClickListener {
             addDisposable(viewModel.login()
-                    .subscribe { _, error ->
+                    .subscribe({}, { error ->
                         Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()
-                    })
+                    }))
         }
     }
 
