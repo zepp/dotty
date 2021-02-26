@@ -6,6 +6,7 @@ package im.point.dotty.post
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
@@ -75,6 +76,9 @@ class PostActivity : RxActivity() {
                 addDisposable((if (isChecked) viewModel.unbookmark() else viewModel.bookmark())
                         .subscribe({}, { error -> error.message?.let { showSnackbar(it) } }))
             }
+        })
+        addDisposable(viewModel.isPinVisible.subscribe { value ->
+            binding.postPin.visibility = if (value) View.VISIBLE else View.GONE
         })
     }
 

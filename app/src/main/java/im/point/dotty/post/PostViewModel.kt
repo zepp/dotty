@@ -15,9 +15,7 @@ import im.point.dotty.network.Envelope
 import im.point.dotty.network.PointAPI
 import im.point.dotty.network.SingleCallbackAdapter
 import im.point.dotty.repository.RepoFactory
-import io.reactivex.Completable
-import io.reactivex.Flowable
-import io.reactivex.Single
+import io.reactivex.*
 import io.reactivex.android.schedulers.AndroidSchedulers
 
 class PostViewModel(application: DottyApplication) : ViewModel() {
@@ -25,19 +23,32 @@ class PostViewModel(application: DottyApplication) : ViewModel() {
     private val state: AppState = application.state
     private val api: PointAPI = application.mainApi
     private val shared: Shared = Shared(application.baseContext, application.state, application.mainApi)
+    private lateinit var pinEmitter: ObservableEmitter<Boolean>
 
     lateinit var postId: String
 
+    val isPinVisible: Observable<Boolean> = Observable.create<Boolean> { emitter -> pinEmitter = emitter }
+            .distinctUntilChanged()
+            .replay(1)
+            .autoConnect()
+            .observeOn(AndroidSchedulers.mainThread())
+
     fun getRecentPost(): Flowable<RecentPost> {
-        return repoFactory.getRecentRepo().getItem(postId).observeOn(AndroidSchedulers.mainThread())
+        return repoFactory.getRecentRepo().getItem(postId)
+                .doAfterNext { post -> pinEmitter.onNext(post.userId == state.id) }
+                .observeOn(AndroidSchedulers.mainThread())
     }
 
     fun getCommentedPost(): Flowable<CommentedPost> {
-        return repoFactory.getCommentedRepo().getItem(postId).observeOn(AndroidSchedulers.mainThread())
+        return repoFactory.getCommentedRepo().getItem(postId)
+                .doAfterNext { post -> pinEmitter.onNext(post.userId == state.id) }
+                .observeOn(AndroidSchedulers.mainThread())
     }
 
     fun getAllPost(): Flowable<AllPost> {
-        return repoFactory.getAllRepo().getItem(postId).observeOn(AndroidSchedulers.mainThread())
+        return repoFactory.getAllRepo().getItem(postId)
+                .doAfterNext { post -> pinEmitter.onNext(post.userId == state.id) }
+                .observeOn(AndroidSchedulers.mainThread())
     }
 
     fun getRecentPostComments(): Flowable<List<Comment>> {
@@ -102,5 +113,6 @@ class PostViewModel(application: DottyApplication) : ViewModel() {
 
     init {
         repoFactory = application.repoFactory
+        isPinVisible.subscribe()
     }
 }
