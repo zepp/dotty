@@ -78,7 +78,7 @@ class PostFragment : RxFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity(), ViewModelFactory(requireActivity()))
+        viewModel = ViewModelProvider(requireActivity(), ViewModelFactory<Any>(requireActivity()))
                 .get(PostViewModel::class.java)
         addDisposable(when (from) {
             From.FROM_RECENT -> viewModel.getRecentPost()

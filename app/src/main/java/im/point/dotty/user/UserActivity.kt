@@ -21,7 +21,7 @@ class UserActivity : RxActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityUserBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        viewModel = ViewModelProvider(this, ViewModelFactory(this))
+        viewModel = ViewModelProvider(this, ViewModelFactory(this, intent.getLongArrayExtra(USER_ID)))
                 .get(UserViewModel::class.java)
     }
 

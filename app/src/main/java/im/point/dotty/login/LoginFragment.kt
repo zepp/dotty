@@ -21,7 +21,7 @@ class LoginFragment : RxFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity(), ViewModelFactory(requireActivity()))
+        viewModel = ViewModelProvider(requireActivity(), ViewModelFactory<Any>(requireActivity()))
                 .get(LoginViewModel::class.java)
     }
 

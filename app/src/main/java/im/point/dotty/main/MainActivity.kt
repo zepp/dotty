@@ -26,7 +26,7 @@ class MainActivity : RxActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        viewModel = ViewModelProvider(this, ViewModelFactory(this))
+        viewModel = ViewModelProvider(this, ViewModelFactory<Any>(this))
                 .get(MainViewModel::class.java)
     }
 

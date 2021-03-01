@@ -12,13 +12,12 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.SingleEmitter
 
-class UserViewModel(application: DottyApplication) : AndroidViewModel(application) {
+class UserViewModel(application: DottyApplication, private val userId: Long) : AndroidViewModel(application) {
     private val userRepo = application.repoFactory.getUserRepo()
+    private val userPostRepo = application.repoFactory.getUserPostRepo(userId)
     private val api: PointAPI = application.mainApi
     private val shared: Shared = Shared(application.baseContext, application.state, application.mainApi)
     private lateinit var actionsEmitter: SingleEmitter<Boolean>
-
-    var userId: Long? = null
 
     val isActionsVisible: Single<Boolean> = Single.create { emitter -> actionsEmitter = emitter }
 
