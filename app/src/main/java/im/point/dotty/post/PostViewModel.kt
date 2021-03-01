@@ -18,14 +18,12 @@ import im.point.dotty.repository.RepoFactory
 import io.reactivex.*
 import io.reactivex.android.schedulers.AndroidSchedulers
 
-class PostViewModel(application: DottyApplication) : ViewModel() {
+class PostViewModel(application: DottyApplication, private val postId: String) : ViewModel() {
     private val repoFactory: RepoFactory
     private val state: AppState = application.state
     private val api: PointAPI = application.mainApi
     private val shared: Shared = Shared(application.baseContext, application.state, application.mainApi)
     private lateinit var pinEmitter: ObservableEmitter<Boolean>
-
-    lateinit var postId: String
 
     val isPinVisible: Observable<Boolean> = Observable.create<Boolean> { emitter -> pinEmitter = emitter }
             .distinctUntilChanged()

@@ -37,9 +37,8 @@ class PostActivity : RxActivity() {
         super.onCreate(savedInstanceState)
         postId = intent.getStringExtra(POST_ID)!!
         from = intent.getSerializableExtra(POST_FROM) as From
-        viewModel = ViewModelProvider(this, ViewModelFactory<Any>(this))
+        viewModel = ViewModelProvider(this, ViewModelFactory(this, postId))
                 .get(PostViewModel::class.java)
-        viewModel.postId = postId
         binding = ActivityPostBinding.inflate(layoutInflater)
         setContentView(binding.root)
         if (supportFragmentManager.backStackEntryCount == 0) {

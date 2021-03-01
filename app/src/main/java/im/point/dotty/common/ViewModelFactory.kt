@@ -22,7 +22,8 @@ class ViewModelFactory<P>(activity: Activity, vararg va: P) : ViewModelProvider.
         } else if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
             LoginViewModel(application) as T
         } else if (modelClass.isAssignableFrom(PostViewModel::class.java)) {
-            PostViewModel(application) as T
+            if (args.size != 1) throw Exception("post ID is not supplied")
+            PostViewModel(application, args.get(0) as String) as T
         } else if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
             if (args.size != 1) throw Exception("user ID is not supplied")
             UserViewModel(application, args.get(0) as Long) as T
