@@ -16,6 +16,8 @@ import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.ActivityUserBinding
 import im.point.dotty.feed.FeedAdapter
 import im.point.dotty.model.UserPost
+import im.point.dotty.post.From
+import im.point.dotty.post.PostActivity
 
 class UserActivity : RxActivity() {
     private lateinit var binding: ActivityUserBinding
@@ -29,6 +31,7 @@ class UserActivity : RxActivity() {
         viewModel = ViewModelProvider(this, ViewModelFactory(this, intent.getLongExtra(USER_ID, -1)))
                 .get(UserViewModel::class.java)
         adapter = FeedAdapter()
+        adapter.onItemClicked = { item -> startActivity(PostActivity.getIntent(this, From.FROM_USER, item.id)) }
         binding.userPosts.adapter = adapter
     }
 

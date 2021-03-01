@@ -57,6 +57,7 @@ class PostFragment : RxFragment() {
                 From.FROM_ALL -> viewModel.fetchAllPostComments()
                 From.FROM_COMMENTED -> viewModel.fetchCommentedPostComments()
                 From.FROM_RECENT -> viewModel.fetchRecentPostComments()
+                From.FROM_USER -> viewModel.fetchUserPostComments()
             }.subscribe({ layout.isRefreshing = false },
                     { error ->
                         layout.isRefreshing = false
@@ -73,6 +74,7 @@ class PostFragment : RxFragment() {
             From.FROM_ALL -> viewModel.fetchAllPostComments()
             From.FROM_COMMENTED -> viewModel.fetchCommentedPostComments()
             From.FROM_RECENT -> viewModel.fetchRecentPostComments()
+            From.FROM_USER -> viewModel.fetchUserPostComments()
         }.subscribe({}, { error -> error.message?.let { showSnackbar(it) } }))
     }
 
@@ -84,6 +86,7 @@ class PostFragment : RxFragment() {
             From.FROM_RECENT -> viewModel.getRecentPost()
             From.FROM_COMMENTED -> viewModel.getCommentedPost()
             From.FROM_ALL -> viewModel.getAllPost()
+            From.FROM_USER -> viewModel.getUserPost()
         }.subscribe { post: Post ->
             binding.postText.text = post.text
             if (post.tags.isNullOrEmpty()) {
@@ -96,6 +99,7 @@ class PostFragment : RxFragment() {
             From.FROM_ALL -> viewModel.getAllPostComments()
             From.FROM_COMMENTED -> viewModel.getCommentedPostComments()
             From.FROM_RECENT -> viewModel.getRecentPostComments()
+            From.FROM_USER -> viewModel.getUserPostComments()
         }.subscribe { list -> adapter.list = list })
     }
 

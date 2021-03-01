@@ -22,7 +22,7 @@ class RepoFactory(private val api: PointAPI, private val database: DottyDatabase
         return AllPostRepo(api, state, database.getAllPostDao())
     }
 
-    fun getUserPostRepo(userId: Long): UserPostRepo {
+    fun getUserPostRepo(userId: Long = 0): UserPostRepo {
         return UserPostRepo(api, state, database.getUserPostsDao(), userId)
     }
 
@@ -42,6 +42,11 @@ class RepoFactory(private val api: PointAPI, private val database: DottyDatabase
 
     fun getAllCommentRepo(id: String): Repository<Comment, String> {
         val dao = database.getAllPostDao()
+        return CommentRepo(api, state, database.getCommentDao(), dao, dao.getPost(id))
+    }
+
+    fun getUserCommentRepo(id: String): Repository<Comment, String> {
+        val dao = database.getUserPostsDao()
         return CommentRepo(api, state, database.getCommentDao(), dao, dao.getPost(id))
     }
 }

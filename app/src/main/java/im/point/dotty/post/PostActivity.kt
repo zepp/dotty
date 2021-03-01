@@ -57,14 +57,15 @@ class PostActivity : RxActivity() {
             From.FROM_RECENT -> viewModel.getRecentPost()
             From.FROM_COMMENTED -> viewModel.getCommentedPost()
             From.FROM_ALL -> viewModel.getAllPost()
+            From.FROM_USER -> viewModel.getUserPost()
         }.subscribe { post: Post ->
             binding.toolbar.title = post.nameOrLogin
             binding.postBookmark.isChecked = post.bookmarked == true
             binding.postRecommend.isChecked = post.recommended == true
             binding.postSubscribe.isChecked = post.subscribed == true
             binding.postPin.isChecked = post.pinned == true
-            binding.postBookmark.setOnCheckedChangeListener { view, isChecked ->
-                addDisposable((if (isChecked) viewModel.unbookmark() else viewModel.bookmark())
+            binding.postSubscribe.setOnCheckedChangeListener { view, isChecked ->
+                addDisposable((if (isChecked) viewModel.unsubscribe() else viewModel.subscribe())
                         .subscribe({}, { error -> error.message?.let { showSnackbar(it) } }))
             }
             binding.postRecommend.setOnCheckedChangeListener { view, isChecked ->
@@ -96,5 +97,6 @@ class PostActivity : RxActivity() {
 enum class From {
     FROM_RECENT,
     FROM_COMMENTED,
-    FROM_ALL
+    FROM_ALL,
+    FROM_USER
 }

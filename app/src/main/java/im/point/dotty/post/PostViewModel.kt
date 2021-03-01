@@ -7,10 +7,7 @@ import androidx.lifecycle.ViewModel
 import im.point.dotty.DottyApplication
 import im.point.dotty.common.AppState
 import im.point.dotty.common.Shared
-import im.point.dotty.model.AllPost
-import im.point.dotty.model.Comment
-import im.point.dotty.model.CommentedPost
-import im.point.dotty.model.RecentPost
+import im.point.dotty.model.*
 import im.point.dotty.network.Envelope
 import im.point.dotty.network.PointAPI
 import im.point.dotty.network.SingleCallbackAdapter
@@ -49,6 +46,12 @@ class PostViewModel(application: DottyApplication, private val postId: String) :
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
+    fun getUserPost(): Flowable<UserPost> {
+        return repoFactory.getUserPostRepo().getItem(postId)
+                .doAfterNext { post -> pinEmitter.onSuccess(post.authorId == state.id) }
+                .observeOn(AndroidSchedulers.mainThread())
+    }
+
     fun getRecentPostComments(): Flowable<List<Comment>> {
         return repoFactory.getRecentCommentRepo(postId).getAll().observeOn(AndroidSchedulers.mainThread())
     }
@@ -59,6 +62,10 @@ class PostViewModel(application: DottyApplication, private val postId: String) :
 
     fun getAllPostComments(): Flowable<List<Comment>> {
         return repoFactory.getAllCommentRepo(postId).getAll().observeOn(AndroidSchedulers.mainThread())
+    }
+
+    fun getUserPostComments(): Flowable<List<Comment>> {
+        return repoFactory.getUserCommentRepo(postId).getAll().observeOn(AndroidSchedulers.mainThread())
     }
 
     fun fetchRecentPostComments(): Completable {
@@ -74,8 +81,12 @@ class PostViewModel(application: DottyApplication, private val postId: String) :
     }
 
     fun fetchAllPostComments(): Completable {
-        return Completable.fromSingle(repoFactory.getAllCommentRepo(postId).fetch()
-                .flatMap { shared.fetchUnreadCounters() })
+        return Completable.fromSingle(repoFactory.getAllCommentRepo(postId).fetch())
+                .observeOn(AndroidSchedulers.mainThread())
+    }
+
+    fun fetchUserPostComments(): Completable {
+        return Completable.fromSingle(repoFactory.getUserCommentRepo(postId).fetch())
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
