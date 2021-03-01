@@ -5,14 +5,10 @@ package im.point.dotty.model
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.Ignore
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "all_posts")
 data class AllPost(@PrimaryKey
-                   val id: String,
-                   @ColumnInfo(name = "user_id")
-                   val userId: Long) : Post() {
-    @Ignore
-    override val postId: String = id
-}
+                   override val id: String,
+                   @ColumnInfo(name = "author_id")
+                   override val authorId: Long) : Post()

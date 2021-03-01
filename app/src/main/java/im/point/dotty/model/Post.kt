@@ -4,10 +4,12 @@
 package im.point.dotty.model
 
 import androidx.room.ColumnInfo
-import androidx.room.Ignore
 import java.util.*
 
 abstract class Post {
+    abstract val id: String
+    abstract val authorId: Long
+
     var login: String? = null
     var name: String? = null
 
@@ -23,9 +25,6 @@ abstract class Post {
     var subscribed: Boolean? = null
     var pinned: Boolean? = null
     var private: Boolean? = null
-
-    @Ignore
-    open val postId: String = ""
 
     val nameOrLogin: String?
         get() = if (name.isNullOrEmpty()) login else name

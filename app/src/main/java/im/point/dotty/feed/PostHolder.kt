@@ -23,11 +23,12 @@ class PostHolder<T : Post>(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val recommended: ImageView
     private val commentsCount: TextView
 
-    fun bind(post: T, onItemClicked: (item: T) -> Unit) {
+    fun bind(post: T, onItemClicked: (item: T) -> Unit, onUserClicked: (item: Long) -> Unit) {
         bookmarked.visibility = if (post.bookmarked == true) View.VISIBLE else View.GONE
         recommended.visibility = if (post.recommended == true) View.VISIBLE else View.GONE
         author.text = post.nameOrLogin
-        id.text = "#" + post.postId
+        author.setOnClickListener { onUserClicked(post.authorId) }
+        id.text = "#" + post.id
         text.text = post.text
         if (post.tags.isNullOrEmpty()) {
             tags.visibility = View.GONE;

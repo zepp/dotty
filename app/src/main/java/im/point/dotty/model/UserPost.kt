@@ -9,6 +9,8 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "user_posts")
 data class UserPost(@PrimaryKey
-                    val id: String,
+                    override val id: String,
+                    @ColumnInfo(name = "author_id")
+                    override val authorId: Long,
                     @ColumnInfo(name = "user_id")
                     val userId: Long) : Post()

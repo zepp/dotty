@@ -18,7 +18,7 @@ class UserPostRepo(private val api: PointAPI,
                    private val state: AppState,
                    private val userPostDao: UserPostDao,
                    private val userId: Long,
-                   private val mapper: Mapper<UserPost, MetaPost> = UserPostMapper()) : Repository<UserPost, String> {
+                   private val mapper: Mapper<UserPost, MetaPost> = UserPostMapper(userId)) : Repository<UserPost, String> {
 
     override fun getAll(): Flowable<List<UserPost>> {
         return userPostDao.getUserPosts(userId)

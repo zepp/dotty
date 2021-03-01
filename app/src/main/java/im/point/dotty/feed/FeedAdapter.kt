@@ -19,16 +19,19 @@ class FeedAdapter<T : Post> internal constructor() : RecyclerView.Adapter<PostHo
 
     var onItemClicked: (item: T) -> Unit = {}
 
+    var onUserClicked: (item: Long) -> Unit = {}
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostHolder<T> {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.list_item_post, parent, false)
         return PostHolder(view)
     }
 
-    override fun onBindViewHolder(holder: PostHolder<T>, position: Int) = holder.bind(list[position], onItemClicked)
+    override fun onBindViewHolder(holder: PostHolder<T>, position: Int) =
+            holder.bind(list[position], onItemClicked, onUserClicked)
 
     override fun getItemCount(): Int = list.size
 
-    override fun getItemId(position: Int): Long = list[position].postId.hashCode().toLong()
+    override fun getItemId(position: Int): Long = list[position].id.hashCode().toLong()
 
     init {
         setHasStableIds(true)

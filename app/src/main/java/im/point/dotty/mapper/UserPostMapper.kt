@@ -6,11 +6,11 @@ package im.point.dotty.mapper
 import im.point.dotty.model.UserPost
 import im.point.dotty.network.MetaPost
 
-class UserPostMapper : PostMapper<UserPost>(), Mapper<UserPost, MetaPost> {
+class UserPostMapper(private val userId: Long) : PostMapper<UserPost>(), Mapper<UserPost, MetaPost> {
     override fun map(entry: MetaPost): UserPost {
         return mergeMetaPost(UserPost(entry.post?.id ?: throw Exception("Post id is not provided"),
                 entry.post?.author?.id
-                        ?: throw Exception("Post's author id is not provided")), entry)
+                        ?: throw Exception("Post's author id is not provided"), userId), entry)
     }
 
     override fun merge(model: UserPost, entry: MetaPost): UserPost {

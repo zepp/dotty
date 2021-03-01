@@ -29,7 +29,7 @@ class CommentRepo<in T : Post>(private val api: PointAPI,
                                private val postMapper: RawPostMapper<T> = RawPostMapper()) : Repository<Comment, String> {
 
     override fun getAll(): Flowable<List<Comment>> {
-        return model.firstElement().flatMapPublisher { model -> commentDao.getPostComments(model.postId) }
+        return model.firstElement().flatMapPublisher { model -> commentDao.getPostComments(model.id) }
     }
 
     override fun getItem(id: String): Flowable<Comment> {
@@ -40,7 +40,7 @@ class CommentRepo<in T : Post>(private val api: PointAPI,
     override fun fetch(): Single<List<Comment>> {
         return model.firstElement().flatMapSingle { model ->
             Observable.create { emitter: ObservableEmitter<PostReply> ->
-                api.getPost(state.token ?: throw Exception("invalid token"), model.postId)
+                api.getPost(state.token ?: throw Exception("invalid token"), model.id)
                         .enqueue(ObservableCallBackAdapter(emitter))
             }.doOnNext { postReply ->
                 postDao.insertItem(postMapper.merge(model, postReply.post

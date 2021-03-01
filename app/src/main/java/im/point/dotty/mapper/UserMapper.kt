@@ -18,7 +18,7 @@ class UserMapper : Mapper<User, UserReply> {
         model.login = user.login
         model.name = user.name
         model.registrationDate = regFormat.parse(user.created)
-        model.birthDate = birthFormat.parse(user.birthdate)
+        user.birthdate?.let { model.birthDate = birthFormat.parse(it) }
         model.gender = when (user.gender) {
             null -> Gender.ROBOT
             true -> Gender.MALE

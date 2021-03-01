@@ -7,12 +7,16 @@ import im.point.dotty.feed.FeedFragment
 import im.point.dotty.model.RecentPost
 import im.point.dotty.post.From
 import im.point.dotty.post.PostActivity
+import im.point.dotty.user.UserActivity
 
 class RecentFragment : FeedFragment<RecentPost>() {
     override fun onStart() {
         super.onStart()
         adapter.onItemClicked = { post ->
             startActivity(PostActivity.getIntent(requireContext(), From.FROM_RECENT, post.id))
+        }
+        adapter.onUserClicked = { id ->
+            startActivity(UserActivity.getIntent(requireContext(), id))
         }
         addDisposable(viewModel.getRecent().subscribe(
                 { list -> adapter.list = list },

@@ -11,6 +11,7 @@ import im.point.dotty.network.PointAPI
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.SingleEmitter
+import io.reactivex.android.schedulers.AndroidSchedulers
 
 class UserViewModel(application: DottyApplication, private val userId: Long) : AndroidViewModel(application) {
     private val userRepo = application.repoFactory.getUserRepo()
@@ -45,5 +46,14 @@ class UserViewModel(application: DottyApplication, private val userId: Long) : A
         return Completable.complete()
     }
 
-    fun getUser() = userRepo.getItem(userId!!)
+    fun fetchUserAndPosts() = userRepo.fetchUser(userId).flatMap { userPostRepo.fetch() }
+            .observeOn(AndroidSchedulers.mainThread())
+
+    fun fetchUser() = userRepo.fetchUser(userId).observeOn(AndroidSchedulers.mainThread())
+
+    fun getUser() = userRepo.getItem(userId).observeOn(AndroidSchedulers.mainThread())
+
+    fun getPosts() = userPostRepo.getAll().observeOn(AndroidSchedulers.mainThread())
+
+    fun fetchPosts() = userPostRepo.fetch().observeOn(AndroidSchedulers.mainThread())
 }

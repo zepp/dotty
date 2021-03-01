@@ -7,12 +7,16 @@ import im.point.dotty.feed.FeedFragment
 import im.point.dotty.model.CommentedPost
 import im.point.dotty.post.From
 import im.point.dotty.post.PostActivity
+import im.point.dotty.user.UserActivity
 
 class CommentedFragment : FeedFragment<CommentedPost>() {
     override fun onStart() {
         super.onStart()
         adapter.onItemClicked = { post ->
             startActivity(PostActivity.getIntent(requireContext(), From.FROM_COMMENTED, post.id))
+        }
+        adapter.onUserClicked = { id ->
+            startActivity(UserActivity.getIntent(requireContext(), id))
         }
         addDisposable(viewModel.getCommented().subscribe(
                 { list -> adapter.list = list },
