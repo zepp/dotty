@@ -15,7 +15,10 @@ import im.point.dotty.network.Envelope
 import im.point.dotty.network.PointAPI
 import im.point.dotty.network.SingleCallbackAdapter
 import im.point.dotty.repository.RepoFactory
-import io.reactivex.*
+import io.reactivex.Completable
+import io.reactivex.Flowable
+import io.reactivex.Single
+import io.reactivex.SingleEmitter
 import io.reactivex.android.schedulers.AndroidSchedulers
 
 class PostViewModel(application: DottyApplication, private val postId: String) : ViewModel() {
@@ -23,29 +26,26 @@ class PostViewModel(application: DottyApplication, private val postId: String) :
     private val state: AppState = application.state
     private val api: PointAPI = application.mainApi
     private val shared: Shared = Shared(application.baseContext, application.state, application.mainApi)
-    private lateinit var pinEmitter: ObservableEmitter<Boolean>
+    private lateinit var pinEmitter: SingleEmitter<Boolean>
 
-    val isPinVisible: Observable<Boolean> = Observable.create<Boolean> { emitter -> pinEmitter = emitter }
-            .distinctUntilChanged()
-            .replay(1)
-            .autoConnect()
+    val isPinVisible: Single<Boolean> = Single.create<Boolean> { emitter -> pinEmitter = emitter }
             .observeOn(AndroidSchedulers.mainThread())
 
     fun getRecentPost(): Flowable<RecentPost> {
         return repoFactory.getRecentPostRepo().getItem(postId)
-                .doAfterNext { post -> pinEmitter.onNext(post.userId == state.id) }
+                .doAfterNext { post -> pinEmitter.onSuccess(post.userId == state.id) }
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
     fun getCommentedPost(): Flowable<CommentedPost> {
         return repoFactory.getCommentedPostRepo().getItem(postId)
-                .doAfterNext { post -> pinEmitter.onNext(post.userId == state.id) }
+                .doAfterNext { post -> pinEmitter.onSuccess(post.userId == state.id) }
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
     fun getAllPost(): Flowable<AllPost> {
         return repoFactory.getAllPostRepo().getItem(postId)
-                .doAfterNext { post -> pinEmitter.onNext(post.userId == state.id) }
+                .doAfterNext { post -> pinEmitter.onSuccess(post.userId == state.id) }
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
