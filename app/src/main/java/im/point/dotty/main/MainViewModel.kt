@@ -22,9 +22,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 
 class MainViewModel internal constructor(application: DottyApplication) : AndroidViewModel(application) {
     private val repoFactory: RepoFactory
-    private val recentRepo: RecentRepo
-    private val commentedPostRepo: CommentedRepo
-    private val allPostRepo: AllRepo
+    private val recentRepo: RecentPostRepo
+    private val commentedRepo: CommentedPostRepo
+    private val allRepo: AllPostRepo
     private val userRepo: UserRepo
     private val shared: Shared = Shared(application.baseContext, application.state, application.mainApi)
     private val state: AppState = application.state
@@ -41,21 +41,21 @@ class MainViewModel internal constructor(application: DottyApplication) : Androi
     }
 
     fun fetchAll(isBefore: Boolean): Completable {
-        return Completable.fromSingle(if (isBefore) allPostRepo.fetchBefore() else allPostRepo.fetch())
+        return Completable.fromSingle(if (isBefore) allRepo.fetchBefore() else allRepo.fetch())
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
     fun getAll(): Flowable<List<AllPost>> {
-        return allPostRepo.getAll().observeOn(AndroidSchedulers.mainThread())
+        return allRepo.getAll().observeOn(AndroidSchedulers.mainThread())
     }
 
     fun fetchCommented(isBefore: Boolean): Completable {
-        return Completable.fromSingle(if (isBefore) commentedPostRepo.fetchBefore() else commentedPostRepo.fetch())
+        return Completable.fromSingle(if (isBefore) commentedRepo.fetchBefore() else commentedRepo.fetch())
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
     fun getCommented(): Flowable<List<CommentedPost>> {
-        return commentedPostRepo.getAll().observeOn(AndroidSchedulers.mainThread())
+        return commentedRepo.getAll().observeOn(AndroidSchedulers.mainThread())
     }
 
     fun fetchUnreadCounters(): Completable {
@@ -73,9 +73,9 @@ class MainViewModel internal constructor(application: DottyApplication) : Androi
                     state.isLoggedIn = false
                     state.csrfToken = null
                     state.token = null
-                    allPostRepo.purge()
+                    allRepo.purge()
                     recentRepo.purge()
-                    commentedPostRepo.purge()
+                    commentedRepo.purge()
                     userRepo.purge()
                     shared.resetActivityBackStack()
                 }.observeOn(AndroidSchedulers.mainThread()))
@@ -91,9 +91,9 @@ class MainViewModel internal constructor(application: DottyApplication) : Androi
 
     init {
         repoFactory = application.repoFactory
-        recentRepo = repoFactory.getRecentRepo()
-        commentedPostRepo = repoFactory.getCommentedRepo()
-        allPostRepo = repoFactory.getAllRepo()
+        recentRepo = repoFactory.getRecentPostRepo()
+        commentedRepo = repoFactory.getCommentedPostRepo()
+        allRepo = repoFactory.getAllPostRepo()
         userRepo = repoFactory.getUserRepo()
     }
 }

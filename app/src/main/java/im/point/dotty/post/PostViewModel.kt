@@ -34,19 +34,19 @@ class PostViewModel(application: DottyApplication) : ViewModel() {
             .observeOn(AndroidSchedulers.mainThread())
 
     fun getRecentPost(): Flowable<RecentPost> {
-        return repoFactory.getRecentRepo().getItem(postId)
+        return repoFactory.getRecentPostRepo().getItem(postId)
                 .doAfterNext { post -> pinEmitter.onNext(post.userId == state.id) }
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
     fun getCommentedPost(): Flowable<CommentedPost> {
-        return repoFactory.getCommentedRepo().getItem(postId)
+        return repoFactory.getCommentedPostRepo().getItem(postId)
                 .doAfterNext { post -> pinEmitter.onNext(post.userId == state.id) }
                 .observeOn(AndroidSchedulers.mainThread())
     }
 
     fun getAllPost(): Flowable<AllPost> {
-        return repoFactory.getAllRepo().getItem(postId)
+        return repoFactory.getAllPostRepo().getItem(postId)
                 .doAfterNext { post -> pinEmitter.onNext(post.userId == state.id) }
                 .observeOn(AndroidSchedulers.mainThread())
     }

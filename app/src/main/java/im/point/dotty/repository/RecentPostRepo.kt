@@ -18,10 +18,10 @@ import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 
-class RecentRepo(private val api: PointAPI,
-                 private val state: AppState,
-                 private val recentPostDao: RecentPostDao,
-                 private val mapper: Mapper<RecentPost, MetaPost> = RecentPostMapper()) :
+class RecentPostRepo(private val api: PointAPI,
+                     private val state: AppState,
+                     private val recentPostDao: RecentPostDao,
+                     private val mapper: Mapper<RecentPost, MetaPost> = RecentPostMapper()) :
         Repository<RecentPost, String> {
 
     @SuppressLint("CheckResult")

@@ -18,10 +18,10 @@ import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 
-class AllRepo(private val api: PointAPI,
-              private val state: AppState,
-              private val allPostDao: AllPostDao,
-              private val mapper: Mapper<AllPost, MetaPost> = AllPostMapper())
+class AllPostRepo(private val api: PointAPI,
+                  private val state: AppState,
+                  private val allPostDao: AllPostDao,
+                  private val mapper: Mapper<AllPost, MetaPost> = AllPostMapper())
     : Repository<AllPost, String> {
 
     @SuppressLint("CheckResult")

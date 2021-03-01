@@ -18,10 +18,10 @@ import io.reactivex.Observable
 import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 
-class CommentedRepo(private val api: PointAPI,
-                    private val state: AppState,
-                    private val commentedPostDao: CommentedPostDao,
-                    private val mapper: Mapper<CommentedPost, MetaPost> = CommentedPostMapper())
+class CommentedPostRepo(private val api: PointAPI,
+                        private val state: AppState,
+                        private val commentedPostDao: CommentedPostDao,
+                        private val mapper: Mapper<CommentedPost, MetaPost> = CommentedPostMapper())
     : Repository<CommentedPost, String> {
 
     @SuppressLint("CheckResult")

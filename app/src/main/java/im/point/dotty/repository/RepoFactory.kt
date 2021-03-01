@@ -10,20 +10,20 @@ import im.point.dotty.network.PointAPI
 
 class RepoFactory(private val api: PointAPI, private val database: DottyDatabase, private val state: AppState) {
 
-    fun getRecentRepo(): RecentRepo {
-        return RecentRepo(api, state, database.getRecentPostDao())
+    fun getRecentPostRepo(): RecentPostRepo {
+        return RecentPostRepo(api, state, database.getRecentPostDao())
     }
 
-    fun getCommentedRepo(): CommentedRepo {
-        return CommentedRepo(api, state, database.getCommentedPostDao())
+    fun getCommentedPostRepo(): CommentedPostRepo {
+        return CommentedPostRepo(api, state, database.getCommentedPostDao())
     }
 
     fun getUserRepo(): UserRepo {
         return UserRepo(api, state, database.getUserDao())
     }
 
-    fun getAllRepo(): AllRepo {
-        return AllRepo(api, state, database.getAllPostDao())
+    fun getAllPostRepo(): AllPostRepo {
+        return AllPostRepo(api, state, database.getAllPostDao())
     }
 
     fun getRecentCommentRepo(id: String): Repository<Comment, String> {
