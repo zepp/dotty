@@ -69,4 +69,22 @@ interface PointAPI {
 
     @DELETE("api/post/{post}/unpin")
     fun unpinPost(@Header("Authorization") token: String, @Path("post") id: String): Call<Envelope>
+
+    @GET("api/user/s/{login}")
+    fun subscribeToUser(@Header("Authorization") token: String, @Path("login") login: String): Call<Envelope>
+
+    @DELETE("api/user/s/{login}")
+    fun unsubscribeFromUser(@Header("Authorization") token: String, @Path("login") login: String): Call<Envelope>
+
+    @GET("api/user/sr/{login}")
+    fun subscribeToUserRecommendations(@Header("Authorization") token: String, @Path("login") login: String): Call<Envelope>
+
+    @DELETE("api/user/sr/{login}")
+    fun unsubscribeFromUserRecommendations(@Header("Authorization") token: String, @Path("login") login: String): Call<Envelope>
+
+    @GET("api/user/bl/{login}")
+    fun blockUser(@Header("Authorization") token: String, @Path("login") login: String): Call<Envelope>
+
+    @DELETE("api/user/bl/{login}")
+    fun unblockUser(@Header("Authorization") token: String, @Path("login") login: String): Call<Envelope>
 }
