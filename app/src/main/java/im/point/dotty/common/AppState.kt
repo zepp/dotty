@@ -46,16 +46,16 @@ class AppState (context: Context) {
             }
         }
 
-    var token: String?
-        get() = preferences.getString(TOKEN, null)
+    var token: String
+        get() = preferences.getString(TOKEN, null) ?: throw Exception("API token is empty")
         set(value) {
             with(preferences.edit()) {
                 if (value == null) remove(TOKEN).apply() else putString(TOKEN, value).apply()
             }
         }
 
-    var csrfToken: String?
-        get() = preferences.getString(CSRF_TOKEN, null)
+    var csrfToken: String
+        get() = preferences.getString(CSRF_TOKEN, null) ?: throw Exception("CSRF token is empty")
         set(value) {
             with(preferences.edit()) {
                 if (value == null) remove(CSRF_TOKEN).apply() else putString(CSRF_TOKEN, value).apply()

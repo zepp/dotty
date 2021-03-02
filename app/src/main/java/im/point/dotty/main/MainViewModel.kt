@@ -71,8 +71,6 @@ class MainViewModel internal constructor(application: DottyApplication) : Androi
         }
                 .doFinally {
                     state.isLoggedIn = false
-                    state.csrfToken = null
-                    state.token = null
                     allRepo.purge()
                     recentRepo.purge()
                     commentedRepo.purge()
