@@ -23,7 +23,7 @@ class RepoFactory(private val api: PointAPI, private val database: DottyDatabase
     }
 
     fun getUserPostRepo(userId: Long = 0): UserPostRepo {
-        return UserPostRepo(api, state, database.getUserPostsDao(), userId)
+        return UserPostRepo(api, state, database.getUserDao(), database.getUserPostsDao(), userId)
     }
 
     fun getUserRepo(): UserRepo {

@@ -1,6 +1,7 @@
 package im.point.dotty.repository
 
 import im.point.dotty.common.AppState
+import im.point.dotty.db.UserDao
 import im.point.dotty.db.UserPostDao
 import im.point.dotty.mapper.Mapper
 import im.point.dotty.mapper.UserPostMapper
@@ -15,6 +16,7 @@ import io.reactivex.Single
 
 class UserPostRepo(private val api: PointAPI,
                    private val state: AppState,
+                   private val userDao: UserDao,
                    private val userPostDao: UserPostDao,
                    private val userId: Long,
                    private val mapper: Mapper<UserPost, MetaPost> = UserPostMapper(userId)) : Repository<UserPost, String> {
@@ -28,11 +30,13 @@ class UserPostRepo(private val api: PointAPI,
     }
 
     override fun fetch(): Single<List<UserPost>> {
-        val source = Single.create<PostsReply> { emitter ->
-            api.getRecent(state.token, null)
-                    .enqueue(SingleCallbackAdapter(emitter))
-        }
-                .flatMapObservable { postsReply: PostsReply -> Observable.fromIterable(postsReply.posts) }
+        val source = userDao.getUser(userId).firstElement().flatMapSingle { user ->
+            Single.create<PostsReply> { emitter ->
+                api.getUserPosts(state.token, user.login
+                        ?: throw Exception("user login is empty"), null)
+                        .enqueue(SingleCallbackAdapter(emitter))
+            }
+        }.flatMapObservable { postsReply: PostsReply -> Observable.fromIterable(postsReply.posts) }
                 .map { entry: MetaPost -> mapper.map(entry) }
 
         return source.toList()

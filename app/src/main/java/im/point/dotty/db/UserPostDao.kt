@@ -10,7 +10,7 @@ import io.reactivex.Flowable
 
 @Dao
 interface UserPostDao : PostDao<UserPost> {
-    @Query("SELECT * FROM user_posts WHERE user_id = :userId ORDER BY page_id")
+    @Query("SELECT * FROM user_posts WHERE user_id = :userId ORDER BY page_id DESC")
     fun getUserPosts(userId: Long): Flowable<List<UserPost>>
 
     @Query("SELECT * FROM user_posts WHERE id = :id")
