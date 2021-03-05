@@ -28,9 +28,6 @@ interface PointAPI {
     @GET("/api/blog/{user}")
     fun getUserPosts(@Header("Authorization") token: String, @Path("user") user: String, @Query("before") before: Long?): Call<PostsReply>
 
-    @GET("/api/unread-counters")
-    fun getCounters(@Header("Authorization") token: String): Call<CountersReply?>
-
     @GET("/api/post/{post}")
     fun getPost(@Header("Authorization") token: String, @Path("post") id: String): Call<PostReply>
 
