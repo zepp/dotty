@@ -10,12 +10,11 @@ import im.point.dotty.mapper.Mapper
 import im.point.dotty.mapper.RecentPostMapper
 import im.point.dotty.model.RecentPost
 import im.point.dotty.network.MetaPost
-import im.point.dotty.network.ObservableCallBackAdapter
 import im.point.dotty.network.PointAPI
 import im.point.dotty.network.PostsReply
+import im.point.dotty.network.SingleCallbackAdapter
 import io.reactivex.Flowable
 import io.reactivex.Observable
-import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 
 class RecentPostRepo(private val api: PointAPI,
@@ -26,12 +25,12 @@ class RecentPostRepo(private val api: PointAPI,
 
     @SuppressLint("CheckResult")
     private fun fetch(isBefore: Boolean): Single<List<RecentPost>> {
-        val source = Observable.create { emitter: ObservableEmitter<PostsReply> ->
-            api.getRecent(state.token ?: throw Exception("invalid token"),
+        val source = Single.create<PostsReply> { emitter ->
+            api.getRecent(state.token,
                     if (isBefore) state.recentPageId else null)
-                    .enqueue(ObservableCallBackAdapter(emitter))
+                    .enqueue(SingleCallbackAdapter(emitter))
         }
-                .flatMap { postsReply: PostsReply -> Observable.fromIterable(postsReply.posts) }
+                .flatMapObservable { postsReply: PostsReply -> Observable.fromIterable(postsReply.posts) }
                 .map { entry: MetaPost -> mapper.map(entry) }
         source.lastElement().subscribe { post -> state.recentPageId = post.pageId }
         return source.toList()

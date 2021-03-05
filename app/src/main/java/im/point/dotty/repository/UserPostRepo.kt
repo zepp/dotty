@@ -6,12 +6,11 @@ import im.point.dotty.mapper.Mapper
 import im.point.dotty.mapper.UserPostMapper
 import im.point.dotty.model.UserPost
 import im.point.dotty.network.MetaPost
-import im.point.dotty.network.ObservableCallBackAdapter
 import im.point.dotty.network.PointAPI
 import im.point.dotty.network.PostsReply
+import im.point.dotty.network.SingleCallbackAdapter
 import io.reactivex.Flowable
 import io.reactivex.Observable
-import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 
 class UserPostRepo(private val api: PointAPI,
@@ -29,10 +28,11 @@ class UserPostRepo(private val api: PointAPI,
     }
 
     override fun fetch(): Single<List<UserPost>> {
-        val source = Observable.create { emitter: ObservableEmitter<PostsReply> ->
-            api.getRecent(state.token ?: throw Exception("invalid token"), null)
-                    .enqueue(ObservableCallBackAdapter(emitter))
-        }.flatMap { postsReply: PostsReply -> Observable.fromIterable(postsReply.posts) }
+        val source = Single.create<PostsReply> { emitter ->
+            api.getRecent(state.token, null)
+                    .enqueue(SingleCallbackAdapter(emitter))
+        }
+                .flatMapObservable { postsReply: PostsReply -> Observable.fromIterable(postsReply.posts) }
                 .map { entry: MetaPost -> mapper.map(entry) }
 
         return source.toList()

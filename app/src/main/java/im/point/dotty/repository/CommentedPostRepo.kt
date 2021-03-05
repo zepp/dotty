@@ -10,12 +10,11 @@ import im.point.dotty.mapper.CommentedPostMapper
 import im.point.dotty.mapper.Mapper
 import im.point.dotty.model.CommentedPost
 import im.point.dotty.network.MetaPost
-import im.point.dotty.network.ObservableCallBackAdapter
 import im.point.dotty.network.PointAPI
 import im.point.dotty.network.PostsReply
+import im.point.dotty.network.SingleCallbackAdapter
 import io.reactivex.Flowable
 import io.reactivex.Observable
-import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 
 class CommentedPostRepo(private val api: PointAPI,
@@ -26,12 +25,11 @@ class CommentedPostRepo(private val api: PointAPI,
 
     @SuppressLint("CheckResult")
     fun fetch(isBefore: Boolean): Single<List<CommentedPost>> {
-        val source = Observable.create { emitter: ObservableEmitter<PostsReply> ->
-            api.getComments(state.token ?: throw Exception("invalid token"),
-                    if (isBefore) state.commentedPageId else null)
-                    .enqueue(ObservableCallBackAdapter(emitter))
+        val source = Single.create<PostsReply> { emitter ->
+            api.getComments(state.token, if (isBefore) state.commentedPageId else null)
+                    .enqueue(SingleCallbackAdapter(emitter))
         }
-                .flatMap { reply: PostsReply -> Observable.fromIterable(reply.posts) }
+                .flatMapObservable { reply: PostsReply -> Observable.fromIterable(reply.posts) }
                 .map { entry: MetaPost -> mapper.map(entry) }
         source.lastElement().subscribe { post -> state.commentedPageId = post.pageId }
         return source.toList()

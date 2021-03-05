@@ -11,13 +11,12 @@ import im.point.dotty.mapper.Mapper
 import im.point.dotty.mapper.RawPostMapper
 import im.point.dotty.model.Comment
 import im.point.dotty.model.Post
-import im.point.dotty.network.ObservableCallBackAdapter
 import im.point.dotty.network.PointAPI
 import im.point.dotty.network.PostReply
 import im.point.dotty.network.RawComment
+import im.point.dotty.network.SingleCallbackAdapter
 import io.reactivex.Flowable
 import io.reactivex.Observable
-import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 
 class CommentRepo<in T : Post>(private val api: PointAPI,
@@ -39,14 +38,14 @@ class CommentRepo<in T : Post>(private val api: PointAPI,
 
     override fun fetch(): Single<List<Comment>> {
         return model.firstElement().flatMapSingle { model ->
-            Observable.create { emitter: ObservableEmitter<PostReply> ->
-                api.getPost(state.token ?: throw Exception("invalid token"), model.id)
-                        .enqueue(ObservableCallBackAdapter(emitter))
-            }.doOnNext { postReply ->
+            Single.create<PostReply> { emitter ->
+                api.getPost(state.token, model.id)
+                        .enqueue(SingleCallbackAdapter(emitter))
+            }.doOnSuccess { postReply ->
                 postDao.insertItem(postMapper.merge(model, postReply.post
                         ?: throw Exception("invalid raw post")))
             }
-                    .flatMap { postReply -> Observable.fromIterable(postReply.comments) }
+                    .flatMapObservable { postReply -> Observable.fromIterable(postReply.comments) }
                     .map { entry: RawComment -> mapper.map(entry) }
                     .toList()
                     .doOnSuccess { comments: List<Comment> -> commentDao.insertAll(comments) }

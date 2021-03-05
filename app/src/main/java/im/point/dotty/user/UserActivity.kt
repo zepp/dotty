@@ -58,6 +58,8 @@ class UserActivity : RxActivity() {
                     { error -> error.message?.let { showSnackbar(it) } }))
         }
         addDisposable(viewModel.getPosts().subscribe { items -> adapter.list = items })
+        addDisposable(viewModel.fetchUserAndPosts().subscribe({ onFetched() },
+                { error -> error.message?.let { showSnackbar(it) } }))
     }
 
     private fun onFetched() {

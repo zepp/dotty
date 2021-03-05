@@ -3,13 +3,12 @@
  */
 package im.point.dotty.network
 
-import io.reactivex.ObservableEmitter
+import io.reactivex.CompletableEmitter
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class ObservableCallBackAdapter<T : Envelope>(private val emitter: ObservableEmitter<T>) : Callback<T?> {
-
+class CompletableCallbackAdapter<T : Envelope>(private val emitter: CompletableEmitter) : Callback<T?> {
     override fun onResponse(call: Call<T?>, response: Response<T?>) {
         if (!response.isSuccessful) {
             emitter.onError(RuntimeException("request failed with error code: " + response.code()))
@@ -22,14 +21,17 @@ class ObservableCallBackAdapter<T : Envelope>(private val emitter: ObservableEmi
         val envelope = response.body()
         if (envelope == null) {
             emitter.onError(RuntimeException("empty body"))
-        } else{
-            if (envelope.error == null) {
-                emitter.onNext(envelope)
+        } else {
+            if (envelope.error == null || envelope.code == null) {
+                emitter.onComplete()
             } else {
-                emitter.onError(RuntimeException(envelope.error))
+                if (envelope.code == null) {
+                    emitter.onError(RuntimeException(envelope.message))
+                } else {
+                    emitter.onError(RuntimeException(envelope.error))
+                }
             }
         }
-        emitter.onComplete()
     }
 
     override fun onFailure(call: Call<T?>, t: Throwable) {

@@ -36,7 +36,7 @@ class UserRepo(private val api: PointAPI,
 
     fun fetchUser(id: Long): Single<User> {
         return Single.create { emitter: SingleEmitter<UserReply> ->
-            api.getUser(state.token ?: throw Exception("invalid token"), id)
+            api.getUser(state.token, id)
                     .enqueue(SingleCallbackAdapter(emitter))
         }
                 .map { user -> mapper.map(user) }
@@ -45,7 +45,7 @@ class UserRepo(private val api: PointAPI,
 
     fun fetchMe(): Single<User> {
         return Single.create { emitter: SingleEmitter<UserReply> ->
-            api.getMe(state.token ?: throw Exception("invalid token"))
+            api.getMe(state.token)
                     .enqueue(SingleCallbackAdapter(emitter))
         }
                 .map { user -> mapper.map(user) }

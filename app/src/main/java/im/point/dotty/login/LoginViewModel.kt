@@ -12,7 +12,10 @@ import im.point.dotty.network.AuthAPI
 import im.point.dotty.network.LoginReply
 import im.point.dotty.network.SingleCallbackAdapter
 import im.point.dotty.repository.UserRepo
-import io.reactivex.*
+import io.reactivex.Completable
+import io.reactivex.Observable
+import io.reactivex.ObservableEmitter
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import java.util.concurrent.TimeUnit
 
@@ -53,7 +56,7 @@ class LoginViewModel internal constructor(application: DottyApplication) : Andro
 
     fun login(): Completable {
         return Completable.fromSingle(
-                Single.create { emitter: SingleEmitter<LoginReply> ->
+                Single.create<LoginReply> { emitter ->
                     isLoginEnabledEmitter.onNext(false)
                     api.login(login, password).enqueue(SingleCallbackAdapter(emitter))
                 }
