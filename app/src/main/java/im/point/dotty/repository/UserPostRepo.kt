@@ -8,11 +8,10 @@ import im.point.dotty.mapper.UserPostMapper
 import im.point.dotty.model.UserPost
 import im.point.dotty.network.MetaPost
 import im.point.dotty.network.PointAPI
-import im.point.dotty.network.PostsReply
-import im.point.dotty.network.SingleCallbackAdapter
-import io.reactivex.Flowable
-import io.reactivex.Observable
-import io.reactivex.Single
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 
 class UserPostRepo(private val api: PointAPI,
                    private val state: AppState,
@@ -21,26 +20,24 @@ class UserPostRepo(private val api: PointAPI,
                    private val userId: Long,
                    private val mapper: Mapper<UserPost, MetaPost> = UserPostMapper(userId)) : Repository<UserPost, String> {
 
-    override fun getAll(): Flowable<List<UserPost>> {
+    override fun getAll(): Flow<List<UserPost>> {
         return userPostDao.getUserPosts(userId)
     }
 
-    override fun getItem(id: String): Flowable<UserPost> {
-        return userPostDao.getPost(id)
+    override fun getItem(id: String): Flow<UserPost> {
+        return userPostDao.getPost(id).map { it ?: throw Exception("post not found") }
     }
 
-    override fun fetch(): Single<List<UserPost>> {
-        val source = userDao.getUser(userId).firstElement().flatMapSingle { user ->
-            Single.create<PostsReply> { emitter ->
-                api.getUserPosts(state.token, user.login
-                        ?: throw Exception("user login is empty"), null)
-                        .enqueue(SingleCallbackAdapter(emitter))
+    override fun fetch() = flow {
+        val login = userDao.getUser(userId).first()?.login ?: throw Exception("user login is empty")
+        with(api.getUserPosts(state.token, login, null)) {
+            checkSuccessful()
+            posts?.let {
+                val list = it.map { post -> mapper.map(post) }
+                userPostDao.insertAll(list)
+                emit(list)
             }
-        }.flatMapObservable { postsReply: PostsReply -> Observable.fromIterable(postsReply.posts) }
-                .map { entry: MetaPost -> mapper.map(entry) }
-
-        return source.toList()
-                .doOnSuccess { recentPosts: List<UserPost> -> userPostDao.insertAll(recentPosts) }
+        }
     }
 
     override fun purge() {

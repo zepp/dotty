@@ -11,13 +11,20 @@ import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import im.point.dotty.common.RxFragment
+import androidx.lifecycle.lifecycleScope
 import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.FragmentLoginBinding
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
-class LoginFragment : RxFragment() {
+class LoginFragment : Fragment() {
     private lateinit var binding: FragmentLoginBinding
     private lateinit var viewModel: LoginViewModel
+    private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
+        Toast.makeText(context, exception.message, Toast.LENGTH_LONG).show()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,12 +47,14 @@ class LoginFragment : RxFragment() {
         binding.loginPassword.addTextChangedListener({ s: CharSequence?, i: Int, i1: Int, i2: Int -> },
                 { s: CharSequence?, i: Int, i1: Int, i2: Int -> },
                 { e -> viewModel.password = e.toString() })
-        addDisposable(viewModel.isLoginEnabled.subscribe { value -> binding.loginLogin.isEnabled = value })
         binding.loginLogin.setOnClickListener {
-            addDisposable(viewModel.login()
-                    .subscribe({}, { error ->
-                        Toast.makeText(context, error.localizedMessage, Toast.LENGTH_LONG).show()
-                    }))
+            lifecycleScope.launch(exceptionHandler) {
+                binding.loginLogin.isEnabled = false
+                viewModel.login().collect()
+            }
+        }
+        lifecycleScope.launch(exceptionHandler) {
+            viewModel.isLoginEnabled.consumeEach { value -> binding.loginLogin.isEnabled = value }
         }
     }
 

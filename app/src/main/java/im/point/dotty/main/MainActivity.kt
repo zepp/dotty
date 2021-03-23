@@ -13,14 +13,21 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import im.point.dotty.R
 import im.point.dotty.common.RxActivity
 import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.ActivityMainBinding
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 class MainActivity : RxActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: MainViewModel
+    private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
+        Toast.makeText(this, exception.message, Toast.LENGTH_LONG).show()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +46,9 @@ class MainActivity : RxActivity() {
 
     override fun onStart() {
         super.onStart()
-        addDisposable(viewModel.fetchUnreadCounters().subscribe())
+        lifecycleScope.launch(exceptionHandler) {
+            viewModel.fetchUnreadCounters().collect()
+        }
         addDisposable(viewModel.unreadPosts()
                 .subscribe { value -> binding.mainUnreadPosts.text = value.toString() })
         addDisposable(viewModel.unreadComments()
@@ -57,9 +66,9 @@ class MainActivity : RxActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.main_logout) {
-            addDisposable(viewModel.logout()
-                    .subscribe({},
-                            { error -> Toast.makeText(this, error.message, Toast.LENGTH_LONG).show() }))
+            lifecycleScope.launch(exceptionHandler) {
+                viewModel.logout()
+            }
             return true
         } else {
             return super.onOptionsItemSelected(item)

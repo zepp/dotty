@@ -11,11 +11,9 @@ import im.point.dotty.mapper.Mapper
 import im.point.dotty.model.CommentedPost
 import im.point.dotty.network.MetaPost
 import im.point.dotty.network.PointAPI
-import im.point.dotty.network.PostsReply
-import im.point.dotty.network.SingleCallbackAdapter
-import io.reactivex.Flowable
-import io.reactivex.Observable
-import io.reactivex.Single
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 
 class CommentedPostRepo(private val api: PointAPI,
                         private val state: AppState,
@@ -24,31 +22,32 @@ class CommentedPostRepo(private val api: PointAPI,
     : Repository<CommentedPost, String> {
 
     @SuppressLint("CheckResult")
-    fun fetch(isBefore: Boolean): Single<List<CommentedPost>> {
-        val source = Single.create<PostsReply> { emitter ->
-            api.getComments(state.token, if (isBefore) state.commentedPageId else null)
-                    .enqueue(SingleCallbackAdapter(emitter))
+    fun fetch(isBefore: Boolean) = flow {
+        with(api.getComments(state.token, if (isBefore) state.commentedPageId else null)) {
+            checkSuccessful()
+            posts?.let {
+                val list = it.map { post -> mapper.map(post) }
+                commentedPostDao.insertAll(list)
+                state.commentedPageId = list.last().pageId
+                emit(list)
+            }
         }
-                .flatMapObservable { reply: PostsReply -> Observable.fromIterable(reply.posts) }
-                .map { entry: MetaPost -> mapper.map(entry) }
-        source.lastElement().subscribe { post -> state.commentedPageId = post.pageId }
-        return source.toList()
-                .doOnSuccess { commentedPosts: List<CommentedPost> -> commentedPostDao.insertAll(commentedPosts) }
     }
 
-    override fun getAll(): Flowable<List<CommentedPost>> {
+    override fun getAll(): Flow<List<CommentedPost>> {
         return commentedPostDao.getAll()
     }
 
-    override fun getItem(id: String): Flowable<CommentedPost> {
+    override fun getItem(id: String): Flow<CommentedPost> {
         return commentedPostDao.getPost(id)
+                .map { it ?: throw Exception("post not found") }
     }
 
-    override fun fetch(): Single<List<CommentedPost>> {
+    override fun fetch(): Flow<List<CommentedPost>> {
         return fetch(false)
     }
 
-    fun fetchBefore(): Single<List<CommentedPost>> {
+    fun fetchBefore(): Flow<List<CommentedPost>> {
         return fetch(true)
     }
 

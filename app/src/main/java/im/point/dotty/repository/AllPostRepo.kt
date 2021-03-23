@@ -11,11 +11,9 @@ import im.point.dotty.mapper.Mapper
 import im.point.dotty.model.AllPost
 import im.point.dotty.network.MetaPost
 import im.point.dotty.network.PointAPI
-import im.point.dotty.network.PostsReply
-import im.point.dotty.network.SingleCallbackAdapter
-import io.reactivex.Flowable
-import io.reactivex.Observable
-import io.reactivex.Single
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 
 class AllPostRepo(private val api: PointAPI,
                   private val state: AppState,
@@ -24,27 +22,27 @@ class AllPostRepo(private val api: PointAPI,
     : Repository<AllPost, String> {
 
     @SuppressLint("CheckResult")
-    fun fetch(isBefore: Boolean): Single<List<AllPost>> {
-        val source = Single.create<PostsReply> { emitter ->
-            api.getAll(state.token, if (isBefore) state.allPageId else null)
-                    .enqueue(SingleCallbackAdapter(emitter))
+    fun fetch(isBefore: Boolean) = flow {
+        with(api.getAll(state.token, if (isBefore) state.allPageId else null)) {
+            checkSuccessful()
+            posts?.let {
+                val list = it.map { post -> mapper.map(post) }
+                state.allPageId = list.last().pageId
+                allPostDao.insertAll(list)
+                emit(list)
+            }
         }
-                .flatMapObservable { reply: PostsReply -> Observable.fromIterable(reply.posts) }
-                .map { entry: MetaPost -> mapper.map(entry) }
-        source.lastElement().subscribe { post -> state.allPageId = post.pageId }
-        return source.toList()
-                .doOnSuccess { allPosts: List<AllPost> -> allPostDao.insertAll(allPosts) }
     }
 
-    override fun getAll(): Flowable<List<AllPost>> {
+    override fun getAll(): Flow<List<AllPost>> {
         return allPostDao.getAll()
     }
 
-    override fun getItem(id: String): Flowable<AllPost> {
-        return allPostDao.getPost(id)
+    override fun getItem(id: String): Flow<AllPost> {
+        return allPostDao.getPost(id).map { it ?: throw Exception("post not found") }
     }
 
-    override fun fetch(): Single<List<AllPost>> {
+    override fun fetch(): Flow<List<AllPost>> {
         return fetch(false)
     }
 
@@ -52,7 +50,7 @@ class AllPostRepo(private val api: PointAPI,
         allPostDao.deleteAll()
     }
 
-    fun fetchBefore(): Single<List<AllPost>> {
+    fun fetchBefore(): Flow<List<AllPost>> {
         return fetch(true)
     }
 }

@@ -3,11 +3,14 @@
  */
 package im.point.dotty.main
 
+import androidx.lifecycle.lifecycleScope
 import im.point.dotty.feed.FeedFragment
 import im.point.dotty.model.RecentPost
 import im.point.dotty.post.From
 import im.point.dotty.post.PostActivity
 import im.point.dotty.user.UserActivity
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 class RecentFragment : FeedFragment<RecentPost>() {
     override fun onStart() {
@@ -18,24 +21,23 @@ class RecentFragment : FeedFragment<RecentPost>() {
         adapter.onUserClicked = { id ->
             startActivity(UserActivity.getIntent(requireContext(), id))
         }
-        addDisposable(viewModel.getRecent().subscribe(
-                { list -> adapter.list = list },
-                { error -> error.message?.let { showSnackbar(it) } }))
+        lifecycleScope.launch(exceptionHandler) {
+            viewModel.getRecent().collect { list ->
+                adapter.list = list
+                finishUpdate()
+            }
+        }
     }
 
     override fun onFeedUpdate() {
-        addDisposable(viewModel.fetchRecent(false).subscribe(this::finishUpdate)
-        { error ->
-            finishUpdate()
-            error.message?.let { showSnackbar(it) }
-        })
+        lifecycleScope.launch(exceptionHandler) {
+            viewModel.fetchRecent(false).collect { finishUpdate() }
+        }
     }
 
     override fun onFeedUpdateBefore() {
-        addDisposable(viewModel.fetchRecent(true).subscribe(this::finishUpdate)
-        { error ->
-            finishUpdate()
-            error.message?.let { showSnackbar(it) }
-        })
+        lifecycleScope.launch(exceptionHandler) {
+            viewModel.fetchRecent(true).collect { finishUpdate() }
+        }
     }
 }

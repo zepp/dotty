@@ -3,85 +3,84 @@
  */
 package im.point.dotty.network
 
-import retrofit2.Call
 import retrofit2.http.*
 
 interface PointAPI {
     @GET("/api/recent")
-    fun getRecent(@Header("Authorization") token: String, @Query("before") before: Long?): Call<PostsReply>
+    suspend fun getRecent(@Header("Authorization") token: String, @Query("before") before: Long?): PostsReply
 
     @GET("/api/all")
-    fun getAll(@Header("Authorization") token: String, @Query("before") before: Long?): Call<PostsReply>
+    suspend fun getAll(@Header("Authorization") token: String, @Query("before") before: Long?): PostsReply
 
     @GET("/api/comments")
-    fun getComments(@Header("Authorization") token: String, @Query("before") before: Long?): Call<PostsReply>
+    suspend fun getComments(@Header("Authorization") token: String, @Query("before") before: Long?): PostsReply
 
     @GET("/api/bookmarks")
-    fun getBookmarks(@Header("Authorization") token: String, @Query("before") before: Long?): Call<PostsReply>
+    suspend fun getBookmarks(@Header("Authorization") token: String, @Query("before") before: Long?): PostsReply
 
     @GET("/api/tags")
-    fun getTagged(@Header("Authorization") token: String, @Query("tag") tag: String, @Query("before") before: Long?): Call<PostsReply>
+    suspend fun getTagged(@Header("Authorization") token: String, @Query("tag") tag: String, @Query("before") before: Long?): PostsReply
 
     @GET("/api/tags/{user}")
-    fun getUserTagged(@Header("Authorization") token: String, @Path("user") user: String, @Query("tag") tag: String, @Query("before") before: Long?): Call<PostsReply>
+    suspend fun getUserTagged(@Header("Authorization") token: String, @Path("user") user: String, @Query("tag") tag: String, @Query("before") before: Long?): PostsReply
 
     @GET("/api/blog/{user}")
-    fun getUserPosts(@Header("Authorization") token: String, @Path("user") user: String, @Query("before") before: Long?): Call<PostsReply>
+    suspend fun getUserPosts(@Header("Authorization") token: String, @Path("user") user: String, @Query("before") before: Long?): PostsReply
 
     @GET("/api/post/{post}")
-    fun getPost(@Header("Authorization") token: String, @Path("post") id: String): Call<PostReply>
+    suspend fun getPost(@Header("Authorization") token: String, @Path("post") id: String): PostReply
 
     @GET("/api/user/login/{login}")
-    fun getUser(@Header("Authorization") token: String, @Path("login") login: String): Call<UserReply>
+    suspend fun getUser(@Header("Authorization") token: String, @Path("login") login: String): UserReply
 
     @GET("/api/user/id/{id}")
-    fun getUser(@Header("Authorization") token: String, @Path("id") id: Long): Call<UserReply>
+    suspend fun getUser(@Header("Authorization") token: String, @Path("id") id: Long): UserReply
 
     @GET("/api/me")
-    fun getMe(@Header("Authorization") token: String): Call<UserReply>
+    suspend fun getMe(@Header("Authorization") token: String): UserReply
 
     @GET("/api/unread-counters")
-    fun getUnreadCounters(@Header("Authorization") token: String): Call<UnreadCounters>
+    suspend fun getUnreadCounters(@Header("Authorization") token: String): UnreadCounters
 
     @GET("api/post/{post}/r")
-    fun recommendPost(@Header("Authorization") token: String, @Path("post") id: String, @Query("text") text: String? = null): Call<Envelope>
+    suspend fun recommendPost(@Header("Authorization") token: String, @Path("post") id: String, @Query("text") text: String? = null): Envelope
 
     @DELETE("api/post/{post}/r")
-    fun unrecommendPost(@Header("Authorization") token: String, @Path("post") id: String): Call<Envelope>
+    suspend fun unrecommendPost(@Header("Authorization") token: String, @Path("post") id: String): Envelope
 
     @GET("api/post/{post}/s")
-    fun subscribeToPost(@Header("Authorization") token: String, @Path("post") id: String): Call<Envelope>
+    suspend fun subscribeToPost(@Header("Authorization") token: String, @Path("post") id: String): Envelope
 
     @DELETE("api/post/{post}/s")
-    fun unsubscribeFromPost(@Header("Authorization") token: String, @Path("post") id: String): Call<Envelope>
+    suspend fun unsubscribeFromPost(@Header("Authorization") token: String, @Path("post") id: String): Envelope
 
     @GET("api/post/{post}/b")
-    fun bookmarkPost(@Header("Authorization") token: String, @Path("post") id: String): Call<Envelope>
+    suspend fun bookmarkPost(@Header("Authorization") token: String, @Path("post") id: String): Envelope
 
     @DELETE("api/post/{post}/b")
-    fun unbookmarkPost(@Header("Authorization") token: String, @Path("post") id: String): Call<Envelope>
+    suspend fun unbookmarkPost(@Header("Authorization") token: String, @Path("post") id: String): Envelope
 
     @GET("api/post/{post}/pin")
-    fun pinPost(@Header("Authorization") token: String, @Path("post") id: String, @Query("text") text: String? = null): Call<Envelope>
+    suspend fun pinPost(@Header("Authorization") token: String, @Path("post") id: String, @Query("text") text: String? = null): Envelope
 
     @DELETE("api/post/{post}/unpin")
-    fun unpinPost(@Header("Authorization") token: String, @Path("post") id: String): Call<Envelope>
+    suspend fun unpinPost(@Header("Authorization") token: String, @Path("post") id: String): Envelope
 
     @GET("api/user/s/{login}")
-    fun subscribeToUser(@Header("Authorization") token: String, @Path("login") login: String): Call<Envelope>
+    suspend fun subscribeToUser(@Header("Authorization") token: String, @Path("login") login: String): Envelope
 
     @DELETE("api/user/s/{login}")
-    fun unsubscribeFromUser(@Header("Authorization") token: String, @Path("login") login: String): Call<Envelope>
+    suspend fun unsubscribeFromUser(@Header("Authorization") token: String, @Path("login") login: String): Envelope
 
     @GET("api/user/sr/{login}")
-    fun subscribeToUserRecommendations(@Header("Authorization") token: String, @Path("login") login: String): Call<Envelope>
+    suspend fun subscribeToUserRecommendations(@Header("Authorization") token: String, @Path("login") login: String): Envelope
 
     @DELETE("api/user/sr/{login}")
-    fun unsubscribeFromUserRecommendations(@Header("Authorization") token: String, @Path("login") login: String): Call<Envelope>
+    suspend fun unsubscribeFromUserRecommendations(@Header("Authorization") token: String, @Path("login") login: String): Envelope
 
     @GET("api/user/bl/{login}")
-    fun blockUser(@Header("Authorization") token: String, @Path("login") login: String): Call<Envelope>
+    suspend fun blockUser(@Header("Authorization") token: String, @Path("login") login: String): Envelope
 
     @DELETE("api/user/bl/{login}")
-    fun unblockUser(@Header("Authorization") token: String, @Path("login") login: String): Call<Envelope>
+    suspend fun unblockUser(@Header("Authorization") token: String, @Path("login") login: String): Envelope
 }

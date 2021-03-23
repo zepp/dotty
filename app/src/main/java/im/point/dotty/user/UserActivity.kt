@@ -7,22 +7,32 @@ package im.point.dotty.user
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
-import im.point.dotty.common.RxActivity
 import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.ActivityUserBinding
 import im.point.dotty.feed.FeedAdapter
 import im.point.dotty.model.UserPost
 import im.point.dotty.post.From
 import im.point.dotty.post.PostActivity
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
-class UserActivity : RxActivity() {
+class UserActivity : AppCompatActivity() {
     private lateinit var binding: ActivityUserBinding
     private lateinit var viewModel: UserViewModel
     private lateinit var adapter: FeedAdapter<UserPost>
+    private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
+        showSnackbar(exception.localizedMessage)
+        Log.e(localClassName, "error: ", exception)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,29 +47,43 @@ class UserActivity : RxActivity() {
 
     override fun onStart() {
         super.onStart()
-        addDisposable(viewModel.isActionsVisible.subscribe { value ->
-            binding.userActions.visibility = if (value) View.VISIBLE else View.GONE
-        })
-        addDisposable(viewModel.getUser().subscribe { user ->
-            binding.userName.text = user.name
-            binding.userAbout.text = user.about
-        })
+
+        lifecycleScope.launch(exceptionHandler) {
+            viewModel.isActionsVisible.consumeEach { value ->
+                binding.userActions.visibility = if (value) View.VISIBLE else View.GONE
+            }
+            viewModel.fetchUserAndPosts().collect { onFetched() }
+            viewModel.getUser().collect { user ->
+                binding.userName.text = user.name
+                binding.userAbout.text = user.about
+            }
+        }
+
+        lifecycleScope.launch(exceptionHandler) {
+            viewModel.getPosts().collect { items -> adapter.list = items }
+        }
+
         binding.userSubscribe.setOnCheckedChangeListener { _, isChecked ->
-            addDisposable((if (isChecked) viewModel.unsubscribe() else viewModel.subscribe()).subscribe())
+            lifecycleScope.launch(exceptionHandler) {
+                if (isChecked) viewModel.unsubscribe().await() else viewModel.subscribe().await()
+            }
         }
         binding.userRecommendSubscribe.setOnCheckedChangeListener { _, isChecked ->
-            addDisposable((if (isChecked) viewModel.unsubscribeRecommendations() else viewModel.subscribeRecommendations()).subscribe())
+            lifecycleScope.launch(exceptionHandler) {
+                if (isChecked) viewModel.unsubscribeRecommendations().await()
+                else viewModel.subscribeRecommendations().await()
+            }
         }
         binding.userBlock.setOnCheckedChangeListener { _, isChecked ->
-            addDisposable((if (isChecked) viewModel.unblock() else viewModel.block()).subscribe())
+            lifecycleScope.launch(exceptionHandler) {
+                if (isChecked) viewModel.unblock().await() else viewModel.block().await()
+            }
         }
         binding.userRefresh.setOnRefreshListener {
-            addDisposable(viewModel.fetchUserAndPosts().subscribe({ onFetched() },
-                    { error -> error.message?.let { showSnackbar(it) } }))
+            lifecycleScope.launch(exceptionHandler) {
+                viewModel.fetchUserAndPosts().collect { onFetched() }
+            }
         }
-        addDisposable(viewModel.getPosts().subscribe { items -> adapter.list = items })
-        addDisposable(viewModel.fetchUserAndPosts().subscribe({ onFetched() },
-                { error -> error.message?.let { showSnackbar(it) } }))
     }
 
     private fun onFetched() {

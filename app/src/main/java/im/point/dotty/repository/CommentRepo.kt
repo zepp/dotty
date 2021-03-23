@@ -12,43 +12,41 @@ import im.point.dotty.mapper.RawPostMapper
 import im.point.dotty.model.Comment
 import im.point.dotty.model.Post
 import im.point.dotty.network.PointAPI
-import im.point.dotty.network.PostReply
 import im.point.dotty.network.RawComment
-import im.point.dotty.network.SingleCallbackAdapter
-import io.reactivex.Flowable
-import io.reactivex.Observable
-import io.reactivex.Single
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 
 class CommentRepo<in T : Post>(private val api: PointAPI,
                                private val state: AppState,
                                private val commentDao: CommentDao,
                                private val postDao: PostDao<T>,
-                               private var model: Flowable<T>,
+                               private val id: String,
+                               private var model: Flow<T?>,
                                private val mapper: Mapper<Comment, RawComment> = CommentMapper(),
                                private val postMapper: RawPostMapper<T> = RawPostMapper()) : Repository<Comment, String> {
 
-    override fun getAll(): Flowable<List<Comment>> {
-        return model.firstElement().flatMapPublisher { model -> commentDao.getPostComments(model.id) }
+    override fun getAll(): Flow<List<Comment>> {
+        return commentDao.getPostComments(id)
     }
 
-    override fun getItem(id: String): Flowable<Comment> {
+    override fun getItem(id: String): Flow<Comment> {
         val bits = id.split('/')
         return commentDao.geComment(bits.first(), bits.last().toLong())
+                .map { it ?: throw Exception("comment not found") }
     }
 
-    override fun fetch(): Single<List<Comment>> {
-        return model.firstElement().flatMapSingle { model ->
-            Single.create<PostReply> { emitter ->
-                api.getPost(state.token, model.id)
-                        .enqueue(SingleCallbackAdapter(emitter))
-            }.doOnSuccess { postReply ->
-                postDao.insertItem(postMapper.merge(model, postReply.post
-                        ?: throw Exception("invalid raw post")))
+    override fun fetch() = flow {
+        with(api.getPost(state.token, id)) {
+            checkSuccessful()
+            postDao.insertItem(postMapper.merge(model.first() ?: throw Exception("post not found"),
+                    post ?: throw Exception("invalid raw post")))
+            comments?.let {
+                val list = it.map { comment -> mapper.map(comment) }
+                commentDao.insertAll(list)
+                emit(list)
             }
-                    .flatMapObservable { postReply -> Observable.fromIterable(postReply.comments) }
-                    .map { entry: RawComment -> mapper.map(entry) }
-                    .toList()
-                    .doOnSuccess { comments: List<Comment> -> commentDao.insertAll(comments) }
         }
     }
 

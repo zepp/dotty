@@ -7,19 +7,26 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
-import im.point.dotty.common.RxActivity
 import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.ActivityPostBinding
-import im.point.dotty.model.Post
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
-class PostActivity : RxActivity() {
+class PostActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPostBinding
     private lateinit var postId: String
     private lateinit var from: From
     private lateinit var viewModel: PostViewModel
+    private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
+        showSnackbar(exception.localizedMessage)
+    }
 
     companion object {
         const val POST_ID = "post-id"
@@ -53,33 +60,38 @@ class PostActivity : RxActivity() {
 
     override fun onStart() {
         super.onStart()
-        addDisposable(when (from) {
-            From.FROM_RECENT -> viewModel.getRecentPost()
-            From.FROM_COMMENTED -> viewModel.getCommentedPost()
-            From.FROM_ALL -> viewModel.getAllPost()
-            From.FROM_USER -> viewModel.getUserPost()
-        }.subscribe { post: Post ->
-            binding.toolbar.title = post.nameOrLogin
-            binding.postBookmark.isChecked = post.bookmarked == true
-            binding.postRecommend.isChecked = post.recommended == true
-            binding.postSubscribe.isChecked = post.subscribed == true
-            binding.postPin.isChecked = post.pinned == true
-            binding.postSubscribe.setOnCheckedChangeListener { view, isChecked ->
-                addDisposable((if (isChecked) viewModel.unsubscribe() else viewModel.subscribe())
-                        .subscribe({}, { error -> error.message?.let { showSnackbar(it) } }))
+        lifecycleScope.launch(exceptionHandler) {
+            when (from) {
+                From.FROM_RECENT -> viewModel.getRecentPost()
+                From.FROM_COMMENTED -> viewModel.getCommentedPost()
+                From.FROM_ALL -> viewModel.getAllPost()
+                From.FROM_USER -> viewModel.getUserPost()
+            }.collect { post ->
+                binding.toolbar.title = post.nameOrLogin
+                binding.postBookmark.isChecked = post.bookmarked == true
+                binding.postRecommend.isChecked = post.recommended == true
+                binding.postSubscribe.isChecked = post.subscribed == true
+                binding.postPin.isChecked = post.pinned == true
             }
-            binding.postRecommend.setOnCheckedChangeListener { view, isChecked ->
-                addDisposable((if (isChecked) viewModel.unrecommend() else viewModel.recommend())
-                        .subscribe({}, { error -> error.message?.let { showSnackbar(it) } }))
+        }
+        lifecycleScope.launch(exceptionHandler) {
+            viewModel.isPinVisible.consumeEach { binding.postPin.visibility = if (it) View.VISIBLE else View.GONE }
+        }
+        binding.postSubscribe.setOnCheckedChangeListener { view, isChecked ->
+            lifecycleScope.launch(exceptionHandler) {
+                if (isChecked) viewModel.unsubscribe().await() else viewModel.subscribe().await()
             }
-            binding.postBookmark.setOnCheckedChangeListener { view, isChecked ->
-                addDisposable((if (isChecked) viewModel.unbookmark() else viewModel.bookmark())
-                        .subscribe({}, { error -> error.message?.let { showSnackbar(it) } }))
+        }
+        binding.postRecommend.setOnCheckedChangeListener { view, isChecked ->
+            lifecycleScope.launch(exceptionHandler) {
+                if (isChecked) viewModel.unrecommend().await() else viewModel.recommend().await()
             }
-        })
-        addDisposable(viewModel.isPinVisible.subscribe { value ->
-            binding.postPin.visibility = if (value) View.VISIBLE else View.GONE
-        })
+        }
+        binding.postBookmark.setOnCheckedChangeListener { view, isChecked ->
+            lifecycleScope.launch(exceptionHandler) {
+                if (isChecked) viewModel.unbookmark().await() else viewModel.bookmark().await()
+            }
+        }
     }
 
     override fun onBackPressed() {

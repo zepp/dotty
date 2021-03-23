@@ -4,124 +4,130 @@
 package im.point.dotty.post
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import im.point.dotty.DottyApplication
 import im.point.dotty.common.AppState
 import im.point.dotty.common.Shared
 import im.point.dotty.model.*
-import im.point.dotty.network.Envelope
 import im.point.dotty.network.PointAPI
-import im.point.dotty.network.SingleCallbackAdapter
 import im.point.dotty.repository.RepoFactory
-import io.reactivex.Completable
-import io.reactivex.Flowable
-import io.reactivex.Single
-import io.reactivex.SingleEmitter
-import io.reactivex.android.schedulers.AndroidSchedulers
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
 
 class PostViewModel(application: DottyApplication, private val postId: String) : ViewModel() {
-    private val repoFactory: RepoFactory
+    private val repoFactory: RepoFactory = application.repoFactory
     private val state: AppState = application.state
     private val api: PointAPI = application.mainApi
     private val shared: Shared = Shared(application.baseContext, application.state, application.mainApi)
-    private lateinit var pinEmitter: SingleEmitter<Boolean>
 
-    val isPinVisible: Single<Boolean> = Single.create<Boolean> { emitter -> pinEmitter = emitter }
-            .observeOn(AndroidSchedulers.mainThread())
+    val isPinVisible = Channel<Boolean>()
 
-    fun getRecentPost(): Flowable<RecentPost> {
+    fun getRecentPost(): Flow<RecentPost> {
         return repoFactory.getRecentPostRepo().getItem(postId)
-                .doAfterNext { post -> pinEmitter.onSuccess(post.authorId == state.id) }
-                .observeOn(AndroidSchedulers.mainThread())
+                .onEach { isPinVisible.send(it.authorId == state.id) }
+                .flowOn(Dispatchers.IO)
     }
 
-    fun getCommentedPost(): Flowable<CommentedPost> {
+    fun getCommentedPost(): Flow<CommentedPost> {
         return repoFactory.getCommentedPostRepo().getItem(postId)
-                .doAfterNext { post -> pinEmitter.onSuccess(post.authorId == state.id) }
-                .observeOn(AndroidSchedulers.mainThread())
+                .onEach { isPinVisible.send(it.authorId == state.id) }
+                .flowOn(Dispatchers.IO)
     }
 
-    fun getAllPost(): Flowable<AllPost> {
+    fun getAllPost(): Flow<AllPost> {
         return repoFactory.getAllPostRepo().getItem(postId)
-                .doAfterNext { post -> pinEmitter.onSuccess(post.authorId == state.id) }
-                .observeOn(AndroidSchedulers.mainThread())
+                .onEach { isPinVisible.send(it.authorId == state.id) }
+                .flowOn(Dispatchers.IO)
     }
 
-    fun getUserPost(): Flowable<UserPost> {
+    fun getUserPost(): Flow<UserPost> {
         return repoFactory.getUserPostRepo().getItem(postId)
-                .doAfterNext { post -> pinEmitter.onSuccess(post.authorId == state.id) }
-                .observeOn(AndroidSchedulers.mainThread())
+                .onEach { isPinVisible.send(it.authorId == state.id) }
+                .flowOn(Dispatchers.IO)
     }
 
-    fun getRecentPostComments(): Flowable<List<Comment>> {
-        return repoFactory.getRecentCommentRepo(postId).getAll().observeOn(AndroidSchedulers.mainThread())
+    fun getRecentPostComments(): Flow<List<Comment>> {
+        return repoFactory.getRecentCommentRepo(postId).getAll().flowOn(Dispatchers.IO)
     }
 
-    fun getCommentedPostComments(): Flowable<List<Comment>> {
-        return repoFactory.getCommentedCommentRepo(postId).getAll().observeOn(AndroidSchedulers.mainThread())
+    fun getCommentedPostComments(): Flow<List<Comment>> {
+        return repoFactory.getCommentedCommentRepo(postId).getAll().flowOn(Dispatchers.IO)
     }
 
-    fun getAllPostComments(): Flowable<List<Comment>> {
-        return repoFactory.getAllCommentRepo(postId).getAll().observeOn(AndroidSchedulers.mainThread())
+    fun getAllPostComments(): Flow<List<Comment>> {
+        return repoFactory.getAllCommentRepo(postId).getAll().flowOn(Dispatchers.IO)
     }
 
-    fun getUserPostComments(): Flowable<List<Comment>> {
-        return repoFactory.getUserCommentRepo(postId).getAll().observeOn(AndroidSchedulers.mainThread())
+    fun getUserPostComments(): Flow<List<Comment>> {
+        return repoFactory.getUserCommentRepo(postId).getAll().flowOn(Dispatchers.IO)
     }
 
-    fun fetchRecentPostComments(): Completable {
-        return Completable.fromSingle(repoFactory.getRecentCommentRepo(postId).fetch()
-                .flatMap { shared.fetchUnreadCounters() })
-                .observeOn(AndroidSchedulers.mainThread())
+    fun fetchRecentPostComments(): Flow<List<Comment>> {
+        return repoFactory.getRecentCommentRepo(postId).fetch()
+                .onCompletion { shared.fetchUnreadCounters() }
+                .flowOn(Dispatchers.IO)
     }
 
-    fun fetchCommentedPostComments(): Completable {
-        return Completable.fromSingle(repoFactory.getCommentedCommentRepo(postId).fetch()
-                .flatMap { shared.fetchUnreadCounters() })
-                .observeOn(AndroidSchedulers.mainThread())
+    fun fetchCommentedPostComments(): Flow<List<Comment>> {
+        return repoFactory.getCommentedCommentRepo(postId).fetch()
+                .onCompletion { shared.fetchUnreadCounters() }
+                .flowOn(Dispatchers.IO)
     }
 
-    fun fetchAllPostComments(): Completable {
-        return Completable.fromSingle(repoFactory.getAllCommentRepo(postId).fetch())
-                .observeOn(AndroidSchedulers.mainThread())
+    fun fetchAllPostComments(): Flow<List<Comment>> {
+        return repoFactory.getAllCommentRepo(postId).fetch()
+                .onCompletion { shared.fetchUnreadCounters() }
+                .flowOn(Dispatchers.IO)
     }
 
-    fun fetchUserPostComments(): Completable {
-        return Completable.fromSingle(repoFactory.getUserCommentRepo(postId).fetch())
-                .observeOn(AndroidSchedulers.mainThread())
+    fun fetchUserPostComments(): Flow<List<Comment>> {
+        return repoFactory.getUserCommentRepo(postId).fetch().flowOn(Dispatchers.IO)
     }
 
-    fun subscribe() = Completable.fromSingle(Single.create<Envelope> { emitter ->
-        api.subscribeToPost(state.token ?: throw Exception("invalidToken"), postId)
-                .enqueue(SingleCallbackAdapter(emitter))
-    })
+    fun subscribe() = viewModelScope.async(Dispatchers.IO) {
+        with(api.subscribeToPost(state.token, postId)) {
+            checkSuccessful()
+            return@async this
+        }
+    }
 
-    fun unsubscribe() = Completable.fromSingle(Single.create<Envelope> { emitter ->
-        api.unsubscribeFromPost(state.token ?: throw Exception("invalidToken"), postId)
-                .enqueue(SingleCallbackAdapter(emitter))
-    })
+    fun unsubscribe() = viewModelScope.async(Dispatchers.IO) {
+        with(api.unsubscribeFromPost(state.token, postId)) {
+            checkSuccessful()
+            return@async this
+        }
+    }
 
-    fun recommend() = Completable.fromSingle(Single.create<Envelope> { emitter ->
-        api.recommendPost(state.token ?: throw Exception("invalidToken"), postId)
-                .enqueue(SingleCallbackAdapter(emitter))
-    })
+    fun recommend() = viewModelScope.async(Dispatchers.IO) {
+        with(api.recommendPost(state.token, postId)) {
+            checkSuccessful()
+            return@async this
+        }
+    }
 
-    fun unrecommend() = Completable.fromSingle(Single.create<Envelope> { emitter ->
-        api.unrecommendPost(state.token ?: throw Exception("invalidToken"), postId)
-                .enqueue(SingleCallbackAdapter(emitter))
-    })
+    fun unrecommend() = viewModelScope.async(Dispatchers.IO) {
+        with(api.unrecommendPost(state.token, postId)) {
+            checkSuccessful()
+            return@async this
+        }
+    }
 
-    fun bookmark() = Completable.fromSingle(Single.create<Envelope> { emitter ->
-        api.bookmarkPost(state.token ?: throw Exception("invalidToken"), postId)
-                .enqueue(SingleCallbackAdapter(emitter))
-    })
+    fun bookmark() = viewModelScope.async(Dispatchers.IO) {
+        with(api.bookmarkPost(state.token, postId)) {
+            checkSuccessful()
+            return@async this
+        }
+    }
 
-    fun unbookmark() = Completable.fromSingle(Single.create<Envelope> { emitter ->
-        api.unbookmarkPost(state.token ?: throw Exception("invalidToken"), postId)
-                .enqueue(SingleCallbackAdapter(emitter))
-    })
-
-    init {
-        repoFactory = application.repoFactory
-        isPinVisible.subscribe()
+    fun unbookmark() = viewModelScope.async(Dispatchers.IO) {
+        with(api.unbookmarkPost(state.token, postId)) {
+            checkSuccessful()
+            return@async this
+        }
     }
 }

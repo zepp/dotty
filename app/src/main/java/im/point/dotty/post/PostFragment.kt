@@ -7,24 +7,31 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
-import im.point.dotty.common.RxFragment
 import im.point.dotty.common.TagsAdapter
 import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.FragmentPostBinding
-import im.point.dotty.model.Post
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
-class PostFragment : RxFragment() {
+class PostFragment : Fragment() {
     private val adapter: CommentAdapter = CommentAdapter()
     private lateinit var binding: FragmentPostBinding
     private lateinit var viewModel: PostViewModel
     private lateinit var layout: SwipeRefreshLayout
     private lateinit var from: From
     private val tagsAdapter: TagsAdapter = TagsAdapter()
+    private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
+        layout.isRefreshing = false
+        showSnackbar(exception.localizedMessage)
+    }
 
     companion object {
         const val POST_ID = "post-id"
@@ -53,16 +60,7 @@ class PostFragment : RxFragment() {
         binding.postTags.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         layout = binding.postSwipeLayout
         layout.setOnRefreshListener {
-            addDisposable(when (from) {
-                From.FROM_ALL -> viewModel.fetchAllPostComments()
-                From.FROM_COMMENTED -> viewModel.fetchCommentedPostComments()
-                From.FROM_RECENT -> viewModel.fetchRecentPostComments()
-                From.FROM_USER -> viewModel.fetchUserPostComments()
-            }.subscribe({ layout.isRefreshing = false },
-                    { error ->
-                        layout.isRefreshing = false
-                        error.message?.let { showSnackbar(it) }
-                    }))
+            fetchPostComments()
         }
         adapter.onIdClicked = { id, pos -> binding.postComments.smoothScrollToPosition(pos) }
         return binding.root
@@ -70,37 +68,47 @@ class PostFragment : RxFragment() {
 
     override fun onStart() {
         super.onStart()
-        addDisposable(when (from) {
-            From.FROM_ALL -> viewModel.fetchAllPostComments()
-            From.FROM_COMMENTED -> viewModel.fetchCommentedPostComments()
-            From.FROM_RECENT -> viewModel.fetchRecentPostComments()
-            From.FROM_USER -> viewModel.fetchUserPostComments()
-        }.subscribe({}, { error -> error.message?.let { showSnackbar(it) } }))
+        fetchPostComments()
+    }
+
+    private fun fetchPostComments() {
+        lifecycleScope.launch(exceptionHandler) {
+            when (from) {
+                From.FROM_ALL -> viewModel.fetchAllPostComments()
+                From.FROM_COMMENTED -> viewModel.fetchCommentedPostComments()
+                From.FROM_RECENT -> viewModel.fetchRecentPostComments()
+                From.FROM_USER -> viewModel.fetchUserPostComments()
+            }.collect { layout.isRefreshing = false }
+        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProvider(requireActivity(), ViewModelFactory<Any>(requireActivity()))
                 .get(PostViewModel::class.java)
-        addDisposable(when (from) {
-            From.FROM_RECENT -> viewModel.getRecentPost()
-            From.FROM_COMMENTED -> viewModel.getCommentedPost()
-            From.FROM_ALL -> viewModel.getAllPost()
-            From.FROM_USER -> viewModel.getUserPost()
-        }.subscribe { post: Post ->
-            binding.postText.text = post.text
-            if (post.tags.isNullOrEmpty()) {
-                binding.postTags.visibility = View.GONE
-            } else {
-                tagsAdapter.list = post.tags!!
+        lifecycleScope.launch(exceptionHandler) {
+            when (from) {
+                From.FROM_RECENT -> viewModel.getRecentPost()
+                From.FROM_COMMENTED -> viewModel.getCommentedPost()
+                From.FROM_ALL -> viewModel.getAllPost()
+                From.FROM_USER -> viewModel.getUserPost()
+            }.collect { post ->
+                binding.postText.text = post.text
+                if (post.tags.isNullOrEmpty()) {
+                    binding.postTags.visibility = View.GONE
+                } else {
+                    tagsAdapter.list = post.tags!!
+                }
             }
-        })
-        addDisposable(when (from) {
-            From.FROM_ALL -> viewModel.getAllPostComments()
-            From.FROM_COMMENTED -> viewModel.getCommentedPostComments()
-            From.FROM_RECENT -> viewModel.getRecentPostComments()
-            From.FROM_USER -> viewModel.getUserPostComments()
-        }.subscribe { list -> adapter.list = list })
+        }
+        lifecycleScope.launch(exceptionHandler) {
+            when (from) {
+                From.FROM_ALL -> viewModel.getAllPostComments()
+                From.FROM_COMMENTED -> viewModel.getCommentedPostComments()
+                From.FROM_RECENT -> viewModel.getRecentPostComments()
+                From.FROM_USER -> viewModel.getUserPostComments()
+            }.collect { list -> adapter.list = list }
+        }
     }
 
     private fun showSnackbar(text: String) {

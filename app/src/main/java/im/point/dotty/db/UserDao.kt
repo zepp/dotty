@@ -8,7 +8,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import im.point.dotty.model.User
-import io.reactivex.Flowable
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UserDao {
@@ -16,10 +16,10 @@ interface UserDao {
     fun insertUser(user: User)
 
     @Query("SELECT * FROM users")
-    fun getAll(): Flowable<List<User>>
+    fun getAll(): Flow<List<User>>
 
     @Query("SELECT * FROM users WHERE id = :id")
-    fun getUser(id: Long): Flowable<User>
+    fun getUser(id: Long): Flow<User?>
 
     @Query("DELETE FROM users")
     fun deleteAll()

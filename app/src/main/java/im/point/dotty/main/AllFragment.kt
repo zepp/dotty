@@ -3,11 +3,14 @@
  */
 package im.point.dotty.main
 
+import androidx.lifecycle.lifecycleScope
 import im.point.dotty.feed.FeedFragment
 import im.point.dotty.model.AllPost
 import im.point.dotty.post.From
 import im.point.dotty.post.PostActivity
 import im.point.dotty.user.UserActivity
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 class AllFragment : FeedFragment<AllPost>() {
     override fun onStart() {
@@ -18,24 +21,20 @@ class AllFragment : FeedFragment<AllPost>() {
         adapter.onUserClicked = { id ->
             startActivity(UserActivity.getIntent(requireContext(), id))
         }
-        addDisposable(viewModel.getAll().subscribe(
-                { list -> adapter.list = list },
-                { error -> error.message?.let { showSnackbar(it) } }))
+        lifecycleScope.launch(exceptionHandler) {
+            viewModel.getAll().collect { list -> adapter.list = list }
+        }
     }
 
     override fun onFeedUpdate() {
-        addDisposable(viewModel.fetchAll(false).subscribe(this::finishUpdate)
-        { error ->
-            finishUpdate()
-            error.message?.let { showSnackbar(it) }
-        })
+        lifecycleScope.launch(exceptionHandler) {
+            viewModel.fetchAll(false).collect { finishUpdate() }
+        }
     }
 
     override fun onFeedUpdateBefore() {
-        addDisposable(viewModel.fetchAll(true).subscribe(this::finishUpdate)
-        { error ->
-            finishUpdate()
-            error.message?.let { showSnackbar(it) }
-        })
+        lifecycleScope.launch(exceptionHandler) {
+            viewModel.fetchAll(true).collect { finishUpdate() }
+        }
     }
 }

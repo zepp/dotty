@@ -4,6 +4,7 @@
 package im.point.dotty.main
 
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import im.point.dotty.DottyApplication
 import im.point.dotty.common.AppState
 import im.point.dotty.common.Shared
@@ -11,14 +12,13 @@ import im.point.dotty.model.AllPost
 import im.point.dotty.model.CommentedPost
 import im.point.dotty.model.RecentPost
 import im.point.dotty.network.AuthAPI
-import im.point.dotty.network.LogoutReply
-import im.point.dotty.network.SingleCallbackAdapter
+import im.point.dotty.network.UnreadCounters
 import im.point.dotty.repository.*
-import io.reactivex.Completable
-import io.reactivex.Flowable
-import io.reactivex.Single
-import io.reactivex.SingleEmitter
-import io.reactivex.android.schedulers.AndroidSchedulers
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 
 class MainViewModel internal constructor(application: DottyApplication) : AndroidViewModel(application) {
     private val repoFactory: RepoFactory
@@ -30,53 +30,50 @@ class MainViewModel internal constructor(application: DottyApplication) : Androi
     private val state: AppState = application.state
     private val api: AuthAPI = application.authApi
 
-    fun fetchRecent(isBefore: Boolean): Completable {
-        return Completable.fromSingle(if (isBefore) recentRepo.fetchBefore() else recentRepo.fetch()
-                .flatMap { shared.fetchUnreadCounters() })
-                .observeOn(AndroidSchedulers.mainThread())
+    fun fetchRecent(isBefore: Boolean): Flow<List<RecentPost>> {
+        return (if (isBefore) recentRepo.fetchBefore() else recentRepo.fetch())
+                .flowOn(Dispatchers.IO)
     }
 
-    fun getRecent(): Flowable<List<RecentPost>> {
-        return recentRepo.getAll().observeOn(AndroidSchedulers.mainThread())
+    fun getRecent(): Flow<List<RecentPost>> {
+        return recentRepo.getAll().flowOn(Dispatchers.IO)
     }
 
-    fun fetchAll(isBefore: Boolean): Completable {
-        return Completable.fromSingle(if (isBefore) allRepo.fetchBefore() else allRepo.fetch())
-                .observeOn(AndroidSchedulers.mainThread())
+    fun fetchAll(isBefore: Boolean): Flow<List<AllPost>> {
+        return (if (isBefore) allRepo.fetchBefore() else allRepo.fetch())
+                .flowOn(Dispatchers.IO)
     }
 
-    fun getAll(): Flowable<List<AllPost>> {
-        return allRepo.getAll().observeOn(AndroidSchedulers.mainThread())
+    fun getAll(): Flow<List<AllPost>> {
+        return allRepo.getAll().flowOn(Dispatchers.IO)
     }
 
-    fun fetchCommented(isBefore: Boolean): Completable {
-        return Completable.fromSingle(if (isBefore) commentedRepo.fetchBefore() else commentedRepo.fetch())
-                .observeOn(AndroidSchedulers.mainThread())
+    fun fetchCommented(isBefore: Boolean): Flow<List<CommentedPost>> {
+        return (if (isBefore) commentedRepo.fetchBefore() else commentedRepo.fetch())
+                .flowOn(Dispatchers.IO)
     }
 
-    fun getCommented(): Flowable<List<CommentedPost>> {
-        return commentedRepo.getAll().observeOn(AndroidSchedulers.mainThread())
+    fun getCommented(): Flow<List<CommentedPost>> {
+        return commentedRepo.getAll().flowOn(Dispatchers.IO)
     }
 
-    fun fetchUnreadCounters(): Completable {
-        return Completable.fromSingle(shared.fetchUnreadCounters())
-                .observeOn(AndroidSchedulers.mainThread())
+    fun fetchUnreadCounters(): Flow<UnreadCounters> {
+        return shared.fetchUnreadCounters().flowOn(Dispatchers.IO)
     }
 
-    fun logout(): Completable {
-        return Completable.fromSingle(Single.create { emitter: SingleEmitter<LogoutReply> ->
-            api.logout(state.token ?: throw Exception("invalid token"),
-                    state.csrfToken ?: throw Exception("invalid CSRF token"))
-                    .enqueue(SingleCallbackAdapter(emitter))
+    fun logout() = viewModelScope.async(Dispatchers.IO) {
+        try {
+            api.logout(state.token, state.csrfToken)
+        } finally {
+            state.isLoggedIn = false
+            allRepo.purge()
+            recentRepo.purge()
+            commentedRepo.purge()
+            userRepo.purge()
         }
-                .doFinally {
-                    state.isLoggedIn = false
-                    allRepo.purge()
-                    recentRepo.purge()
-                    commentedRepo.purge()
-                    userRepo.purge()
-                    shared.resetActivityBackStack()
-                }.observeOn(AndroidSchedulers.mainThread()))
+        withContext(Dispatchers.Main) {
+            shared.resetActivityBackStack()
+        }
     }
 
     fun unreadPosts() = state.unreadPosts

@@ -6,15 +6,15 @@ package im.point.dotty.db
 import androidx.room.Dao
 import androidx.room.Query
 import im.point.dotty.model.AllPost
-import io.reactivex.Flowable
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AllPostDao : PostDao<AllPost>{
     @Query("SELECT * FROM all_posts ORDER BY page_id ASC")
-    fun getAll(): Flowable<List<AllPost>>
+    fun getAll(): Flow<List<AllPost>>
 
     @Query("SELECT * FROM all_posts WHERE id = :id")
-    fun getPost(id: String): Flowable<AllPost>
+    fun getPost(id: String): Flow<AllPost?>
 
     @Query("DELETE FROM all_posts")
     fun deleteAll()

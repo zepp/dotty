@@ -3,7 +3,6 @@
  */
 package im.point.dotty.repository
 
-import android.annotation.SuppressLint
 import im.point.dotty.common.AppState
 import im.point.dotty.db.RecentPostDao
 import im.point.dotty.mapper.Mapper
@@ -11,11 +10,9 @@ import im.point.dotty.mapper.RecentPostMapper
 import im.point.dotty.model.RecentPost
 import im.point.dotty.network.MetaPost
 import im.point.dotty.network.PointAPI
-import im.point.dotty.network.PostsReply
-import im.point.dotty.network.SingleCallbackAdapter
-import io.reactivex.Flowable
-import io.reactivex.Observable
-import io.reactivex.Single
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 
 class RecentPostRepo(private val api: PointAPI,
                      private val state: AppState,
@@ -23,29 +20,27 @@ class RecentPostRepo(private val api: PointAPI,
                      private val mapper: Mapper<RecentPost, MetaPost> = RecentPostMapper()) :
         Repository<RecentPost, String> {
 
-    @SuppressLint("CheckResult")
-    private fun fetch(isBefore: Boolean): Single<List<RecentPost>> {
-        val source = Single.create<PostsReply> { emitter ->
-            api.getRecent(state.token,
-                    if (isBefore) state.recentPageId else null)
-                    .enqueue(SingleCallbackAdapter(emitter))
+    private fun fetch(isBefore: Boolean) = flow {
+        with(api.getRecent(state.token, if (isBefore) state.recentPageId else null)) {
+            checkSuccessful()
+            posts?.let {
+                val list = it.map { post -> mapper.map(post) }
+                state.recentPageId = list.last().pageId
+                recentPostDao.insertAll(list)
+                emit(list)
+            }
         }
-                .flatMapObservable { postsReply: PostsReply -> Observable.fromIterable(postsReply.posts) }
-                .map { entry: MetaPost -> mapper.map(entry) }
-        source.lastElement().subscribe { post -> state.recentPageId = post.pageId }
-        return source.toList()
-                .doOnSuccess { recentPosts: List<RecentPost> -> recentPostDao.insertAll(recentPosts) }
     }
 
-    override fun getAll(): Flowable<List<RecentPost>> {
+    override fun getAll(): Flow<List<RecentPost>> {
         return recentPostDao.getAll()
     }
 
-    override fun getItem(id: String): Flowable<RecentPost> {
-        return recentPostDao.getPost(id)
+    override fun getItem(id: String): Flow<RecentPost> {
+        return recentPostDao.getPost(id).map { it ?: throw Exception("post not found") }
     }
 
-    override fun fetch(): Single<List<RecentPost>> {
+    override fun fetch(): Flow<List<RecentPost>> {
         return fetch(false)
     }
 
@@ -53,7 +48,7 @@ class RecentPostRepo(private val api: PointAPI,
         recentPostDao.deleteAll()
     }
 
-    fun fetchBefore(): Single<List<RecentPost>> {
+    fun fetchBefore(): Flow<List<RecentPost>> {
         return fetch(true)
     }
 }

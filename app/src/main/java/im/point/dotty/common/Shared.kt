@@ -9,20 +9,20 @@ import android.content.Intent
 import im.point.dotty.login.LoginActivity
 import im.point.dotty.main.MainActivity
 import im.point.dotty.network.PointAPI
-import im.point.dotty.network.SingleCallbackAdapter
 import im.point.dotty.network.UnreadCounters
-import io.reactivex.Single
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 class Shared(private val context: Context, private val state: AppState, private val api: PointAPI) : ContextWrapper(context) {
-    fun fetchUnreadCounters(): Single<UnreadCounters> {
-        return Single.create<UnreadCounters> { emitter ->
-            api.getUnreadCounters(state.token ?: throw Exception("invalid token"))
-                    .enqueue(SingleCallbackAdapter(emitter))
-        }.doOnSuccess { reply ->
-            state.updateUnreadPosts(reply.posts)
-            state.updateUnreadComments(reply.comments)
-            state.updatePrivateUnreadPosts(reply.privatePosts)
-            state.updatePrivateUnreadComments(reply.privateComments)
+    fun fetchUnreadCounters(): Flow<UnreadCounters> {
+        return flow {
+            with(api.getUnreadCounters(state.token)) {
+                checkSuccessful()
+                state.updateUnreadPosts(this.posts)
+                state.updateUnreadComments(this.comments)
+                state.updatePrivateUnreadPosts(this.privatePosts)
+                state.updatePrivateUnreadComments(this.privateComments)
+            }
         }
     }
 

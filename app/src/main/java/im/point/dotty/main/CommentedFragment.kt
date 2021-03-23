@@ -3,11 +3,14 @@
  */
 package im.point.dotty.main
 
+import androidx.lifecycle.lifecycleScope
 import im.point.dotty.feed.FeedFragment
 import im.point.dotty.model.CommentedPost
 import im.point.dotty.post.From
 import im.point.dotty.post.PostActivity
 import im.point.dotty.user.UserActivity
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 class CommentedFragment : FeedFragment<CommentedPost>() {
     override fun onStart() {
@@ -18,24 +21,20 @@ class CommentedFragment : FeedFragment<CommentedPost>() {
         adapter.onUserClicked = { id ->
             startActivity(UserActivity.getIntent(requireContext(), id))
         }
-        addDisposable(viewModel.getCommented().subscribe(
-                { list -> adapter.list = list },
-                { error -> error.message?.let { showSnackbar(it) } }))
+        lifecycleScope.launch(exceptionHandler) {
+            viewModel.getCommented().collect { list -> adapter.list = list }
+        }
     }
 
     override fun onFeedUpdate() {
-        addDisposable(viewModel.fetchCommented(false).subscribe(this::finishUpdate)
-        { error ->
-            finishUpdate()
-            error.message?.let { showSnackbar(it) }
-        })
+        lifecycleScope.launch(exceptionHandler) {
+            viewModel.fetchCommented(false).collect { finishUpdate() }
+        }
     }
 
     override fun onFeedUpdateBefore() {
-        addDisposable(viewModel.fetchCommented(true).subscribe(this::finishUpdate)
-        { error ->
-            finishUpdate()
-            error.message?.let { showSnackbar(it) }
-        })
+        lifecycleScope.launch(exceptionHandler) {
+            viewModel.fetchCommented(true).collect { finishUpdate() }
+        }
     }
 }
