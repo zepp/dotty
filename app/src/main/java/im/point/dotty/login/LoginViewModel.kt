@@ -23,7 +23,8 @@ class LoginViewModel internal constructor(application: DottyApplication) : Andro
     private val api: AuthAPI = application.authApi
     private val shared: Shared = Shared(application.baseContext, application.state, application.mainApi)
     private val userRepo: UserRepo = UserRepo(application.mainApi, state, application.database.getUserDao())
-    val isLoginEnabled: Channel<Boolean> = Channel()
+
+    val isLoginEnabled = Channel<Boolean>(Channel.CONFLATED)
 
     var login: String = ""
         set(value) {

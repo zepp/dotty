@@ -9,20 +9,21 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import im.point.dotty.R
-import im.point.dotty.common.RxActivity
 import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 
-class MainActivity : RxActivity() {
+class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: MainViewModel
     private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
@@ -46,17 +47,23 @@ class MainActivity : RxActivity() {
 
     override fun onStart() {
         super.onStart()
+        viewModel.fetchUnreadCounters().launchIn(lifecycleScope)
         lifecycleScope.launch(exceptionHandler) {
-            viewModel.fetchUnreadCounters().collect()
+            viewModel.unreadPosts()
+                    .collect { binding.mainUnreadPosts.text = it.toString() }
         }
-        addDisposable(viewModel.unreadPosts()
-                .subscribe { value -> binding.mainUnreadPosts.text = value.toString() })
-        addDisposable(viewModel.unreadComments()
-                .subscribe { value -> binding.mainUnreadComments.text = value.toString() })
-        addDisposable(viewModel.unreadPrivatePosts()
-                .subscribe { value -> binding.mainPrivateUnreadPosts.text = value.toString() })
-        addDisposable(viewModel.unreadPrivateComments()
-                .subscribe { value -> binding.mainPrivateUnreadComments.text = value.toString() })
+        lifecycleScope.launch(exceptionHandler) {
+            viewModel.unreadComments()
+                    .collect { binding.mainUnreadComments.text = it.toString() }
+        }
+        lifecycleScope.launch(exceptionHandler) {
+            viewModel.unreadPrivatePosts()
+                    .collect { binding.mainPrivateUnreadPosts.text = it.toString() }
+        }
+        lifecycleScope.launch(exceptionHandler) {
+            viewModel.unreadPrivateComments()
+                    .collect { binding.mainPrivateUnreadComments.text = it.toString() }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

@@ -76,13 +76,13 @@ class MainViewModel internal constructor(application: DottyApplication) : Androi
         }
     }
 
-    fun unreadPosts() = state.unreadPosts
+    fun unreadPosts() = state.unreadPostsFlow
 
-    fun unreadComments() = state.unreadComments
+    fun unreadComments() = state.unreadCommentsFlow
 
-    fun unreadPrivatePosts() = state.privateUnreadPosts
+    fun unreadPrivatePosts() = state.privateUnreadPostsFlow
 
-    fun unreadPrivateComments() = state.privateUnreadComments
+    fun unreadPrivateComments() = state.privateUnreadCommentsFlow
 
     init {
         repoFactory = application.repoFactory

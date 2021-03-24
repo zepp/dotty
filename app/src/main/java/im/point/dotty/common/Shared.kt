@@ -18,10 +18,10 @@ class Shared(private val context: Context, private val state: AppState, private 
         return flow {
             with(api.getUnreadCounters(state.token)) {
                 checkSuccessful()
-                state.updateUnreadPosts(this.posts)
-                state.updateUnreadComments(this.comments)
-                state.updatePrivateUnreadPosts(this.privatePosts)
-                state.updatePrivateUnreadComments(this.privateComments)
+                state.unreadPosts = this.posts
+                state.unreadComments = this.comments
+                state.privateUnreadPosts = this.privatePosts
+                state.privateUnreadComments = this.privateComments
             }
         }
     }

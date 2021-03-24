@@ -25,7 +25,7 @@ class PostViewModel(application: DottyApplication, private val postId: String) :
     private val api: PointAPI = application.mainApi
     private val shared: Shared = Shared(application.baseContext, application.state, application.mainApi)
 
-    val isPinVisible = Channel<Boolean>()
+    val isPinVisible = Channel<Boolean>(Channel.CONFLATED)
 
     fun getRecentPost(): Flow<RecentPost> {
         return repoFactory.getRecentPostRepo().getItem(postId)
