@@ -6,7 +6,7 @@ package im.point.dotty.main
 import androidx.lifecycle.lifecycleScope
 import im.point.dotty.feed.FeedFragment
 import im.point.dotty.model.CommentedPost
-import im.point.dotty.post.From
+import im.point.dotty.model.PostType
 import im.point.dotty.post.PostActivity
 import im.point.dotty.user.UserActivity
 import kotlinx.coroutines.flow.collect
@@ -16,7 +16,7 @@ class CommentedFragment : FeedFragment<CommentedPost>() {
     override fun onStart() {
         super.onStart()
         adapter.onItemClicked = { post ->
-            startActivity(PostActivity.getIntent(requireContext(), From.FROM_COMMENTED, post.id))
+            startActivity(PostActivity.getIntent(requireContext(), PostType.COMMENTED_POST, post.id))
         }
         adapter.onUserClicked = { id ->
             startActivity(UserActivity.getIntent(requireContext(), id))

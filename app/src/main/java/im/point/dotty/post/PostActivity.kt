@@ -14,6 +14,7 @@ import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
 import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.ActivityPostBinding
+import im.point.dotty.model.PostType
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.collect
@@ -21,8 +22,6 @@ import kotlinx.coroutines.launch
 
 class PostActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPostBinding
-    private lateinit var postId: String
-    private lateinit var from: From
     private lateinit var viewModel: PostViewModel
     private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
         showSnackbar(exception.localizedMessage)
@@ -30,43 +29,30 @@ class PostActivity : AppCompatActivity() {
 
     companion object {
         const val POST_ID = "post-id"
-        const val POST_FROM = "post-from"
+        const val POST_TYPE = "post-type"
 
-        fun getIntent(context: Context, from: From, id: String): Intent {
+        fun getIntent(context: Context, post: PostType, id: String): Intent {
             val intent = Intent(context, PostActivity::class.java)
             intent.putExtra(POST_ID, id)
-            intent.putExtra(POST_FROM, from)
+            intent.putExtra(POST_TYPE, post)
             return intent
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        postId = intent.getStringExtra(POST_ID)!!
-        from = intent.getSerializableExtra(POST_FROM) as From
-        viewModel = ViewModelProvider(this, ViewModelFactory(this, postId))
+        val postId = intent.getStringExtra(POST_ID)!!
+        val post = intent.getSerializableExtra(POST_TYPE) as PostType
+        viewModel = ViewModelProvider(this, ViewModelFactory(this, post, postId))
                 .get(PostViewModel::class.java)
         binding = ActivityPostBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        if (supportFragmentManager.backStackEntryCount == 0) {
-            val fragment = PostFragment.newInstance(intent.getSerializableExtra(POST_FROM) as From,
-                    intent.getStringExtra(POST_ID)!!)
-            supportFragmentManager.beginTransaction()
-                    .replace(R.id.post_container, fragment)
-                    .addToBackStack(fragment::class.simpleName)
-                    .commit()
-        }
     }
 
     override fun onStart() {
         super.onStart()
         lifecycleScope.launch(exceptionHandler) {
-            when (from) {
-                From.FROM_RECENT -> viewModel.getRecentPost()
-                From.FROM_COMMENTED -> viewModel.getCommentedPost()
-                From.FROM_ALL -> viewModel.getAllPost()
-                From.FROM_USER -> viewModel.getUserPost()
-            }.collect { post ->
+            viewModel.getPost().collect { post ->
                 binding.toolbar.title = post.nameOrLogin
                 binding.postBookmark.isChecked = post.bookmarked == true
                 binding.postRecommend.isChecked = post.recommended == true
@@ -106,9 +92,3 @@ class PostActivity : AppCompatActivity() {
     }
 }
 
-enum class From {
-    FROM_RECENT,
-    FROM_COMMENTED,
-    FROM_ALL,
-    FROM_USER
-}
