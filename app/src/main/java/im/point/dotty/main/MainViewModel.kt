@@ -29,6 +29,7 @@ class MainViewModel internal constructor(application: DottyApplication) : Androi
     private val shared: Shared = Shared(application.baseContext, application.state, application.mainApi)
     private val state: AppState = application.state
     private val api: AuthAPI = application.authApi
+    private val avaRepo = application.avaRepo
 
     fun fetchRecent(isBefore: Boolean): Flow<List<RecentPost>> {
         return (if (isBefore) recentRepo.fetchBefore() else recentRepo.fetch())
@@ -60,6 +61,8 @@ class MainViewModel internal constructor(application: DottyApplication) : Androi
     fun fetchUnreadCounters(): Flow<UnreadCounters> {
         return shared.fetchUnreadCounters().flowOn(Dispatchers.IO)
     }
+
+    fun getAvatar(name: String) = avaRepo.getAvatar(name, Size.SIZE_80)
 
     fun logout() = viewModelScope.async(Dispatchers.IO) {
         try {

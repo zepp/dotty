@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
@@ -35,7 +36,7 @@ abstract class FeedFragment<T : Post> : Fragment() {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProvider(requireActivity(), ViewModelFactory<Any>(requireActivity()))
                 .get(MainViewModel::class.java)
-        adapter = FeedAdapter()
+        adapter = FeedAdapter(lifecycleScope, viewModel::getAvatar)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,

@@ -3,13 +3,19 @@
  */
 package im.point.dotty.feed
 
+import android.graphics.Bitmap
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import im.point.dotty.R
 import im.point.dotty.model.Post
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
-class FeedAdapter<T : Post> internal constructor() : RecyclerView.Adapter<PostHolder<T>>() {
+class FeedAdapter<T : Post> internal constructor(val scope: CoroutineScope, val factory: (name: String) -> Flow<Bitmap>) : RecyclerView.Adapter<PostHolder<T>>() {
     var list: List<T> = listOf()
         get() = field
         set(value) {
@@ -26,8 +32,14 @@ class FeedAdapter<T : Post> internal constructor() : RecyclerView.Adapter<PostHo
         return PostHolder(view)
     }
 
-    override fun onBindViewHolder(holder: PostHolder<T>, position: Int) =
-            holder.bind(list[position], onItemClicked, onUserClicked)
+    override fun onBindViewHolder(holder: PostHolder<T>, position: Int) {
+        scope.launch(Dispatchers.Main) {
+            list[position].let {
+                factory(it.login ?: throw Exception("empty name"))
+                        .collect { bitmap -> holder.bind(it, bitmap, onItemClicked, onUserClicked) }
+            }
+        }
+    }
 
     override fun getItemCount(): Int = list.size
 

@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import im.point.dotty.DottyApplication
 import im.point.dotty.common.AppState
 import im.point.dotty.network.PointAPI
+import im.point.dotty.repository.Size
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.produce
@@ -21,10 +22,13 @@ class UserViewModel(application: DottyApplication, private val userId: Long) : A
     private val userPostRepo = application.repoFactory.getUserPostRepo(userId)
     private val api: PointAPI = application.mainApi
     private val state: AppState = application.state
+    private val avaRepo = application.avaRepo
 
     val isActionsVisible = viewModelScope.produce {
         send(state.id != userId)
     }
+
+    fun getAvatar(name: String) = avaRepo.getAvatar(name, Size.SIZE_80)
 
     fun subscribe() = viewModelScope.async(Dispatchers.IO) {
         with(api.subscribeToUser(state.token, getUser().first().login

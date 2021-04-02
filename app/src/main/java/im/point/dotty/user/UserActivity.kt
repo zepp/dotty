@@ -40,7 +40,7 @@ class UserActivity : AppCompatActivity() {
         setContentView(binding.root)
         viewModel = ViewModelProvider(this, ViewModelFactory(this, intent.getLongExtra(USER_ID, -1)))
                 .get(UserViewModel::class.java)
-        adapter = FeedAdapter()
+        adapter = FeedAdapter(lifecycleScope, viewModel::getAvatar)
         adapter.onItemClicked = { item -> startActivity(PostActivity.getIntent(this, PostType.USER_POST, item.id)) }
         binding.userPosts.adapter = adapter
     }
