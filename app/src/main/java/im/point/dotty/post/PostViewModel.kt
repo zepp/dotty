@@ -12,6 +12,7 @@ import im.point.dotty.model.Post
 import im.point.dotty.model.PostType
 import im.point.dotty.network.PointAPI
 import im.point.dotty.repository.RepoFactory
+import im.point.dotty.repository.Size
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
@@ -25,6 +26,7 @@ class PostViewModel(application: DottyApplication, private val post: PostType, p
     private val repoFactory: RepoFactory = application.repoFactory
     private val state: AppState = application.state
     private val api: PointAPI = application.mainApi
+    private val avaRepository = application.avaRepo
 
     val isPinVisible = Channel<Boolean>(Channel.CONFLATED)
 
@@ -98,4 +100,6 @@ class PostViewModel(application: DottyApplication, private val post: PostType, p
             return@async this
         }
     }
+
+    fun getAvatar(name: String) = avaRepository.getAvatar(name, Size.SIZE_40)
 }

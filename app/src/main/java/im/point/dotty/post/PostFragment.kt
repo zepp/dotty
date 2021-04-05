@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class PostFragment : Fragment() {
-    private val adapter: CommentAdapter = CommentAdapter()
+    private lateinit var adapter: CommentAdapter
     private lateinit var binding: FragmentPostBinding
     private lateinit var viewModel: PostViewModel
     private lateinit var layout: SwipeRefreshLayout
@@ -35,14 +35,12 @@ class PostFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         binding = FragmentPostBinding.inflate(layoutInflater, container, false);
-        binding.postComments.adapter = adapter
         binding.postTags.adapter = tagsAdapter
         binding.postTags.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         layout = binding.postSwipeLayout
         layout.setOnRefreshListener {
             fetchPostComments()
         }
-        adapter.onIdClicked = { id, pos -> binding.postComments.smoothScrollToPosition(pos) }
         return binding.root
     }
 
@@ -61,6 +59,9 @@ class PostFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProvider(requireActivity(), ViewModelFactory<Any>(requireActivity()))
                 .get(PostViewModel::class.java)
+        adapter = CommentAdapter(lifecycleScope, viewModel::getAvatar)
+        binding.postComments.adapter = adapter
+        adapter.onIdClicked = { id, pos -> binding.postComments.smoothScrollToPosition(pos) }
         lifecycleScope.launch(exceptionHandler) {
             viewModel.getPost().collect { post ->
                 binding.postText.text = post.text

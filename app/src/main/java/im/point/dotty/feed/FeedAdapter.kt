@@ -32,14 +32,12 @@ class FeedAdapter<T : Post> internal constructor(val scope: CoroutineScope, val 
         return PostHolder(view)
     }
 
-    override fun onBindViewHolder(holder: PostHolder<T>, position: Int) {
-        scope.launch(Dispatchers.Main) {
-            list[position].let {
-                factory(it.login ?: throw Exception("empty name"))
-                        .collect { bitmap -> holder.bind(it, bitmap, onItemClicked, onUserClicked) }
-            }
+    override fun onBindViewHolder(holder: PostHolder<T>, position: Int) = scope.launch(Dispatchers.Main) {
+        list[position].let {
+            factory(it.login ?: throw Exception("empty name"))
+                    .collect { bitmap -> holder.bind(it, bitmap, onItemClicked, onUserClicked) }
         }
-    }
+    }.let { Unit }
 
     override fun getItemCount(): Int = list.size
 
