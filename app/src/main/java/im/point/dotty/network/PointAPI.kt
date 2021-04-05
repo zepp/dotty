@@ -42,43 +42,43 @@ interface PointAPI {
     @GET("/api/unread-counters")
     suspend fun getUnreadCounters(@Header("Authorization") token: String): UnreadCounters
 
-    @GET("api/post/{post}/r")
+    @POST("api/post/{post}/r")
     suspend fun recommendPost(@Header("Authorization") token: String, @Path("post") id: String, @Query("text") text: String? = null): Envelope
 
     @DELETE("api/post/{post}/r")
     suspend fun unrecommendPost(@Header("Authorization") token: String, @Path("post") id: String): Envelope
 
-    @GET("api/post/{post}/s")
+    @POST("api/post/{post}/s")
     suspend fun subscribeToPost(@Header("Authorization") token: String, @Path("post") id: String): Envelope
 
     @DELETE("api/post/{post}/s")
     suspend fun unsubscribeFromPost(@Header("Authorization") token: String, @Path("post") id: String): Envelope
 
-    @GET("api/post/{post}/b")
+    @POST("api/post/{post}/b")
     suspend fun bookmarkPost(@Header("Authorization") token: String, @Path("post") id: String): Envelope
 
     @DELETE("api/post/{post}/b")
     suspend fun unbookmarkPost(@Header("Authorization") token: String, @Path("post") id: String): Envelope
 
-    @GET("api/post/{post}/pin")
+    @POST("api/post/{post}/pin")
     suspend fun pinPost(@Header("Authorization") token: String, @Path("post") id: String, @Query("text") text: String? = null): Envelope
 
     @DELETE("api/post/{post}/unpin")
     suspend fun unpinPost(@Header("Authorization") token: String, @Path("post") id: String): Envelope
 
-    @GET("api/user/s/{login}")
+    @POST("api/user/s/{login}")
     suspend fun subscribeToUser(@Header("Authorization") token: String, @Path("login") login: String): Envelope
 
     @DELETE("api/user/s/{login}")
     suspend fun unsubscribeFromUser(@Header("Authorization") token: String, @Path("login") login: String): Envelope
 
-    @GET("api/user/sr/{login}")
+    @POST("api/user/sr/{login}")
     suspend fun subscribeToUserRecommendations(@Header("Authorization") token: String, @Path("login") login: String): Envelope
 
     @DELETE("api/user/sr/{login}")
     suspend fun unsubscribeFromUserRecommendations(@Header("Authorization") token: String, @Path("login") login: String): Envelope
 
-    @GET("api/user/bl/{login}")
+    @POST("api/user/bl/{login}")
     suspend fun blockUser(@Header("Authorization") token: String, @Path("login") login: String): Envelope
 
     @DELETE("api/user/bl/{login}")
