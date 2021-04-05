@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
+import im.point.dotty.common.RecyclerItemDecorator
 import im.point.dotty.common.TagsAdapter
 import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.FragmentPostBinding
@@ -36,6 +37,7 @@ class PostFragment : Fragment() {
                               savedInstanceState: Bundle?): View? {
         binding = FragmentPostBinding.inflate(layoutInflater, container, false);
         binding.postTags.adapter = tagsAdapter
+        binding.postTags.addItemDecoration(RecyclerItemDecorator(requireContext(), LinearLayoutManager.HORIZONTAL, 4))
         binding.postTags.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         layout = binding.postSwipeLayout
         layout.setOnRefreshListener {

@@ -11,10 +11,12 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
+import im.point.dotty.common.RecyclerItemDecorator
 import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.FragmentFeedBinding
 import im.point.dotty.main.MainViewModel
@@ -48,6 +50,7 @@ abstract class FeedFragment<T : Post> : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         feedPosts = binding.feedPosts
+        feedPosts.addItemDecoration(RecyclerItemDecorator(requireContext(), DividerItemDecoration.VERTICAL, 4))
         feedPosts.adapter = adapter
         feedPosts.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             val manager = feedPosts.layoutManager as LinearLayoutManager

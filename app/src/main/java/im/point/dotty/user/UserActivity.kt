@@ -12,8 +12,10 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DividerItemDecoration
 import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
+import im.point.dotty.common.RecyclerItemDecorator
 import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.ActivityUserBinding
 import im.point.dotty.feed.FeedAdapter
@@ -43,6 +45,7 @@ class UserActivity : AppCompatActivity() {
         adapter = FeedAdapter(lifecycleScope, viewModel::getAvatar)
         adapter.onItemClicked = { item -> startActivity(PostActivity.getIntent(this, PostType.USER_POST, item.id)) }
         binding.userPosts.adapter = adapter
+        binding.userPosts.addItemDecoration(RecyclerItemDecorator(this, DividerItemDecoration.VERTICAL, 4))
     }
 
     override fun onStart() {

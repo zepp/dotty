@@ -15,7 +15,7 @@
             android:id="@+id/feed_posts"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:listitem="@layout/list_item_post"/>
+            tools:listitem="@layout/post" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </LinearLayout>

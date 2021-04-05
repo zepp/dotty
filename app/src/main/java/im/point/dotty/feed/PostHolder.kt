@@ -9,9 +9,11 @@ import android.view.View
 import android.view.ViewOutlineProvider
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import im.point.dotty.R
+import im.point.dotty.common.RecyclerItemDecorator
 import im.point.dotty.common.TagsAdapter
 import im.point.dotty.model.Post
 
@@ -47,6 +49,7 @@ class PostHolder<T : Post>(itemView: View) : RecyclerView.ViewHolder(itemView) {
     init {
         tags.adapter = adapter
         tags.layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
+        tags.addItemDecoration(RecyclerItemDecorator(itemView.context, DividerItemDecoration.HORIZONTAL, 4))
         avatar.outlineProvider = OutlineProvider
         avatar.clipToOutline = true
     }
