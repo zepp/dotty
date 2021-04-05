@@ -4,9 +4,11 @@
 package im.point.dotty.post
 
 import android.graphics.Bitmap
+import android.graphics.Outline
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewOutlineProvider
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -70,6 +72,20 @@ class CommentHolder(view: View) : RecyclerView.ViewHolder(view) {
         comment.replyTo?.let {
             replyTo.text = it.toString()
             replyTo.setOnClickListener { v -> onIdClicked(it, pos) }
+        }
+    }
+
+    init {
+        avatar.outlineProvider = OutlineProvider
+        avatar.clipToOutline = true
+    }
+
+    companion object OutlineProvider : ViewOutlineProvider() {
+        private const val curveRadius = 8;
+        override fun getOutline(view: View?, outline: Outline?) {
+            view?.let {
+                outline?.setRoundRect(0, 0, it.getWidth(), it.getHeight(), curveRadius.toFloat())
+            }
         }
     }
 }

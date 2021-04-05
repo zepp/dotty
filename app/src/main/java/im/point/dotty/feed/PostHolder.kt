@@ -4,7 +4,9 @@
 package im.point.dotty.feed
 
 import android.graphics.Bitmap
+import android.graphics.Outline
 import android.view.View
+import android.view.ViewOutlineProvider
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -45,6 +47,17 @@ class PostHolder<T : Post>(itemView: View) : RecyclerView.ViewHolder(itemView) {
     init {
         tags.adapter = adapter
         tags.layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
+        avatar.outlineProvider = OutlineProvider
+        avatar.clipToOutline = true
+    }
+
+    companion object OutlineProvider : ViewOutlineProvider() {
+        private const val curveRadius = 16;
+        override fun getOutline(view: View?, outline: Outline?) {
+            view?.let {
+                outline?.setRoundRect(0, 0, it.getWidth(), it.getHeight(), curveRadius.toFloat())
+            }
+        }
     }
 }
 
