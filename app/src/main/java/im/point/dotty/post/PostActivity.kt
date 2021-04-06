@@ -6,6 +6,7 @@ package im.point.dotty.post
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -24,6 +25,7 @@ class PostActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPostBinding
     private lateinit var viewModel: PostViewModel
     private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
+        Log.e(this::class.simpleName, exception.message, exception)
         showSnackbar(exception.localizedMessage)
     }
 

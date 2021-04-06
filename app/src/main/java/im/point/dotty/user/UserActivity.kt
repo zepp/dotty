@@ -32,8 +32,8 @@ class UserActivity : AppCompatActivity() {
     private lateinit var viewModel: UserViewModel
     private lateinit var adapter: FeedAdapter<UserPost>
     private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
+        Log.e(this::class.simpleName, exception.message, exception)
         showSnackbar(exception.localizedMessage)
-        Log.e(localClassName, "error: ", exception)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,6 +59,7 @@ class UserActivity : AppCompatActivity() {
             viewModel.getUser().collect { user ->
                 binding.userName.text = user.name
                 binding.userAbout.text = user.about
+                user.subscribed?.let { binding.userSubscribe.isChecked = it }
             }
         }
 

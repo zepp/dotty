@@ -21,4 +21,6 @@ data class User (@PrimaryKey
     var birthDate: Date? = null
     var gender: Gender? = null
     var about: String? = null
+
+    var subscribed: Boolean? = null
 }

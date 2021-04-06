@@ -29,7 +29,7 @@ abstract class FeedFragment<T : Post> : Fragment() {
     protected lateinit var adapter: FeedAdapter<T>
     protected lateinit var feedPosts: RecyclerView
     protected val exceptionHandler = CoroutineExceptionHandler { _, exception ->
-        Log.e("error: ", exception.message, exception)
+        Log.e(this::class.simpleName, exception.message, exception)
         finishUpdate()
         showSnackbar(exception.localizedMessage)
     }

@@ -27,8 +27,10 @@ class CommentedPostRepo(private val api: PointAPI,
             checkSuccessful()
             posts?.let {
                 val list = it.map { post -> mapper.map(post) }
-                commentedPostDao.insertAll(list)
-                state.commentedPageId = list.last().pageId
+                if (!list.isEmpty()) {
+                    commentedPostDao.insertAll(list)
+                    state.commentedPageId = list.last().pageId
+                }
                 emit(list)
             }
         }

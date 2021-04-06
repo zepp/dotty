@@ -4,6 +4,7 @@
 package im.point.dotty.login
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,6 +24,7 @@ class LoginFragment : Fragment() {
     private lateinit var binding: FragmentLoginBinding
     private lateinit var viewModel: LoginViewModel
     private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
+        Log.e(this::class.simpleName, exception.message, exception)
         Toast.makeText(context, exception.message, Toast.LENGTH_LONG).show()
     }
 

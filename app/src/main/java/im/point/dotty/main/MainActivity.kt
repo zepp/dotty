@@ -6,6 +6,7 @@ package im.point.dotty.main
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -27,6 +28,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: MainViewModel
     private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
+        Log.e(this::class.simpleName, exception.message, exception)
         Toast.makeText(this, exception.message, Toast.LENGTH_LONG).show()
     }
 

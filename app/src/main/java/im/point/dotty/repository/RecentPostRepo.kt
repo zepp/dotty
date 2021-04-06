@@ -25,8 +25,11 @@ class RecentPostRepo(private val api: PointAPI,
             checkSuccessful()
             posts?.let {
                 val list = it.map { post -> mapper.map(post) }
-                state.recentPageId = list.last().pageId
-                recentPostDao.insertAll(list)
+                // recent feed is empty in case of a new user
+                if (!list.isEmpty()) {
+                    state.recentPageId = list.last().pageId
+                    recentPostDao.insertAll(list)
+                }
                 emit(list)
             }
         }

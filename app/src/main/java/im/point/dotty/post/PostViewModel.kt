@@ -18,7 +18,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 
 class PostViewModel(application: DottyApplication, private val post: PostType, private val postId: String)
@@ -34,10 +33,9 @@ class PostViewModel(application: DottyApplication, private val post: PostType, p
         return when (post) {
             PostType.RECENT_POST -> repoFactory.getRecentPostRepo().getItem(postId)
             PostType.COMMENTED_POST -> repoFactory.getCommentedPostRepo().getItem(postId)
-            PostType.ALL_POST -> repoFactory.getAllCommentRepo(postId).getItem(postId)
+            PostType.ALL_POST -> repoFactory.getAllPostRepo().getItem(postId)
             PostType.USER_POST -> repoFactory.getUserPostRepo().getItem(postId)
-        }.map { it as Post }
-                .onEach { isPinVisible.send(it.authorId == state.id) }
+        }.onEach { isPinVisible.send(it.authorId == state.id) }
                 .flowOn(Dispatchers.IO)
     }
 

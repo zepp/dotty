@@ -25,6 +25,7 @@ class UserMapper : Mapper<User, UserReply> {
             false -> Gender.FEMALE
         }
         model.about = user.about
+        model.subscribed = user.isSubscribed
         return model
     }
 

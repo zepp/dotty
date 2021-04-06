@@ -4,6 +4,7 @@
 package im.point.dotty.post
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,6 +30,7 @@ class PostFragment : Fragment() {
     private lateinit var layout: SwipeRefreshLayout
     private val tagsAdapter: TagsAdapter = TagsAdapter()
     private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
+        Log.e(this::class.simpleName, exception.message, exception)
         layout.isRefreshing = false
         showSnackbar(exception.localizedMessage)
     }
