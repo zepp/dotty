@@ -7,8 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import im.point.dotty.DottyApplication
 import im.point.dotty.common.AppState
-import im.point.dotty.model.Comment
-import im.point.dotty.model.Post
 import im.point.dotty.model.PostType
 import im.point.dotty.network.PointAPI
 import im.point.dotty.repository.RepoFactory
@@ -16,7 +14,6 @@ import im.point.dotty.repository.Size
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onEach
 
@@ -29,33 +26,27 @@ class PostViewModel(application: DottyApplication, private val post: PostType, p
 
     val isPinVisible = Channel<Boolean>(Channel.CONFLATED)
 
-    fun getPost(): Flow<Post> {
-        return when (post) {
-            PostType.RECENT_POST -> repoFactory.getRecentPostRepo().getItem(postId)
-            PostType.COMMENTED_POST -> repoFactory.getCommentedPostRepo().getItem(postId)
-            PostType.ALL_POST -> repoFactory.getAllPostRepo().getItem(postId)
-            PostType.USER_POST -> repoFactory.getUserPostRepo().getItem(postId)
-        }.onEach { isPinVisible.send(it.authorId == state.id) }
-                .flowOn(Dispatchers.IO)
-    }
+    fun getPost() = when (post) {
+        PostType.RECENT_POST -> repoFactory.getRecentPostRepo().getItem(postId)
+        PostType.COMMENTED_POST -> repoFactory.getCommentedPostRepo().getItem(postId)
+        PostType.ALL_POST -> repoFactory.getAllPostRepo().getItem(postId)
+        PostType.USER_POST -> repoFactory.getUserPostRepo().getItem(postId)
+    }.onEach { isPinVisible.send(it.authorId == state.id) }
+            .flowOn(Dispatchers.IO)
 
-    fun getPostComments(): Flow<List<Comment>> {
-        return when (post) {
-            PostType.RECENT_POST -> repoFactory.getRecentCommentRepo(postId).getAll()
-            PostType.COMMENTED_POST -> repoFactory.getCommentedCommentRepo(postId).getAll()
-            PostType.ALL_POST -> repoFactory.getAllCommentRepo(postId).getAll()
-            PostType.USER_POST -> repoFactory.getUserCommentRepo(postId).getAll()
-        }.flowOn(Dispatchers.IO)
-    }
+    fun getPostComments() = when (post) {
+        PostType.RECENT_POST -> repoFactory.getRecentCommentRepo(postId).getAll()
+        PostType.COMMENTED_POST -> repoFactory.getCommentedCommentRepo(postId).getAll()
+        PostType.ALL_POST -> repoFactory.getAllCommentRepo(postId).getAll()
+        PostType.USER_POST -> repoFactory.getUserCommentRepo(postId).getAll()
+    }.flowOn(Dispatchers.IO)
 
-    fun fetchPostComments(): Flow<List<Comment>> {
-        return when (post) {
-            PostType.RECENT_POST -> repoFactory.getRecentCommentRepo(postId).fetchAll()
-            PostType.COMMENTED_POST -> repoFactory.getCommentedCommentRepo(postId).fetchAll()
-            PostType.ALL_POST -> repoFactory.getAllCommentRepo(postId).fetchAll()
-            PostType.USER_POST -> repoFactory.getUserCommentRepo(postId).fetchAll()
-        }.flowOn(Dispatchers.IO)
-    }
+    fun fetchPostComments() = when (post) {
+        PostType.RECENT_POST -> repoFactory.getRecentCommentRepo(postId).fetchAll()
+        PostType.COMMENTED_POST -> repoFactory.getCommentedCommentRepo(postId).fetchAll()
+        PostType.ALL_POST -> repoFactory.getAllCommentRepo(postId).fetchAll()
+        PostType.USER_POST -> repoFactory.getUserCommentRepo(postId).fetchAll()
+    }.flowOn(Dispatchers.IO)
 
     fun subscribe() = viewModelScope.async(Dispatchers.IO) {
         with(api.subscribeToPost(postId)) {
