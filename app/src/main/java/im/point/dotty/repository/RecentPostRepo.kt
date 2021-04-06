@@ -43,7 +43,7 @@ class RecentPostRepo(private val api: PointAPI,
         return recentPostDao.getPost(id).map { it ?: throw Exception("post not found") }
     }
 
-    override fun fetch(): Flow<List<RecentPost>> {
+    override fun fetchAll(): Flow<List<RecentPost>> {
         return fetch(false)
     }
 

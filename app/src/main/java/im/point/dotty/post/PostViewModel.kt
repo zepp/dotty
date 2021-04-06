@@ -50,10 +50,10 @@ class PostViewModel(application: DottyApplication, private val post: PostType, p
 
     fun fetchPostComments(): Flow<List<Comment>> {
         return when (post) {
-            PostType.RECENT_POST -> repoFactory.getRecentCommentRepo(postId).fetch()
-            PostType.COMMENTED_POST -> repoFactory.getCommentedCommentRepo(postId).fetch()
-            PostType.ALL_POST -> repoFactory.getAllCommentRepo(postId).fetch()
-            PostType.USER_POST -> repoFactory.getUserCommentRepo(postId).fetch()
+            PostType.RECENT_POST -> repoFactory.getRecentCommentRepo(postId).fetchAll()
+            PostType.COMMENTED_POST -> repoFactory.getCommentedCommentRepo(postId).fetchAll()
+            PostType.ALL_POST -> repoFactory.getAllCommentRepo(postId).fetchAll()
+            PostType.USER_POST -> repoFactory.getUserCommentRepo(postId).fetchAll()
         }.flowOn(Dispatchers.IO)
     }
 

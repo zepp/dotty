@@ -32,7 +32,7 @@ class MainViewModel internal constructor(application: DottyApplication) : Androi
     private val avaRepo = application.avaRepo
 
     fun fetchRecent(isBefore: Boolean): Flow<List<RecentPost>> {
-        return (if (isBefore) recentRepo.fetchBefore() else recentRepo.fetch())
+        return (if (isBefore) recentRepo.fetchBefore() else recentRepo.fetchAll())
                 .flowOn(Dispatchers.IO)
     }
 
@@ -41,7 +41,7 @@ class MainViewModel internal constructor(application: DottyApplication) : Androi
     }
 
     fun fetchAll(isBefore: Boolean): Flow<List<AllPost>> {
-        return (if (isBefore) allRepo.fetchBefore() else allRepo.fetch())
+        return (if (isBefore) allRepo.fetchBefore() else allRepo.fetchAll())
                 .flowOn(Dispatchers.IO)
     }
 
@@ -50,7 +50,7 @@ class MainViewModel internal constructor(application: DottyApplication) : Androi
     }
 
     fun fetchCommented(isBefore: Boolean): Flow<List<CommentedPost>> {
-        return (if (isBefore) commentedRepo.fetchBefore() else commentedRepo.fetch())
+        return (if (isBefore) commentedRepo.fetchBefore() else commentedRepo.fetchAll())
                 .flowOn(Dispatchers.IO)
     }
 

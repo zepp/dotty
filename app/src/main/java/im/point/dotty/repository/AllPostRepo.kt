@@ -42,7 +42,7 @@ class AllPostRepo(private val api: PointAPI,
         return allPostDao.getPost(id).map { it ?: throw Exception("post not found") }
     }
 
-    override fun fetch(): Flow<List<AllPost>> {
+    override fun fetchAll(): Flow<List<AllPost>> {
         return fetch(false)
     }
 

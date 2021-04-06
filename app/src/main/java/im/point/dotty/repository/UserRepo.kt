@@ -25,7 +25,7 @@ class UserRepo(private val api: PointAPI,
         return dao.getUser(id).map { it ?: throw Exception("user not found") }
     }
 
-    override fun fetch(): Flow<List<User>> {
+    override fun fetchAll(): Flow<List<User>> {
         throw Exception("operation is not supported")
     }
 

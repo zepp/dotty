@@ -35,7 +35,7 @@ class CommentRepo<in T : Post>(private val api: PointAPI,
                 .map { it ?: throw Exception("comment not found") }
     }
 
-    override fun fetch() = flow {
+    override fun fetchAll() = flow {
         with(api.getPost(id)) {
             checkSuccessful()
             postDao.insertItem(postMapper.merge(model.first() ?: throw Exception("post not found"),

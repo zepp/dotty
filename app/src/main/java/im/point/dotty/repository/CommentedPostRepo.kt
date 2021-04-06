@@ -45,7 +45,7 @@ class CommentedPostRepo(private val api: PointAPI,
                 .map { it ?: throw Exception("post not found") }
     }
 
-    override fun fetch(): Flow<List<CommentedPost>> {
+    override fun fetchAll(): Flow<List<CommentedPost>> {
         return fetch(false)
     }
 

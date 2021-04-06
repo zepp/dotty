@@ -26,7 +26,7 @@ class UserPostRepo(private val api: PointAPI,
         return userPostDao.getPost(id).map { it ?: throw Exception("post not found") }
     }
 
-    override fun fetch() = flow {
+    override fun fetchAll() = flow {
         val login = userDao.getUser(userId).first()?.login ?: throw Exception("user login is empty")
         with(api.getUserPosts(login, null)) {
             checkSuccessful()

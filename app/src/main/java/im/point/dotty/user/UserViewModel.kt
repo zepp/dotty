@@ -79,7 +79,7 @@ class UserViewModel(application: DottyApplication, private val userId: Long) : A
     }
 
     fun fetchUserAndPosts() = userRepo.fetchUser(userId)
-            .flatMapConcat { userPostRepo.fetch() }
+            .flatMapConcat { userPostRepo.fetchAll() }
             .flowOn(Dispatchers.IO)
 
     fun getUser() = userRepo.getItem(userId).flowOn(Dispatchers.IO)
