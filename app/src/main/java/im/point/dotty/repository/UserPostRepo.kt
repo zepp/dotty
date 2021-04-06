@@ -1,6 +1,5 @@
 package im.point.dotty.repository
 
-import im.point.dotty.common.AppState
 import im.point.dotty.db.UserDao
 import im.point.dotty.db.UserPostDao
 import im.point.dotty.mapper.Mapper
@@ -14,7 +13,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
 class UserPostRepo(private val api: PointAPI,
-                   private val state: AppState,
                    private val userDao: UserDao,
                    private val userPostDao: UserPostDao,
                    private val userId: Long,
@@ -30,7 +28,7 @@ class UserPostRepo(private val api: PointAPI,
 
     override fun fetch() = flow {
         val login = userDao.getUser(userId).first()?.login ?: throw Exception("user login is empty")
-        with(api.getUserPosts(state.token, login, null)) {
+        with(api.getUserPosts(login, null)) {
             checkSuccessful()
             posts?.let {
                 val list = it.map { post -> mapper.map(post) }

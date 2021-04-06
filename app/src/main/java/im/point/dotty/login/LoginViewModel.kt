@@ -52,9 +52,9 @@ class LoginViewModel internal constructor(application: DottyApplication) : Andro
                 checkSuccessful()
                 state.isLoggedIn = true
                 state.userLogin = login
-                state.csrfToken = this.csrfToken
+                state.csrfToken = csrfToken
                         ?: throw Exception("CSRF token is empty")
-                state.token = this.token ?: throw Exception("token is empty")
+                state.token = token ?: throw Exception("token is empty")
                 shared.resetActivityBackStack()
                 userRepo.fetchMe()
                 emit(this)

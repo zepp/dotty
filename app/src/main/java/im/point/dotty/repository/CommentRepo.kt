@@ -3,7 +3,6 @@
  */
 package im.point.dotty.repository
 
-import im.point.dotty.common.AppState
 import im.point.dotty.db.CommentDao
 import im.point.dotty.db.PostDao
 import im.point.dotty.mapper.CommentMapper
@@ -19,7 +18,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
 class CommentRepo<in T : Post>(private val api: PointAPI,
-                               private val state: AppState,
                                private val commentDao: CommentDao,
                                private val postDao: PostDao<T>,
                                private val id: String,
@@ -38,7 +36,7 @@ class CommentRepo<in T : Post>(private val api: PointAPI,
     }
 
     override fun fetch() = flow {
-        with(api.getPost(state.token, id)) {
+        with(api.getPost(id)) {
             checkSuccessful()
             postDao.insertItem(postMapper.merge(model.first() ?: throw Exception("post not found"),
                     post ?: throw Exception("invalid raw post")))

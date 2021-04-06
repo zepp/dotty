@@ -31,7 +31,7 @@ class UserViewModel(application: DottyApplication, private val userId: Long) : A
     fun getAvatar(name: String) = avaRepo.getAvatar(name, Size.SIZE_80)
 
     fun subscribe() = viewModelScope.async(Dispatchers.IO) {
-        with(api.subscribeToUser(state.token, getUser().first().login
+        with(api.subscribeToUser(getUser().first().login
                 ?: throw Exception("user not found"))) {
             checkSuccessful()
             return@async this
@@ -39,7 +39,7 @@ class UserViewModel(application: DottyApplication, private val userId: Long) : A
     }
 
     fun unsubscribe() = viewModelScope.async(Dispatchers.IO) {
-        with(api.unsubscribeFromUser(state.token, getUser().first().login
+        with(api.unsubscribeFromUser(getUser().first().login
                 ?: throw Exception("user not found"))) {
             checkSuccessful()
             return@async this
@@ -47,7 +47,7 @@ class UserViewModel(application: DottyApplication, private val userId: Long) : A
     }
 
     fun subscribeRecommendations() = viewModelScope.async(Dispatchers.IO) {
-        with(api.subscribeToUserRecommendations(state.token, getUser().first().login
+        with(api.subscribeToUserRecommendations(getUser().first().login
                 ?: throw Exception("user not found"))) {
             checkSuccessful()
             return@async this
@@ -55,7 +55,7 @@ class UserViewModel(application: DottyApplication, private val userId: Long) : A
     }
 
     fun unsubscribeRecommendations() = viewModelScope.async(Dispatchers.IO) {
-        with(api.unsubscribeFromUserRecommendations(state.token, getUser().first().login
+        with(api.unsubscribeFromUserRecommendations(getUser().first().login
                 ?: throw Exception("user not found"))) {
             checkSuccessful()
             return@async this
@@ -63,7 +63,7 @@ class UserViewModel(application: DottyApplication, private val userId: Long) : A
     }
 
     fun block() = viewModelScope.async(Dispatchers.IO) {
-        with(api.blockUser(state.token, getUser().first().login
+        with(api.blockUser(getUser().first().login
                 ?: throw Exception("user not found"))) {
             checkSuccessful()
             return@async this
@@ -71,7 +71,7 @@ class UserViewModel(application: DottyApplication, private val userId: Long) : A
     }
 
     fun unblock() = viewModelScope.async(Dispatchers.IO) {
-        with(api.unblockUser(state.token, getUser().first().login
+        with(api.unblockUser(getUser().first().login
                 ?: throw Exception("user not found"))) {
             checkSuccessful()
             return@async this

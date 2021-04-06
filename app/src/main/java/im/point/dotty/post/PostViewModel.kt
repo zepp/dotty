@@ -60,42 +60,42 @@ class PostViewModel(application: DottyApplication, private val post: PostType, p
     }
 
     fun subscribe() = viewModelScope.async(Dispatchers.IO) {
-        with(api.subscribeToPost(state.token, postId)) {
+        with(api.subscribeToPost(postId)) {
             checkSuccessful()
             return@async this
         }
     }
 
     fun unsubscribe() = viewModelScope.async(Dispatchers.IO) {
-        with(api.unsubscribeFromPost(state.token, postId)) {
+        with(api.unsubscribeFromPost(postId)) {
             checkSuccessful()
             return@async this
         }
     }
 
     fun recommend() = viewModelScope.async(Dispatchers.IO) {
-        with(api.recommendPost(state.token, postId)) {
+        with(api.recommendPost(postId)) {
             checkSuccessful()
             return@async this
         }
     }
 
     fun unrecommend() = viewModelScope.async(Dispatchers.IO) {
-        with(api.unrecommendPost(state.token, postId)) {
+        with(api.unrecommendPost(postId)) {
             checkSuccessful()
             return@async this
         }
     }
 
     fun bookmark() = viewModelScope.async(Dispatchers.IO) {
-        with(api.bookmarkPost(state.token, postId)) {
+        with(api.bookmarkPost(postId)) {
             checkSuccessful()
             return@async this
         }
     }
 
     fun unbookmark() = viewModelScope.async(Dispatchers.IO) {
-        with(api.unbookmarkPost(state.token, postId)) {
+        with(api.unbookmarkPost(postId)) {
             checkSuccessful()
             return@async this
         }

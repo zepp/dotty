@@ -21,7 +21,7 @@ class RecentPostRepo(private val api: PointAPI,
         Repository<RecentPost, String> {
 
     private fun fetch(isBefore: Boolean) = flow {
-        with(api.getRecent(state.token, if (isBefore) state.recentPageId else null)) {
+        with(api.getRecent(if (isBefore) state.recentPageId else null)) {
             checkSuccessful()
             posts?.let {
                 val list = it.map { post -> mapper.map(post) }

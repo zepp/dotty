@@ -34,7 +34,7 @@ class UserRepo(private val api: PointAPI,
     }
 
     fun fetchUser(id: Long) = flow {
-        with(api.getUser(state.token, id)) {
+        with(api.getUser(id)) {
             checkSuccessful()
             with(mapper.map(this)) {
                 dao.insertUser(this)
@@ -44,7 +44,7 @@ class UserRepo(private val api: PointAPI,
     }
 
     fun fetchMe() = flow {
-        with(api.getMe(state.token)) {
+        with(api.getMe()) {
             checkSuccessful()
             with(mapper.map(this)) {
                 state.id = id

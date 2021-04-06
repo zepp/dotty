@@ -23,7 +23,7 @@ class CommentedPostRepo(private val api: PointAPI,
 
     @SuppressLint("CheckResult")
     fun fetch(isBefore: Boolean) = flow {
-        with(api.getComments(state.token, if (isBefore) state.commentedPageId else null)) {
+        with(api.getComments(if (isBefore) state.commentedPageId else null)) {
             checkSuccessful()
             posts?.let {
                 val list = it.map { post -> mapper.map(post) }

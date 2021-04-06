@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.flow
 class Shared(private val context: Context, private val state: AppState, private val api: PointAPI) : ContextWrapper(context) {
     fun fetchUnreadCounters(): Flow<UnreadCounters> {
         return flow {
-            with(api.getUnreadCounters(state.token)) {
+            with(api.getUnreadCounters()) {
                 checkSuccessful()
                 state.unreadPosts = this.posts
                 state.unreadComments = this.comments

@@ -23,7 +23,7 @@ class AllPostRepo(private val api: PointAPI,
 
     @SuppressLint("CheckResult")
     fun fetch(isBefore: Boolean) = flow {
-        with(api.getAll(state.token, if (isBefore) state.allPageId else null)) {
+        with(api.getAll(if (isBefore) state.allPageId else null)) {
             checkSuccessful()
             posts?.let {
                 val list = it.map { post -> mapper.map(post) }
