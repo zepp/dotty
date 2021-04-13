@@ -23,4 +23,6 @@ data class User (@PrimaryKey
     var about: String? = null
 
     var subscribed: Boolean? = null
+    var blocked: Boolean? = null
+    var recSubscribed: Boolean? = null
 }

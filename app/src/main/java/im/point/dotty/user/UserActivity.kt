@@ -59,7 +59,9 @@ class UserActivity : AppCompatActivity() {
             viewModel.getUser().collect { user ->
                 binding.userName.text = user.name
                 binding.userAbout.text = user.about
-                user.subscribed?.let { binding.userSubscribe.isChecked = it }
+                binding.userSubscribe.isChecked = user.subscribed == true
+                binding.userRecommendSubscribe.isChecked = user.recSubscribed == true
+                binding.userBlock.isChecked = user.blocked == true
             }
         }
 
@@ -69,18 +71,18 @@ class UserActivity : AppCompatActivity() {
 
         binding.userSubscribe.setOnCheckedChangeListener { _, isChecked ->
             lifecycleScope.launch(exceptionHandler) {
-                if (isChecked) viewModel.unsubscribe().await() else viewModel.subscribe().await()
+                if (isChecked) viewModel.subscribe().await() else viewModel.unsubscribe().await()
             }
         }
         binding.userRecommendSubscribe.setOnCheckedChangeListener { _, isChecked ->
             lifecycleScope.launch(exceptionHandler) {
-                if (isChecked) viewModel.unsubscribeRecommendations().await()
-                else viewModel.subscribeRecommendations().await()
+                if (isChecked) viewModel.subscribeRecommendations().await()
+                else viewModel.unsubscribeRecommendations().await()
             }
         }
         binding.userBlock.setOnCheckedChangeListener { _, isChecked ->
             lifecycleScope.launch(exceptionHandler) {
-                if (isChecked) viewModel.unblock().await() else viewModel.block().await()
+                if (isChecked) viewModel.block().await() else viewModel.unblock().await()
             }
         }
         binding.userRefresh.setOnRefreshListener {

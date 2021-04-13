@@ -26,6 +26,8 @@ class UserMapper : Mapper<User, UserReply> {
         }
         model.about = user.about
         model.subscribed = user.isSubscribed
+        model.blocked = user.isBlackListed
+        model.recSubscribed = user.isSubscribedToRecommendations
         return model
     }
 
