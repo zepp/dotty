@@ -48,6 +48,10 @@ class CommentRepo<in T : Post>(private val api: PointAPI,
         }
     }
 
+    override fun updateItem(model: Comment) {
+        commentDao.insertItem(model)
+    }
+
     override fun purge() {
         commentDao.deleteAll()
     }

@@ -29,6 +29,10 @@ class UserRepo(private val api: PointAPI,
         throw Exception("operation is not supported")
     }
 
+    override fun updateItem(model: User) {
+        dao.insertUser(model)
+    }
+
     override fun purge() {
         dao.deleteAll()
     }

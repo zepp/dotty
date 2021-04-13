@@ -46,6 +46,10 @@ class AllPostRepo(private val api: PointAPI,
         return fetch(false)
     }
 
+    override fun updateItem(model: AllPost) {
+        allPostDao.insertItem(model)
+    }
+
     override fun purge() {
         allPostDao.deleteAll()
     }

@@ -3,17 +3,20 @@
  */
 package im.point.dotty.post
 
+import androidx.annotation.IdRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import im.point.dotty.DottyApplication
 import im.point.dotty.common.AppState
-import im.point.dotty.model.PostType
+import im.point.dotty.model.*
+import im.point.dotty.network.Envelope
 import im.point.dotty.network.PointAPI
 import im.point.dotty.repository.RepoFactory
 import im.point.dotty.repository.Size
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onEach
 
@@ -26,12 +29,23 @@ class PostViewModel(application: DottyApplication, private val post: PostType, p
 
     val isPinVisible = Channel<Boolean>(Channel.CONFLATED)
 
-    fun getPost() = when (post) {
-        PostType.RECENT_POST -> repoFactory.getRecentPostRepo().getItem(postId)
-        PostType.COMMENTED_POST -> repoFactory.getCommentedPostRepo().getItem(postId)
-        PostType.ALL_POST -> repoFactory.getAllPostRepo().getItem(postId)
-        PostType.USER_POST -> repoFactory.getUserPostRepo().getItem(postId)
-    }.onEach { isPinVisible.send(it.authorId == state.id) }
+    private fun getPost(id: String) = when (post) {
+        PostType.RECENT_POST -> repoFactory.getRecentPostRepo().getItem(id)
+        PostType.COMMENTED_POST -> repoFactory.getCommentedPostRepo().getItem(id)
+        PostType.ALL_POST -> repoFactory.getAllPostRepo().getItem(id)
+        PostType.USER_POST -> repoFactory.getUserPostRepo().getItem(id)
+    }
+
+    private fun updatePost(model: Post) = when (model) {
+        is RecentPost -> repoFactory.getRecentPostRepo().updateItem(model)
+        is CommentedPost -> repoFactory.getCommentedPostRepo().updateItem(model)
+        is AllPost -> repoFactory.getAllPostRepo().updateItem(model)
+        is UserPost -> repoFactory.getUserPostRepo().updateItem(model)
+        else -> throw Exception("unknown model type")
+    }
+
+    fun getPost() = getPost(postId)
+            .onEach { isPinVisible.send(it.authorId == state.id) }
             .flowOn(Dispatchers.IO)
 
     fun getPostComments() = when (post) {
@@ -49,46 +63,84 @@ class PostViewModel(application: DottyApplication, private val post: PostType, p
     }.flowOn(Dispatchers.IO)
 
     fun subscribe() = viewModelScope.async(Dispatchers.IO) {
-        with(api.subscribeToPost(postId)) {
-            checkSuccessful()
-            return@async this
+        val post = getPost(postId).first()
+        if (post.subscribed == false) {
+            with(api.subscribeToPost(postId)) {
+                checkSuccessful()
+                post.subscribed = true
+                updatePost(post)
+                return@async this
+            }
         }
+        return@async Envelope()
     }
 
     fun unsubscribe() = viewModelScope.async(Dispatchers.IO) {
-        with(api.unsubscribeFromPost(postId)) {
-            checkSuccessful()
-            return@async this
+        val post = getPost(postId).first()
+        if (post.subscribed == true) {
+            with(api.unsubscribeFromPost(postId)) {
+                checkSuccessful()
+                post.subscribed = false
+                updatePost(post)
+                return@async this
+            }
         }
+        return@async Envelope()
     }
 
     fun recommend() = viewModelScope.async(Dispatchers.IO) {
-        with(api.recommendPost(postId)) {
-            checkSuccessful()
-            return@async this
+        val post = getPost(postId).first()
+        if (post.recommended == false) {
+            with(api.recommendPost(postId)) {
+                checkSuccessful()
+                post.recommended = true
+                updatePost(post)
+                return@async this
+            }
         }
+        return@async Envelope()
     }
 
     fun unrecommend() = viewModelScope.async(Dispatchers.IO) {
-        with(api.unrecommendPost(postId)) {
-            checkSuccessful()
-            return@async this
+        val post = getPost(postId).first()
+        if (post.recommended == true) {
+            with(api.unrecommendPost(postId)) {
+                checkSuccessful()
+                post.recommended = false
+                updatePost(post)
+                return@async this
+            }
         }
+        return@async Envelope()
     }
 
     fun bookmark() = viewModelScope.async(Dispatchers.IO) {
-        with(api.bookmarkPost(postId)) {
-            checkSuccessful()
-            return@async this
+        val post = getPost(postId).first()
+        if (post.bookmarked == false) {
+            with(api.bookmarkPost(postId)) {
+                checkSuccessful()
+                post.bookmarked = true
+                updatePost(post)
+                return@async this
+            }
         }
+        return@async Envelope()
     }
 
     fun unbookmark() = viewModelScope.async(Dispatchers.IO) {
-        with(api.unbookmarkPost(postId)) {
-            checkSuccessful()
-            return@async this
+        val post = getPost(postId).first()
+        if (post.bookmarked == true) {
+            with(api.unbookmarkPost(postId)) {
+                checkSuccessful()
+                post.bookmarked = false
+                updatePost(post)
+                return@async this
+            }
         }
+        return@async Envelope()
     }
 
     fun getAvatar(name: String) = avaRepository.getAvatar(name, Size.SIZE_40)
+
+    internal data class Event(@IdRes val id: Int, val isChecked: Boolean)
 }

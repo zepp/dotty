@@ -65,19 +65,19 @@ class PostActivity : AppCompatActivity() {
         lifecycleScope.launch(exceptionHandler) {
             viewModel.isPinVisible.consumeEach { binding.postPin.visibility = if (it) View.VISIBLE else View.GONE }
         }
-        binding.postSubscribe.setOnCheckedChangeListener { view, isChecked ->
+        binding.postSubscribe.setOnCheckedChangeListener { _, isChecked ->
             lifecycleScope.launch(exceptionHandler) {
-                if (isChecked) viewModel.unsubscribe().await() else viewModel.subscribe().await()
+                if (isChecked) viewModel.subscribe().await() else viewModel.unsubscribe().await()
             }
         }
-        binding.postRecommend.setOnCheckedChangeListener { view, isChecked ->
+        binding.postRecommend.setOnCheckedChangeListener { _, isChecked ->
             lifecycleScope.launch(exceptionHandler) {
-                if (isChecked) viewModel.unrecommend().await() else viewModel.recommend().await()
+                if (isChecked) viewModel.recommend().await() else viewModel.unrecommend().await()
             }
         }
-        binding.postBookmark.setOnCheckedChangeListener { view, isChecked ->
+        binding.postBookmark.setOnCheckedChangeListener { _, isChecked ->
             lifecycleScope.launch(exceptionHandler) {
-                if (isChecked) viewModel.unbookmark().await() else viewModel.bookmark().await()
+                if (isChecked) viewModel.bookmark().await() else viewModel.unbookmark().await()
             }
         }
     }

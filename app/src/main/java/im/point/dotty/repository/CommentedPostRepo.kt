@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.map
 
 class CommentedPostRepo(private val api: PointAPI,
                         private val state: AppState,
-                        private val commentedPostDao: CommentedPostDao,
+                        private val dao: CommentedPostDao,
                         private val mapper: Mapper<CommentedPost, MetaPost> = CommentedPostMapper())
     : Repository<CommentedPost, String> {
 
@@ -28,7 +28,7 @@ class CommentedPostRepo(private val api: PointAPI,
             posts?.let {
                 val list = it.map { post -> mapper.map(post) }
                 if (!list.isEmpty()) {
-                    commentedPostDao.insertAll(list)
+                    dao.insertAll(list)
                     state.commentedPageId = list.last().pageId
                 }
                 emit(list)
@@ -37,11 +37,11 @@ class CommentedPostRepo(private val api: PointAPI,
     }
 
     override fun getAll(): Flow<List<CommentedPost>> {
-        return commentedPostDao.getAll()
+        return dao.getAll()
     }
 
     override fun getItem(id: String): Flow<CommentedPost> {
-        return commentedPostDao.getPost(id)
+        return dao.getPost(id)
                 .map { it ?: throw Exception("post not found") }
     }
 
@@ -53,7 +53,11 @@ class CommentedPostRepo(private val api: PointAPI,
         return fetch(true)
     }
 
+    override fun updateItem(model: CommentedPost) {
+        dao.insertItem(model)
+    }
+
     override fun purge() {
-        commentedPostDao.deleteAll()
+        dao.deleteAll()
     }
 }

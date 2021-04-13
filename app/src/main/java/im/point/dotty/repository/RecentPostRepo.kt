@@ -47,6 +47,10 @@ class RecentPostRepo(private val api: PointAPI,
         return fetch(false)
     }
 
+    override fun updateItem(model: RecentPost) {
+        updateItem(model)
+    }
+
     override fun purge() {
         recentPostDao.deleteAll()
     }

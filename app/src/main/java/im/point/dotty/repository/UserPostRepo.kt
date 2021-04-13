@@ -38,6 +38,10 @@ class UserPostRepo(private val api: PointAPI,
         }
     }
 
+    override fun updateItem(model: UserPost) {
+        userPostDao.insertItem(model)
+    }
+
     override fun purge() {
         userPostDao.deleteAll()
     }
