@@ -29,7 +29,9 @@ class UserViewModel(application: DottyApplication, private val userId: Long) : A
         send(state.id != userId)
     }
 
-    fun getAvatar(name: String) = avaRepo.getAvatar(name, Size.SIZE_80)
+    fun getAvatar(login: String) = avaRepo.getAvatar(login, Size.SIZE_280)
+
+    fun getCommentAvatar(login: String) = avaRepo.getAvatar(login, Size.SIZE_80)
 
     fun subscribe() = viewModelScope.async(Dispatchers.IO) {
         val user = getUser().first()

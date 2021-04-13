@@ -25,4 +25,7 @@ data class User (@PrimaryKey
     var subscribed: Boolean? = null
     var blocked: Boolean? = null
     var recSubscribed: Boolean? = null
+
+    val formattedLogin: String
+        get() = "@$login"
 }

@@ -15,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
+import im.point.dotty.common.AvatarOutline
 import im.point.dotty.common.RecyclerItemDecorator
 import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.ActivityUserBinding
@@ -42,10 +43,12 @@ class UserActivity : AppCompatActivity() {
         setContentView(binding.root)
         viewModel = ViewModelProvider(this, ViewModelFactory(this, intent.getLongExtra(USER_ID, -1)))
                 .get(UserViewModel::class.java)
-        adapter = FeedAdapter(lifecycleScope, viewModel::getAvatar)
+        adapter = FeedAdapter(lifecycleScope, viewModel::getCommentAvatar)
         adapter.onItemClicked = { item -> startActivity(PostActivity.getIntent(this, PostType.USER_POST, item.id)) }
         binding.userPosts.adapter = adapter
         binding.userPosts.addItemDecoration(RecyclerItemDecorator(this, DividerItemDecoration.VERTICAL, 4))
+        binding.userAvatar.outlineProvider = AvatarOutline(64)
+        binding.userAvatar.clipToOutline = true
     }
 
     override fun onStart() {
@@ -57,11 +60,14 @@ class UserActivity : AppCompatActivity() {
             }
             viewModel.fetchUserAndPosts().collect { onFetched() }
             viewModel.getUser().collect { user ->
+                binding.userToolbar.title = user.formattedLogin
                 binding.userName.text = user.name
                 binding.userAbout.text = user.about
                 binding.userSubscribe.isChecked = user.subscribed == true
                 binding.userRecommendSubscribe.isChecked = user.recSubscribed == true
                 binding.userBlock.isChecked = user.blocked == true
+                viewModel.getAvatar(user.login ?: throw Exception("empty login"))
+                        .collect { binding.userAvatar.setImageBitmap(it) }
             }
         }
 

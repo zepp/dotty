@@ -16,8 +16,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:expandedTitleGravity="top"
-            app:layout_scrollFlags="scroll"
-            app:titleEnabled="false"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            app:titleEnabled="true"
             app:toolbarId="@id/toolbar">
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -31,7 +31,7 @@
                     android:id="@+id/user_avatar"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:visibility="gone"
+                    android:layout_marginTop="24dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -40,19 +40,29 @@
                     android:id="@+id/user_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:lines="1"
+                    android:textSize="16sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/user_avatar" />
+                    app:layout_constraintTop_toBottomOf="@id/user_avatar"
+                    tools:text="User Name" />
 
                 <TextView
                     android:id="@+id/user_about"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:ellipsize="end"
+                    android:maxLines="4"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/user_name" />
+                    app:layout_constraintTop_toBottomOf="@+id/user_name"
+                    tools:text="User BIO" />
 
                 <LinearLayout
                     android:id="@+id/user_actions"

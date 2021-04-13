@@ -4,15 +4,14 @@
 package im.point.dotty.feed
 
 import android.graphics.Bitmap
-import android.graphics.Outline
 import android.view.View
-import android.view.ViewOutlineProvider
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import im.point.dotty.R
+import im.point.dotty.common.AvatarOutline
 import im.point.dotty.common.RecyclerItemDecorator
 import im.point.dotty.common.TagsAdapter
 import im.point.dotty.model.Post
@@ -31,6 +30,7 @@ class PostHolder<T : Post>(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     fun bind(post: T, bitmap: Bitmap, onItemClicked: (item: T) -> Unit, onUserClicked: (item: Long) -> Unit) {
         avatar.setImageBitmap(bitmap)
+        avatar.setOnClickListener { onUserClicked(post.authorId) }
         bookmarked.visibility = if (post.bookmarked == true) View.VISIBLE else View.GONE
         recommended.visibility = if (post.recommended == true) View.VISIBLE else View.GONE
         author.text = post.nameOrLogin
@@ -50,17 +50,12 @@ class PostHolder<T : Post>(itemView: View) : RecyclerView.ViewHolder(itemView) {
         tags.adapter = adapter
         tags.layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
         tags.addItemDecoration(RecyclerItemDecorator(itemView.context, DividerItemDecoration.HORIZONTAL, 4))
-        avatar.outlineProvider = OutlineProvider
+        avatar.outlineProvider = outline
         avatar.clipToOutline = true
     }
 
-    companion object OutlineProvider : ViewOutlineProvider() {
-        private const val curveRadius = 16;
-        override fun getOutline(view: View?, outline: Outline?) {
-            view?.let {
-                outline?.setRoundRect(0, 0, it.getWidth(), it.getHeight(), curveRadius.toFloat())
-            }
-        }
+    companion object {
+        val outline = AvatarOutline()
     }
 }
 

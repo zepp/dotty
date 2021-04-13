@@ -4,15 +4,14 @@
 package im.point.dotty.post
 
 import android.graphics.Bitmap
-import android.graphics.Outline
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewOutlineProvider
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import im.point.dotty.R
+import im.point.dotty.common.AvatarOutline
 import im.point.dotty.model.Comment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -76,16 +75,11 @@ class CommentHolder(view: View) : RecyclerView.ViewHolder(view) {
     }
 
     init {
-        avatar.outlineProvider = OutlineProvider
+        avatar.outlineProvider = outline
         avatar.clipToOutline = true
     }
 
-    companion object OutlineProvider : ViewOutlineProvider() {
-        private const val curveRadius = 8;
-        override fun getOutline(view: View?, outline: Outline?) {
-            view?.let {
-                outline?.setRoundRect(0, 0, it.getWidth(), it.getHeight(), curveRadius.toFloat())
-            }
-        }
+    companion object {
+        val outline = AvatarOutline()
     }
 }
