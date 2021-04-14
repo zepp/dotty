@@ -4,10 +4,9 @@
 package im.point.dotty.post
 
 import androidx.annotation.IdRes
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import im.point.dotty.DottyApplication
-import im.point.dotty.common.AppState
+import im.point.dotty.common.DottyViewModel
 import im.point.dotty.model.*
 import im.point.dotty.network.Envelope
 import im.point.dotty.network.PointAPI
@@ -21,9 +20,8 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onEach
 
 class PostViewModel(application: DottyApplication, private val post: PostType, private val postId: String)
-    : ViewModel() {
+    : DottyViewModel(application) {
     private val repoFactory: RepoFactory = application.repoFactory
-    private val state: AppState = application.state
     private val api: PointAPI = application.mainApi
     private val avaRepository = application.avaRepo
 

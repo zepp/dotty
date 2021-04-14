@@ -4,10 +4,9 @@
 
 package im.point.dotty.user
 
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import im.point.dotty.DottyApplication
-import im.point.dotty.common.AppState
+import im.point.dotty.common.DottyViewModel
 import im.point.dotty.network.Envelope
 import im.point.dotty.network.PointAPI
 import im.point.dotty.repository.Size
@@ -18,11 +17,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flowOn
 
-class UserViewModel(application: DottyApplication, private val userId: Long) : AndroidViewModel(application) {
+class UserViewModel(application: DottyApplication, private val userId: Long) : DottyViewModel(application) {
     private val userRepo = application.repoFactory.getUserRepo()
     private val userPostRepo = application.repoFactory.getUserPostRepo(userId)
     private val api: PointAPI = application.mainApi
-    private val state: AppState = application.state
     private val avaRepo = application.avaRepo
 
     val isActionsVisible = viewModelScope.produce {

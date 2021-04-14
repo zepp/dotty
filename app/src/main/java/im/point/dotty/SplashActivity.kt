@@ -6,6 +6,7 @@ package im.point.dotty
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.login.LoginViewModel
 
@@ -20,6 +21,6 @@ class SplashActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        viewModel.resetActivityBackStack()
+        lifecycleScope.launchWhenStarted { viewModel.resetActivityBackStack() }
     }
 }

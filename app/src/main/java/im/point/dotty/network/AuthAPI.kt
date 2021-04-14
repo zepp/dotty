@@ -15,5 +15,5 @@ interface AuthAPI {
 
     @FormUrlEncoded
     @POST("/api/logout")
-    fun logout(@Header("Authorization") token: String, @Field("csrf_token") csrfToken: String): LogoutReply
+    suspend fun logout(@Header("Authorization") token: String, @Field("csrf_token") csrfToken: String): LogoutReply
 }

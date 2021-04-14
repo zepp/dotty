@@ -21,7 +21,6 @@ import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -49,7 +48,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        viewModel.fetchUnreadCounters().launchIn(lifecycleScope)
+        lifecycleScope.launch(exceptionHandler) {
+            viewModel.fetchUnreadCounters().await()
+        }
         lifecycleScope.launch(exceptionHandler) {
             viewModel.unreadPosts()
                     .collect { binding.mainUnreadPosts.text = it.toString() }

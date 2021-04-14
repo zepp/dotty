@@ -3,32 +3,26 @@
  */
 package im.point.dotty.main
 
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import im.point.dotty.DottyApplication
-import im.point.dotty.common.AppState
-import im.point.dotty.common.Shared
+import im.point.dotty.common.DottyViewModel
 import im.point.dotty.model.AllPost
 import im.point.dotty.model.CommentedPost
 import im.point.dotty.model.RecentPost
-import im.point.dotty.network.AuthAPI
-import im.point.dotty.network.UnreadCounters
+import im.point.dotty.network.PointAPI
 import im.point.dotty.repository.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.withContext
 
-class MainViewModel internal constructor(application: DottyApplication) : AndroidViewModel(application) {
+class MainViewModel internal constructor(application: DottyApplication) : DottyViewModel(application) {
     private val repoFactory: RepoFactory
     private val recentRepo: RecentPostRepo
     private val commentedRepo: CommentedPostRepo
     private val allRepo: AllPostRepo
     private val userRepo: UserRepo
-    private val shared: Shared = Shared(application.baseContext, application.state, application.mainApi)
-    private val state: AppState = application.state
-    private val api: AuthAPI = application.authApi
+    private val api: PointAPI = application.mainApi
     private val avaRepo = application.avaRepo
 
     fun fetchRecent(isBefore: Boolean): Flow<List<RecentPost>> {
@@ -58,24 +52,27 @@ class MainViewModel internal constructor(application: DottyApplication) : Androi
         return commentedRepo.getAll().flowOn(Dispatchers.IO)
     }
 
-    fun fetchUnreadCounters(): Flow<UnreadCounters> {
-        return shared.fetchUnreadCounters().flowOn(Dispatchers.IO)
+    fun fetchUnreadCounters() = viewModelScope.async(Dispatchers.IO) {
+        with(api.getUnreadCounters()) {
+            checkSuccessful()
+            state.unreadPosts = this.posts
+            state.unreadComments = this.comments
+            state.privateUnreadPosts = this.privatePosts
+            state.privateUnreadComments = this.privateComments
+            return@async this
+        }
     }
 
     fun getAvatar(name: String) = avaRepo.getAvatar(name, Size.SIZE_80)
 
     fun logout() = viewModelScope.async(Dispatchers.IO) {
-        try {
-            api.logout(state.token, state.csrfToken)
-        } finally {
+        with(authAPI.logout(state.token, state.csrfToken)) {
             state.isLoggedIn = false
             allRepo.purge()
             recentRepo.purge()
             commentedRepo.purge()
             userRepo.purge()
-        }
-        withContext(Dispatchers.Main) {
-            shared.resetActivityBackStack()
+            resetActivityBackStack()
         }
     }
 

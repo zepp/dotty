@@ -3,6 +3,7 @@
  */
 package im.point.dotty.common
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import kotlinx.coroutines.GlobalScope
@@ -10,6 +11,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
+@SuppressLint("ApplySharedPref")
 class AppState (context: Context) {
     companion object {
         private val IS_LOGGED_IN = "is-logged-in"
@@ -32,25 +34,25 @@ class AppState (context: Context) {
     var isLoggedIn: Boolean?
         get() = preferences.getBoolean(IS_LOGGED_IN, false)
         set(value) = preferences.edit().run {
-            if (value == null) remove(IS_LOGGED_IN).apply() else putBoolean(IS_LOGGED_IN, value).apply()
+            if (value == null) remove(IS_LOGGED_IN).commit() else putBoolean(IS_LOGGED_IN, value).commit()
         }
 
     var userLogin: String?
         get() = preferences.getString(USER_LOGIN, null)
         set(value) = preferences.edit().run {
-            if (value == null) remove(USER_LOGIN).apply() else putString(USER_LOGIN, value).apply()
+            if (value == null) remove(USER_LOGIN).commit() else putString(USER_LOGIN, value).commit()
         }
 
     var token: String
         get() = preferences.getString(TOKEN, null) ?: throw Exception("API token is empty")
         set(value) = preferences.edit().run {
-            if (value.isEmpty()) remove(TOKEN).apply() else putString(TOKEN, value).apply()
+            if (value.isEmpty()) remove(TOKEN).commit() else putString(TOKEN, value).commit()
         }
 
     var csrfToken: String
         get() = preferences.getString(CSRF_TOKEN, null) ?: throw Exception("CSRF token is empty")
         set(value) = preferences.edit().run {
-            if (value.isEmpty()) remove(CSRF_TOKEN).apply() else putString(CSRF_TOKEN, value).apply()
+            if (value.isEmpty()) remove(CSRF_TOKEN).commit() else putString(CSRF_TOKEN, value).commit()
         }
 
     var id: Long?
@@ -58,7 +60,7 @@ class AppState (context: Context) {
             if (this == -1L) null else this
         }
         set(value) = preferences.edit().run {
-            if (value == null) remove(USER_ID).apply() else putLong(USER_ID, value).apply()
+            if (value == null) remove(USER_ID).commit() else putLong(USER_ID, value).commit()
         }
 
     var commentedPageId: Long?
@@ -66,8 +68,8 @@ class AppState (context: Context) {
             if (this == -1L) null else this
         }
         set(value) = preferences.edit().run {
-            if (value == null) remove(COMMENTED_PAGE_ID).apply()
-            else putLong(COMMENTED_PAGE_ID, value).apply()
+            if (value == null) remove(COMMENTED_PAGE_ID).commit()
+            else putLong(COMMENTED_PAGE_ID, value).commit()
         }
 
     var recentPageId: Long?
@@ -75,8 +77,8 @@ class AppState (context: Context) {
             if (this == -1L) null else this
         }
         set(value) = preferences.edit().run {
-            if (value == null) remove(RECENT_PAGE_ID).apply()
-            else putLong(RECENT_PAGE_ID, value).apply()
+            if (value == null) remove(RECENT_PAGE_ID).commit()
+            else putLong(RECENT_PAGE_ID, value).commit()
         }
 
     var allPageId: Long?
@@ -84,8 +86,8 @@ class AppState (context: Context) {
             if (this == -1L) return null else this
         }
         set(value) = preferences.edit().run {
-            if (value == null) remove(ALL_PAGE_ID).apply()
-            else putLong(ALL_PAGE_ID, value).apply()
+            if (value == null) remove(ALL_PAGE_ID).commit()
+            else putLong(ALL_PAGE_ID, value).commit()
         }
 
     private val unreadPostsFlow_ = MutableSharedFlow<Int>(1)
@@ -94,7 +96,7 @@ class AppState (context: Context) {
         get() = preferences.getInt(UNREAD_POSTS, 0)
         set(value) {
             GlobalScope.launch { unreadPostsFlow_.emit(value) }
-            preferences.edit().putInt(UNREAD_POSTS, value).apply()
+            preferences.edit().putInt(UNREAD_POSTS, value).commit()
         }
 
     val unreadPostsFlow = unreadPostsFlow_.asSharedFlow()
@@ -105,7 +107,7 @@ class AppState (context: Context) {
         get() = preferences.getInt(UNREAD_COMMENTS, 0)
         set(value) {
             GlobalScope.launch { unreadCommentsFlow_.emit(value) }
-            preferences.edit().putInt(UNREAD_COMMENTS, value).apply()
+            preferences.edit().putInt(UNREAD_COMMENTS, value).commit()
         }
 
     val unreadCommentsFlow = unreadCommentsFlow_.asSharedFlow()
@@ -116,7 +118,7 @@ class AppState (context: Context) {
         get() = preferences.getInt(PRIVATE_UNREAD_POSTS, 0)
         set(value) {
             GlobalScope.launch { privateUnreadPostsFlow_.emit(value) }
-            preferences.edit().putInt(PRIVATE_UNREAD_POSTS, value).apply()
+            preferences.edit().putInt(PRIVATE_UNREAD_POSTS, value).commit()
         }
 
     val privateUnreadPostsFlow = privateUnreadPostsFlow_.asSharedFlow()
@@ -127,7 +129,7 @@ class AppState (context: Context) {
         get() = preferences.getInt(PRIVATE_UNREAD_COMMENTS, 0)
         set(value) {
             GlobalScope.launch { privateUnreadCommentsFlow_.emit(value) }
-            preferences.edit().putInt(PRIVATE_UNREAD_COMMENTS, value).apply()
+            preferences.edit().putInt(PRIVATE_UNREAD_COMMENTS, value).commit()
         }
 
     val privateUnreadCommentsFlow = privateUnreadCommentsFlow_.asSharedFlow()
