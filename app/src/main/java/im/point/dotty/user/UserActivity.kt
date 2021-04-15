@@ -24,7 +24,6 @@ import im.point.dotty.model.PostType
 import im.point.dotty.model.UserPost
 import im.point.dotty.post.PostActivity
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -49,16 +48,42 @@ class UserActivity : AppCompatActivity() {
         binding.userPosts.addItemDecoration(RecyclerItemDecorator(this, DividerItemDecoration.VERTICAL, 4))
         binding.userAvatar.outlineProvider = AvatarOutline(64)
         binding.userAvatar.clipToOutline = true
-    }
 
-    override fun onStart() {
-        super.onStart()
+        binding.userSubscribe.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.onSubscribeChecked(isChecked)
+        }
+        binding.userRecommendSubscribe.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.onRecSubscribeChecked(isChecked)
+        }
+        binding.userBlock.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.onBlockChecked(isChecked)
+        }
+        binding.userRefresh.setOnRefreshListener {
+            lifecycleScope.launch(exceptionHandler) {
+                viewModel.fetchUserAndPosts().collect { onFetched() }
+            }
+        }
 
         lifecycleScope.launch(exceptionHandler) {
-            viewModel.isActionsVisible.consumeEach { value ->
+            viewModel.onSubscribe.collect {
+                if (it) viewModel.subscribe().await() else viewModel.unsubscribe().await()
+            }
+            viewModel.onRecSubscribe.collect {
+                if (it) viewModel.subscribeRecommendations().await()
+                else viewModel.unsubscribeRecommendations().await()
+            }
+            viewModel.onBlock.collect {
+                if (it) viewModel.block().await() else viewModel.unblock().await()
+            }
+        }
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.isActionsVisible.collect { value ->
                 binding.userActions.visibility = if (value) View.VISIBLE else View.GONE
             }
-            viewModel.fetchUserAndPosts().collect { onFetched() }
+        }
+
+        lifecycleScope.launchWhenStarted {
             viewModel.getUser().collect { user ->
                 binding.userToolbar.title = user.formattedLogin
                 binding.userName.text = user.name
@@ -71,30 +96,12 @@ class UserActivity : AppCompatActivity() {
             }
         }
 
-        lifecycleScope.launch(exceptionHandler) {
+        lifecycleScope.launchWhenStarted {
             viewModel.getPosts().collect { items -> adapter.list = items }
         }
 
-        binding.userSubscribe.setOnCheckedChangeListener { _, isChecked ->
-            lifecycleScope.launch(exceptionHandler) {
-                if (isChecked) viewModel.subscribe().await() else viewModel.unsubscribe().await()
-            }
-        }
-        binding.userRecommendSubscribe.setOnCheckedChangeListener { _, isChecked ->
-            lifecycleScope.launch(exceptionHandler) {
-                if (isChecked) viewModel.subscribeRecommendations().await()
-                else viewModel.unsubscribeRecommendations().await()
-            }
-        }
-        binding.userBlock.setOnCheckedChangeListener { _, isChecked ->
-            lifecycleScope.launch(exceptionHandler) {
-                if (isChecked) viewModel.block().await() else viewModel.unblock().await()
-            }
-        }
-        binding.userRefresh.setOnRefreshListener {
-            lifecycleScope.launch(exceptionHandler) {
-                viewModel.fetchUserAndPosts().collect { onFetched() }
-            }
+        lifecycleScope.launchWhenStarted {
+            viewModel.fetchUserAndPosts().collect { onFetched() }
         }
     }
 

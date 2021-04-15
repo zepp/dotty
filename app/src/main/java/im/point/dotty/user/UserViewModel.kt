@@ -12,10 +12,8 @@ import im.point.dotty.network.PointAPI
 import im.point.dotty.repository.Size
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.channels.produce
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMapConcat
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 class UserViewModel(application: DottyApplication, private val userId: Long) : DottyViewModel(application) {
     private val userRepo = application.repoFactory.getUserRepo()
@@ -23,8 +21,25 @@ class UserViewModel(application: DottyApplication, private val userId: Long) : D
     private val api: PointAPI = application.mainApi
     private val avaRepo = application.avaRepo
 
-    val isActionsVisible = viewModelScope.produce {
-        send(state.id != userId)
+    private val onSubscribe_ = MutableSharedFlow<Boolean>()
+    private val onRecSubscribe_ = MutableSharedFlow<Boolean>()
+    private val onBlock_ = MutableSharedFlow<Boolean>()
+
+    val isActionsVisible = MutableStateFlow(state.id != userId)
+    val onSubscribe = onSubscribe_.distinctUntilChanged()
+    val onRecSubscribe = onRecSubscribe_.distinctUntilChanged()
+    val onBlock = onBlock_.distinctUntilChanged()
+
+    fun onSubscribeChecked(value: Boolean) = viewModelScope.launch {
+        onSubscribe_.emit(value)
+    }
+
+    fun onRecSubscribeChecked(value: Boolean) = viewModelScope.launch {
+        onRecSubscribe_.emit(value)
+    }
+
+    fun onBlockChecked(value: Boolean) = viewModelScope.launch {
+        onBlock_.emit(value)
     }
 
     fun getAvatar(login: String) = avaRepo.getAvatar(login, Size.SIZE_280)
