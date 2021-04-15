@@ -3,7 +3,6 @@
  */
 package im.point.dotty.post
 
-import androidx.annotation.IdRes
 import androidx.lifecycle.viewModelScope
 import im.point.dotty.DottyApplication
 import im.point.dotty.common.DottyViewModel
@@ -14,10 +13,8 @@ import im.point.dotty.repository.RepoFactory
 import im.point.dotty.repository.Size
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 class PostViewModel(application: DottyApplication, private val post: PostType, private val postId: String)
     : DottyViewModel(application) {
@@ -25,7 +22,27 @@ class PostViewModel(application: DottyApplication, private val post: PostType, p
     private val api: PointAPI = application.mainApi
     private val avaRepository = application.avaRepo
 
-    val isPinVisible = Channel<Boolean>(Channel.CONFLATED)
+    private val isPinVisible_ = MutableStateFlow(false)
+    private val onSubscribe_ = MutableSharedFlow<Boolean>(0)
+    private val onRecommend_ = MutableSharedFlow<Boolean>(0)
+    private val onBookmark_ = MutableSharedFlow<Boolean>(0)
+
+    val isPinVisible: StateFlow<Boolean> = isPinVisible_
+    val onSubscribe = onSubscribe_.distinctUntilChanged()
+    val onRecommend = onRecommend_.distinctUntilChanged()
+    val onBookmark = onBookmark_.distinctUntilChanged()
+
+    fun onSubscribeChecked(value: Boolean) = viewModelScope.launch {
+        onSubscribe_.emit(value)
+    }
+
+    fun onRecommendChecked(value: Boolean) = viewModelScope.launch {
+        onRecommend_.emit(value)
+    }
+
+    fun onBookmarkChecked(value: Boolean) = viewModelScope.launch {
+        onBookmark_.emit(value)
+    }
 
     private fun getPost(id: String) = when (post) {
         PostType.RECENT_POST -> repoFactory.getRecentPostRepo().getItem(id)
@@ -43,7 +60,7 @@ class PostViewModel(application: DottyApplication, private val post: PostType, p
     }
 
     fun getPost() = getPost(postId)
-            .onEach { isPinVisible.send(it.authorId == state.id) }
+            .onEach { isPinVisible_.emit(it.authorId == state.id) }
             .flowOn(Dispatchers.IO)
 
     fun getPostComments() = when (post) {
@@ -139,6 +156,4 @@ class PostViewModel(application: DottyApplication, private val post: PostType, p
     }
 
     fun getAvatar(name: String) = avaRepository.getAvatar(name, Size.SIZE_40)
-
-    internal data class Event(@IdRes val id: Int, val isChecked: Boolean)
 }

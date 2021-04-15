@@ -17,7 +17,6 @@ import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.ActivityPostBinding
 import im.point.dotty.model.PostType
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -49,11 +48,31 @@ class PostActivity : AppCompatActivity() {
                 .get(PostViewModel::class.java)
         binding = ActivityPostBinding.inflate(layoutInflater)
         setContentView(binding.root)
-    }
-
-    override fun onStart() {
-        super.onStart()
+        binding.postSubscribe.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.onSubscribeChecked(isChecked)
+        }
+        binding.postRecommend.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.onRecommendChecked(isChecked)
+        }
+        binding.postBookmark.setOnCheckedChangeListener { _, isChecked ->
+            viewModel.onBookmarkChecked(isChecked)
+        }
         lifecycleScope.launch(exceptionHandler) {
+            viewModel.onSubscribe.collect {
+                if (it) viewModel.subscribe().await() else viewModel.unsubscribe().await()
+            }
+        }
+        lifecycleScope.launch(exceptionHandler) {
+            viewModel.onRecommend.collect {
+                if (it) viewModel.recommend().await() else viewModel.unrecommend().await()
+            }
+        }
+        lifecycleScope.launch(exceptionHandler) {
+            viewModel.onBookmark.collect {
+                if (it) viewModel.bookmark().await() else viewModel.unbookmark().await()
+            }
+        }
+        lifecycleScope.launchWhenStarted {
             viewModel.getPost().collect { post ->
                 binding.toolbar.title = post.nameOrLogin
                 binding.postBookmark.isChecked = post.bookmarked == true
@@ -62,30 +81,10 @@ class PostActivity : AppCompatActivity() {
                 binding.postPin.isChecked = post.pinned == true
             }
         }
-        lifecycleScope.launch(exceptionHandler) {
-            viewModel.isPinVisible.consumeEach { binding.postPin.visibility = if (it) View.VISIBLE else View.GONE }
-        }
-        binding.postSubscribe.setOnCheckedChangeListener { _, isChecked ->
-            lifecycleScope.launch(exceptionHandler) {
-                if (isChecked) viewModel.subscribe().await() else viewModel.unsubscribe().await()
+        lifecycleScope.launchWhenStarted {
+            viewModel.isPinVisible.collect {
+                binding.postPin.visibility = if (it) View.VISIBLE else View.GONE
             }
-        }
-        binding.postRecommend.setOnCheckedChangeListener { _, isChecked ->
-            lifecycleScope.launch(exceptionHandler) {
-                if (isChecked) viewModel.recommend().await() else viewModel.unrecommend().await()
-            }
-        }
-        binding.postBookmark.setOnCheckedChangeListener { _, isChecked ->
-            lifecycleScope.launch(exceptionHandler) {
-                if (isChecked) viewModel.bookmark().await() else viewModel.unbookmark().await()
-            }
-        }
-    }
-
-    override fun onBackPressed() {
-        super.onBackPressed()
-        if (supportFragmentManager.backStackEntryCount == 0) {
-            finish()
         }
     }
 
