@@ -3,6 +3,8 @@
  */
 package im.point.dotty.main
 
+import android.os.Bundle
+import android.view.View
 import androidx.lifecycle.lifecycleScope
 import im.point.dotty.feed.FeedFragment
 import im.point.dotty.model.PostType
@@ -13,19 +15,16 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class RecentFragment : FeedFragment<RecentPost>() {
-    override fun onStart() {
-        super.onStart()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         adapter.onItemClicked = { post ->
             startActivity(PostActivity.getIntent(requireContext(), PostType.RECENT_POST, post.id))
         }
         adapter.onUserClicked = { id ->
             startActivity(UserActivity.getIntent(requireContext(), id))
         }
-        lifecycleScope.launch(exceptionHandler) {
-            viewModel.getRecent().collect { list ->
-                adapter.list = list
-                finishUpdate()
-            }
+        lifecycleScope.launchWhenStarted {
+            viewModel.getRecent().collect { list -> adapter.list = list }
         }
     }
 

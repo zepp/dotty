@@ -37,35 +37,29 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         viewModel = ViewModelProvider(this, ViewModelFactory<Any>(this))
                 .get(MainViewModel::class.java)
-    }
-
-    override fun onPostCreate(savedInstanceState: Bundle?) {
-        super.onPostCreate(savedInstanceState)
         setSupportActionBar(binding.toolbar)
         binding.mainTabLayout.setupWithViewPager(binding.mainPager)
         binding.mainPager.adapter = Adapter(supportFragmentManager)
-    }
 
-    override fun onStart() {
-        super.onStart()
-        lifecycleScope.launch(exceptionHandler) {
-            viewModel.fetchUnreadCounters().await()
-        }
-        lifecycleScope.launch(exceptionHandler) {
+        lifecycleScope.launchWhenStarted {
             viewModel.unreadPosts()
                     .collect { binding.mainUnreadPosts.text = it.toString() }
         }
-        lifecycleScope.launch(exceptionHandler) {
+        lifecycleScope.launchWhenStarted {
             viewModel.unreadComments()
                     .collect { binding.mainUnreadComments.text = it.toString() }
         }
-        lifecycleScope.launch(exceptionHandler) {
+        lifecycleScope.launchWhenStarted {
             viewModel.unreadPrivatePosts()
                     .collect { binding.mainPrivateUnreadPosts.text = it.toString() }
         }
-        lifecycleScope.launch(exceptionHandler) {
+        lifecycleScope.launchWhenStarted {
             viewModel.unreadPrivateComments()
                     .collect { binding.mainPrivateUnreadComments.text = it.toString() }
+        }
+
+        lifecycleScope.launch(exceptionHandler) {
+            viewModel.fetchUnreadCounters().await()
         }
     }
 
@@ -77,7 +71,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.main_logout) {
             lifecycleScope.launch(exceptionHandler) {
-                viewModel.logout()
+                viewModel.logout().await()
             }
             return true
         } else {

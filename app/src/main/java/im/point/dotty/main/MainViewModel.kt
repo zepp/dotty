@@ -73,6 +73,7 @@ class MainViewModel internal constructor(application: DottyApplication) : DottyV
             commentedRepo.purge()
             userRepo.purge()
             resetActivityBackStack()
+            this
         }
     }
 

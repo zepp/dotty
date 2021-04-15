@@ -3,6 +3,8 @@
  */
 package im.point.dotty.main
 
+import android.os.Bundle
+import android.view.View
 import androidx.lifecycle.lifecycleScope
 import im.point.dotty.feed.FeedFragment
 import im.point.dotty.model.CommentedPost
@@ -13,15 +15,15 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class CommentedFragment : FeedFragment<CommentedPost>() {
-    override fun onStart() {
-        super.onStart()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         adapter.onItemClicked = { post ->
             startActivity(PostActivity.getIntent(requireContext(), PostType.COMMENTED_POST, post.id))
         }
         adapter.onUserClicked = { id ->
             startActivity(UserActivity.getIntent(requireContext(), id))
         }
-        lifecycleScope.launch(exceptionHandler) {
+        lifecycleScope.launchWhenStarted {
             viewModel.getCommented().collect { list -> adapter.list = list }
         }
     }
