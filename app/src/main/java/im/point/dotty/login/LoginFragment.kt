@@ -16,7 +16,6 @@ import androidx.lifecycle.lifecycleScope
 import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.FragmentLoginBinding
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -39,24 +38,28 @@ class LoginFragment : Fragment() {
         return binding.root
     }
 
-    override fun onStart() {
-        super.onStart()
-        binding.loginUserName.setText(viewModel.login)
-        binding.loginUserName.addTextChangedListener({ s: CharSequence?, i: Int, i1: Int, i2: Int -> },
-                { s: CharSequence?, i: Int, i1: Int, i2: Int -> },
-                { e -> viewModel.login = e.toString() })
-        binding.loginPassword.setText(viewModel.password)
-        binding.loginPassword.addTextChangedListener({ s: CharSequence?, i: Int, i1: Int, i2: Int -> },
-                { s: CharSequence?, i: Int, i1: Int, i2: Int -> },
-                { e -> viewModel.password = e.toString() })
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding.loginUserName.addTextChangedListener({ _, _, _, _ -> }, { _, _, _, _ -> },
+                { e -> viewModel.login.value = e.toString() })
+        binding.loginPassword.addTextChangedListener({ _, _, _, _ -> }, { _, _, _, _ -> },
+                { e -> viewModel.password.value = e.toString() })
         binding.loginLogin.setOnClickListener {
             lifecycleScope.launch(exceptionHandler) {
                 binding.loginLogin.isEnabled = false
-                viewModel.login().collect()
+                try {
+                    viewModel.login().await()
+                } finally {
+                    binding.loginLogin.isEnabled = viewModel.isLoginEnabled.value
+                }
             }
         }
-        lifecycleScope.launch(exceptionHandler) {
-            viewModel.isLoginEnabled.consumeEach { value -> binding.loginLogin.isEnabled = value }
+        lifecycleScope.launchWhenStarted {
+            binding.loginUserName.setText(viewModel.login.value)
+            binding.loginPassword.setText(viewModel.password.value)
+            viewModel.isLoginEnabled.collect {
+                binding.loginLogin.isEnabled = it
+            }
         }
     }
 

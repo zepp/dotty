@@ -9,56 +9,46 @@ import im.point.dotty.DottyApplication
 import im.point.dotty.common.DottyViewModel
 import im.point.dotty.repository.UserRepo
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @SuppressLint("CheckResult")
 class LoginViewModel internal constructor(application: DottyApplication) : DottyViewModel(application) {
     private val userRepo: UserRepo = UserRepo(application.mainApi, state, application.database.getUserDao())
 
-    val isLoginEnabled = Channel<Boolean>(Channel.CONFLATED)
+    val isLoginEnabled = MutableStateFlow(false)
 
-    var login: String = ""
-        set(value) {
-            field = value
-            viewModelScope.launch {
-                updateLoginEnabled()
-            }
-        }
+    val login = MutableStateFlow("")
 
-    var password: String = ""
-        set(value) {
-            field = value
-            viewModelScope.launch {
-                updateLoginEnabled()
-            }
-        }
+    val password = MutableStateFlow("")
 
     private suspend fun updateLoginEnabled() {
-        isLoginEnabled.send(!(login.trim().isBlank() || password.isBlank()))
+        isLoginEnabled.emit(!(login.value.isBlank() || password.value.isBlank()))
     }
 
-    fun login() = flow {
-        try {
-            with(authAPI.login(login, password)) {
-                checkSuccessful()
-                state.isLoggedIn = true
-                state.userLogin = login
-                state.csrfToken = csrfToken
-                        ?: throw Exception("CSRF token is empty")
-                state.token = token ?: throw Exception("token is empty")
-                resetActivityBackStack()
-                userRepo.fetchMe()
-                emit(this)
-            }
-        } finally {
-            updateLoginEnabled()
+    fun login() = viewModelScope.async(Dispatchers.IO) {
+        val login = login.value
+        with(authAPI.login(login, password.value)) {
+            checkSuccessful()
+            state.isLoggedIn = true
+            state.userLogin = login
+            state.csrfToken = csrfToken
+                    ?: throw Exception("CSRF token is empty")
+            state.token = token ?: throw Exception("token is empty")
+            resetActivityBackStack()
+            userRepo.fetchMe()
+            this
         }
-    }.flowOn(Dispatchers.IO)
+    }
 
     init {
-        login = state.userLogin ?: ""
+        viewModelScope.launch(Dispatchers.Default) {
+            login.collect { updateLoginEnabled() }
+        }
+        viewModelScope.launch(Dispatchers.Default) {
+            password.collect { updateLoginEnabled() }
+        }
     }
 }
