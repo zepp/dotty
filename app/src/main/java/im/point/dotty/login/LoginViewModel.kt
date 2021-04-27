@@ -7,11 +7,13 @@ import android.annotation.SuppressLint
 import androidx.lifecycle.viewModelScope
 import im.point.dotty.DottyApplication
 import im.point.dotty.common.DottyViewModel
+import im.point.dotty.network.LoginReply
 import im.point.dotty.repository.UserRepo
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
 @SuppressLint("CheckResult")
@@ -28,7 +30,7 @@ class LoginViewModel internal constructor(application: DottyApplication) : Dotty
         isLoginEnabled.emit(!(login.value.isBlank() || password.value.isBlank()))
     }
 
-    fun login() = viewModelScope.async(Dispatchers.IO) {
+    fun login() = flow<LoginReply> {
         val login = login.value
         with(authAPI.login(login, password.value)) {
             checkSuccessful()
@@ -41,7 +43,7 @@ class LoginViewModel internal constructor(application: DottyApplication) : Dotty
             userRepo.fetchMe()
             this
         }
-    }
+    }.flowOn(Dispatchers.IO)
 
     init {
         viewModelScope.launch(Dispatchers.Default) {
