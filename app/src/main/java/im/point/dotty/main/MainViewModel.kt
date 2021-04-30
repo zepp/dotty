@@ -14,14 +14,16 @@ import im.point.dotty.repository.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.launch
 
 class MainViewModel internal constructor(application: DottyApplication) : DottyViewModel(application) {
-    private val repoFactory: RepoFactory
-    private val recentRepo: RecentPostRepo
-    private val commentedRepo: CommentedPostRepo
-    private val allRepo: AllPostRepo
-    private val userRepo: UserRepo
+    private val repoFactory = application.repoFactory
+    private val recentRepo = repoFactory.getRecentPostRepo()
+    private val commentedRepo = repoFactory.getCommentedPostRepo()
+    private val allRepo = repoFactory.getAllPostRepo()
+    private val userRepo = repoFactory.getUserRepo()
     private val api: PointAPI = application.mainApi
     private val avaRepo = application.avaRepo
 
@@ -86,10 +88,10 @@ class MainViewModel internal constructor(application: DottyApplication) : DottyV
     fun unreadPrivateComments() = state.privateUnreadCommentsFlow
 
     init {
-        repoFactory = application.repoFactory
-        recentRepo = repoFactory.getRecentPostRepo()
-        commentedRepo = repoFactory.getCommentedPostRepo()
-        allRepo = repoFactory.getAllPostRepo()
-        userRepo = repoFactory.getUserRepo()
+        viewModelScope.launch(Dispatchers.IO + exceptionHandler) {
+            launch { fetchRecent(false).collect() }
+            launch { fetchCommented(false).collect() }
+            launch { fetchAll(false).collect() }
+        }
     }
 }

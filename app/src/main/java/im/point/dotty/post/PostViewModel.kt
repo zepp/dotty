@@ -32,6 +32,12 @@ class PostViewModel(application: DottyApplication, private val post: PostType, p
     val onRecommend = onRecommend_.distinctUntilChanged()
     val onBookmark = onBookmark_.distinctUntilChanged()
 
+    init {
+        viewModelScope.launch(Dispatchers.IO + exceptionHandler) {
+            launch { fetchPostComments().collect() }
+        }
+    }
+
     fun onSubscribeChecked(value: Boolean) = viewModelScope.launch {
         onSubscribe_.emit(value)
     }

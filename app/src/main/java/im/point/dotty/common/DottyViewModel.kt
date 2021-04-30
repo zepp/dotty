@@ -5,17 +5,22 @@ package im.point.dotty.common
 
 import android.app.Application
 import android.content.Intent
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import im.point.dotty.DottyApplication
 import im.point.dotty.login.LoginActivity
 import im.point.dotty.main.MainActivity
 import im.point.dotty.network.AuthAPI
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 abstract class DottyViewModel(application: DottyApplication) : AndroidViewModel(application) {
     protected val state = application.state
     protected val authAPI: AuthAPI = application.authApi
+    protected val exceptionHandler = CoroutineExceptionHandler { _, exception ->
+        Log.e(this::class.simpleName, "error: ", exception)
+    }
 
     suspend fun resetActivityBackStack() = withContext(Dispatchers.Main) {
         val intent: Intent = if (state.isLoggedIn == true) {

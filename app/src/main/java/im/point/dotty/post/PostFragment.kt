@@ -43,20 +43,11 @@ class PostFragment : Fragment() {
         binding.postTags.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         layout = binding.postSwipeLayout
         layout.setOnRefreshListener {
-            fetchPostComments()
+            lifecycleScope.launch(exceptionHandler) {
+                viewModel.fetchPostComments().collect { layout.isRefreshing = false }
+            }
         }
         return binding.root
-    }
-
-    override fun onStart() {
-        super.onStart()
-        fetchPostComments()
-    }
-
-    private fun fetchPostComments() {
-        lifecycleScope.launch(exceptionHandler) {
-            viewModel.fetchPostComments().collect { layout.isRefreshing = false }
-        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
