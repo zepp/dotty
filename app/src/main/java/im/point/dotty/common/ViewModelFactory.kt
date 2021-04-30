@@ -26,8 +26,8 @@ class ViewModelFactory<P>(activity: Activity, vararg va: P) : ViewModelProvider.
             if (args.size != 2) throw Exception("post ID is not supplied")
             PostViewModel(application, args.get(0) as PostType, args.get(1) as String) as T
         } else if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
-            if (args.size != 1) throw Exception("user ID is not supplied")
-            UserViewModel(application, args.get(0) as Long) as T
+            if (args.size != 2) throw Exception("user ID and login are not supplied")
+            UserViewModel(application, args.get(0) as Long, args.get(1) as String) as T
         } else {
             throw IllegalArgumentException(modelClass.simpleName + " can not be constructed by this factory")
         }

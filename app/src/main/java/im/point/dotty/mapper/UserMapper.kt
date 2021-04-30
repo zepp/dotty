@@ -11,11 +11,11 @@ import java.util.*
 
 class UserMapper : Mapper<User, UserReply> {
     override fun map(user: UserReply): User {
-        return merge(User(user.id ?: throw Exception("User id is not provided")), user)
+        return merge(User(user.id ?: throw Exception("User id is not provided"),
+                user.login ?: throw Exception("User login is not provided")), user)
     }
 
     override fun merge(model: User, user: UserReply): User {
-        model.login = user.login
         model.name = user.name
         model.registrationDate = regFormat.parse(user.created)
         user.birthdate?.let { model.birthDate = birthFormat.parse(it) }

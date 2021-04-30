@@ -20,8 +20,8 @@ class CommentedFragment : FeedFragment<CommentedPost>() {
         adapter.onItemClicked = { post ->
             startActivity(PostActivity.getIntent(requireContext(), PostType.COMMENTED_POST, post.id))
         }
-        adapter.onUserClicked = { id ->
-            startActivity(UserActivity.getIntent(requireContext(), id))
+        adapter.onUserClicked = { id, login ->
+            startActivity(UserActivity.getIntent(requireContext(), id, login))
         }
         lifecycleScope.launchWhenStarted {
             viewModel.getCommented().collect { list -> adapter.list = list }

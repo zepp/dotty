@@ -22,7 +22,7 @@ class UserRepo(private val api: PointAPI,
     }
 
     override fun getItem(id: Long): Flow<User> {
-        return dao.getUser(id).map { it ?: throw Exception("user not found") }
+        return dao.getUser(id).map { it ?: throw Exception("user not found in DB") }
     }
 
     override fun fetchAll(): Flow<List<User>> {

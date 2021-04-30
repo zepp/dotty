@@ -12,14 +12,13 @@ data class Comment(@ColumnInfo(name = "post_id")
                    val postId: String,
                    val id: Int,
                    @ColumnInfo(name = "user_id")
-                   val userId: Long) {
-
-    @ColumnInfo(name = "parent_id")
-    var replyTo: Int? = 0
-    var text: String? = null
-    var timestamp: Date? = null
-    var login: String? = null
-    var name: String? = null
+                   val userId: Long,
+                   @ColumnInfo(name = "parent_id")
+                   var replyTo: Int? = 0,
+                   var text: String? = null,
+                   var timestamp: Date? = null,
+                   var login: String? = null,
+                   var name: String? = null) {
 
     val fullId: String
         get() = "$postId/$id"

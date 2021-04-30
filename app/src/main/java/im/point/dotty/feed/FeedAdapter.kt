@@ -25,7 +25,7 @@ class FeedAdapter<T : Post> internal constructor(val scope: CoroutineScope, val 
 
     var onItemClicked: (item: T) -> Unit = {}
 
-    var onUserClicked: (item: Long) -> Unit = {}
+    var onUserClicked: (id: Long, login: String) -> Unit = { _, _ -> }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostHolder<T> {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.post, parent, false)

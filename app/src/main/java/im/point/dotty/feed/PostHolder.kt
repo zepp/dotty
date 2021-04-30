@@ -28,13 +28,13 @@ class PostHolder<T : Post>(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val bookmarked: ImageView = itemView.findViewById(R.id.post_bookmarked)
     private val adapter: TagsAdapter = TagsAdapter()
 
-    fun bind(post: T, bitmap: Bitmap, onItemClicked: (item: T) -> Unit, onUserClicked: (item: Long) -> Unit) {
+    fun bind(post: T, bitmap: Bitmap, onItemClicked: (item: T) -> Unit, onUserClicked: (id: Long, login: String) -> Unit) {
         avatar.setImageBitmap(bitmap)
-        avatar.setOnClickListener { onUserClicked(post.authorId) }
+        avatar.setOnClickListener { onUserClicked(post.authorId, post.login!!) }
         bookmarked.visibility = if (post.bookmarked == true) View.VISIBLE else View.GONE
         recommended.visibility = if (post.recommended == true) View.VISIBLE else View.GONE
         author.text = post.nameOrLogin
-        author.setOnClickListener { onUserClicked(post.authorId) }
+        author.setOnClickListener { onUserClicked(post.authorId, post.login!!) }
         id.text = "#" + post.id
         text.text = post.text
         if (post.tags.isNullOrEmpty()) {

@@ -40,7 +40,8 @@ class UserActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityUserBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        viewModel = ViewModelProvider(this, ViewModelFactory(this, intent.getLongExtra(USER_ID, -1)))
+        viewModel = ViewModelProvider(this, ViewModelFactory(this,
+                intent.getLongExtra(USER_ID, -1), intent.getStringExtra(USER_LOGIN)))
                 .get(UserViewModel::class.java)
         adapter = FeedAdapter(lifecycleScope, viewModel::getCommentAvatar)
         adapter.onItemClicked = { item -> startActivity(PostActivity.getIntent(this, PostType.USER_POST, item.id)) }
@@ -77,14 +78,18 @@ class UserActivity : AppCompatActivity() {
             }
         }
 
-        lifecycleScope.launchWhenStarted {
+        bind()
+    }
+
+    private fun bind() = lifecycleScope.launchWhenStarted {
+        launch {
             viewModel.isActionsVisible.collect { value ->
                 binding.userActions.visibility = if (value) View.VISIBLE else View.GONE
             }
         }
 
-        lifecycleScope.launchWhenStarted {
-            viewModel.getUser().collect { user ->
+        launch {
+            viewModel.user.collect { user ->
                 binding.userToolbar.title = user.formattedLogin
                 binding.userName.text = user.name
                 binding.userAbout.text = user.about
@@ -96,12 +101,8 @@ class UserActivity : AppCompatActivity() {
             }
         }
 
-        lifecycleScope.launchWhenStarted {
+        launch {
             viewModel.getPosts().collect { items -> adapter.list = items }
-        }
-
-        lifecycleScope.launchWhenStarted {
-            viewModel.fetchUserAndPosts().collect { onFetched() }
         }
     }
 
@@ -115,10 +116,12 @@ class UserActivity : AppCompatActivity() {
 
     companion object {
         private const val USER_ID = "user-id"
+        private const val USER_LOGIN = "user-login"
 
-        fun getIntent(context: Context, userId: Long): Intent {
+        fun getIntent(context: Context, userId: Long, login: String): Intent {
             val intent = Intent(context, UserActivity::class.java)
             intent.putExtra(USER_ID, userId)
+            intent.putExtra(USER_LOGIN, login)
             return intent
         }
     }
