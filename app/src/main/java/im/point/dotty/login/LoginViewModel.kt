@@ -47,10 +47,8 @@ class LoginViewModel internal constructor(application: DottyApplication) : Dotty
 
     init {
         viewModelScope.launch(Dispatchers.Default) {
-            login.collect { updateLoginEnabled() }
-        }
-        viewModelScope.launch(Dispatchers.Default) {
-            password.collect { updateLoginEnabled() }
+            launch { login.collect { updateLoginEnabled() } }
+            launch { password.collect { updateLoginEnabled() } }
         }
     }
 }
