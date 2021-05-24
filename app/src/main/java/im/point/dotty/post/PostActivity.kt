@@ -73,7 +73,7 @@ class PostActivity : AppCompatActivity() {
             }
         }
         lifecycleScope.launchWhenStarted {
-            viewModel.getPost().collect { post ->
+            viewModel.post.collect { post ->
                 binding.toolbar.title = post.nameOrLogin
                 binding.postBookmark.isChecked = post.bookmarked == true
                 binding.postRecommend.isChecked = post.recommended == true

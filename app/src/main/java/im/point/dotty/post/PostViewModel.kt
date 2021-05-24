@@ -16,7 +16,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class PostViewModel(application: DottyApplication, private val post: PostType, private val postId: String)
+class PostViewModel(application: DottyApplication, private val type: PostType, private val postId: String)
     : DottyViewModel(application) {
     private val repoFactory: RepoFactory = application.repoFactory
     private val api: PointAPI = application.mainApi
@@ -31,10 +31,20 @@ class PostViewModel(application: DottyApplication, private val post: PostType, p
     val onSubscribe = onSubscribe_.distinctUntilChanged()
     val onRecommend = onRecommend_.distinctUntilChanged()
     val onBookmark = onBookmark_.distinctUntilChanged()
+    val post = MutableStateFlow<Post>(object : Post(){
+        override val id: String = postId
+        override val authorId = 0L
+    })
+    val comments = MutableStateFlow<List<Comment>>(listOf())
 
     init {
         viewModelScope.launch(Dispatchers.IO + exceptionHandler) {
             launch { fetchPostComments().collect() }
+            launch { getPost(postId).collect {
+                isPinVisible_.emit(it.authorId == state.id)
+                post.emit(it) }
+            }
+            launch { getPostComments(postId).collect { comments.emit(it) } }
         }
     }
 
@@ -50,7 +60,7 @@ class PostViewModel(application: DottyApplication, private val post: PostType, p
         onBookmark_.emit(value)
     }
 
-    private fun getPost(id: String) = when (post) {
+    private fun getPost(id: String) = when (type) {
         PostType.RECENT_POST -> repoFactory.getRecentPostRepo().getItem(id)
         PostType.COMMENTED_POST -> repoFactory.getCommentedPostRepo().getItem(id)
         PostType.ALL_POST -> repoFactory.getAllPostRepo().getItem(id)
@@ -65,18 +75,14 @@ class PostViewModel(application: DottyApplication, private val post: PostType, p
         else -> throw Exception("unknown model type")
     }
 
-    fun getPost() = getPost(postId)
-            .onEach { isPinVisible_.emit(it.authorId == state.id) }
-            .flowOn(Dispatchers.IO)
+    private fun getPostComments(id:String) = when (type) {
+        PostType.RECENT_POST -> repoFactory.getRecentCommentRepo(id).getAll()
+        PostType.COMMENTED_POST -> repoFactory.getCommentedCommentRepo(id).getAll()
+        PostType.ALL_POST -> repoFactory.getAllCommentRepo(id).getAll()
+        PostType.USER_POST -> repoFactory.getUserCommentRepo(id).getAll()
+    }
 
-    fun getPostComments() = when (post) {
-        PostType.RECENT_POST -> repoFactory.getRecentCommentRepo(postId).getAll()
-        PostType.COMMENTED_POST -> repoFactory.getCommentedCommentRepo(postId).getAll()
-        PostType.ALL_POST -> repoFactory.getAllCommentRepo(postId).getAll()
-        PostType.USER_POST -> repoFactory.getUserCommentRepo(postId).getAll()
-    }.flowOn(Dispatchers.IO)
-
-    fun fetchPostComments() = when (post) {
+    fun fetchPostComments() = when (type) {
         PostType.RECENT_POST -> repoFactory.getRecentCommentRepo(postId).fetchAll()
         PostType.COMMENTED_POST -> repoFactory.getCommentedCommentRepo(postId).fetchAll()
         PostType.ALL_POST -> repoFactory.getAllCommentRepo(postId).fetchAll()
@@ -84,12 +90,12 @@ class PostViewModel(application: DottyApplication, private val post: PostType, p
     }.flowOn(Dispatchers.IO)
 
     fun subscribe() = viewModelScope.async(Dispatchers.IO) {
-        val post = getPost(postId).first()
-        if (post.subscribed == false) {
+        val model = post.value
+        if (model.subscribed == false) {
             with(api.subscribeToPost(postId)) {
                 checkSuccessful()
-                post.subscribed = true
-                updatePost(post)
+                model.subscribed = true
+                updatePost(model)
                 return@async this
             }
         }
@@ -97,12 +103,12 @@ class PostViewModel(application: DottyApplication, private val post: PostType, p
     }
 
     fun unsubscribe() = viewModelScope.async(Dispatchers.IO) {
-        val post = getPost(postId).first()
-        if (post.subscribed == true) {
+        val model = post.value
+        if (model.subscribed == true) {
             with(api.unsubscribeFromPost(postId)) {
                 checkSuccessful()
-                post.subscribed = false
-                updatePost(post)
+                model.subscribed = false
+                updatePost(model)
                 return@async this
             }
         }
@@ -110,12 +116,12 @@ class PostViewModel(application: DottyApplication, private val post: PostType, p
     }
 
     fun recommend() = viewModelScope.async(Dispatchers.IO) {
-        val post = getPost(postId).first()
-        if (post.recommended == false) {
+        val model = post.value
+        if (model.recommended == false) {
             with(api.recommendPost(postId)) {
                 checkSuccessful()
-                post.recommended = true
-                updatePost(post)
+                model.recommended = true
+                updatePost(model)
                 return@async this
             }
         }
@@ -123,12 +129,12 @@ class PostViewModel(application: DottyApplication, private val post: PostType, p
     }
 
     fun unrecommend() = viewModelScope.async(Dispatchers.IO) {
-        val post = getPost(postId).first()
-        if (post.recommended == true) {
+        val model = post.value
+        if (model.recommended == true) {
             with(api.unrecommendPost(postId)) {
                 checkSuccessful()
-                post.recommended = false
-                updatePost(post)
+                model.recommended = false
+                updatePost(model)
                 return@async this
             }
         }
@@ -136,12 +142,12 @@ class PostViewModel(application: DottyApplication, private val post: PostType, p
     }
 
     fun bookmark() = viewModelScope.async(Dispatchers.IO) {
-        val post = getPost(postId).first()
-        if (post.bookmarked == false) {
+        val model = post.value
+        if (model.bookmarked == false) {
             with(api.bookmarkPost(postId)) {
                 checkSuccessful()
-                post.bookmarked = true
-                updatePost(post)
+                model.bookmarked = true
+                updatePost(model)
                 return@async this
             }
         }
@@ -149,12 +155,12 @@ class PostViewModel(application: DottyApplication, private val post: PostType, p
     }
 
     fun unbookmark() = viewModelScope.async(Dispatchers.IO) {
-        val post = getPost(postId).first()
-        if (post.bookmarked == true) {
+        val model = post.value
+        if (model.bookmarked == true) {
             with(api.unbookmarkPost(postId)) {
                 checkSuccessful()
-                post.bookmarked = false
-                updatePost(post)
+                model.bookmarked = false
+                updatePost(model)
                 return@async this
             }
         }

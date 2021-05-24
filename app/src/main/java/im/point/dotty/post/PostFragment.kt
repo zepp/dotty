@@ -57,8 +57,8 @@ class PostFragment : Fragment() {
         adapter = CommentAdapter(lifecycleScope, viewModel::getAvatar)
         binding.postComments.adapter = adapter
         adapter.onIdClicked = { id, pos -> binding.postComments.smoothScrollToPosition(pos) }
-        lifecycleScope.launch(exceptionHandler) {
-            viewModel.getPost().collect { post ->
+        lifecycleScope.launchWhenStarted {
+            viewModel.post.collect { post ->
                 binding.postText.text = post.text
                 if (post.tags.isNullOrEmpty()) {
                     binding.postTags.visibility = View.GONE
@@ -68,7 +68,7 @@ class PostFragment : Fragment() {
             }
         }
         lifecycleScope.launch(exceptionHandler) {
-            viewModel.getPostComments().collect { list -> adapter.list = list }
+            viewModel.comments.collect { list -> adapter.list = list }
         }
     }
 
