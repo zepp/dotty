@@ -16,8 +16,12 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class PostViewModel(application: DottyApplication, private val type: PostType, private val postId: String)
+class PostViewModel(application: DottyApplication, vararg args: Any)
     : DottyViewModel(application) {
+
+    private val type = args[0] as PostType
+    private val postId = args[1] as String
+
     private val repoFactory: RepoFactory = application.repoFactory
     private val api: PointAPI = application.mainApi
     private val avaRepository = application.avaRepo

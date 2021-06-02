@@ -41,7 +41,7 @@ class UserActivity : AppCompatActivity() {
         binding = ActivityUserBinding.inflate(layoutInflater)
         setContentView(binding.root)
         viewModel = ViewModelProvider(this, ViewModelFactory(this,
-                intent.getLongExtra(USER_ID, -1), intent.getStringExtra(USER_LOGIN)))
+                intent.getLongExtra(USER_ID, -1), intent.getStringExtra(USER_LOGIN)!!))
                 .get(UserViewModel::class.java)
         adapter = FeedAdapter(lifecycleScope, viewModel::getCommentAvatar)
         adapter.onItemClicked = { item -> startActivity(PostActivity.getIntent(this, PostType.USER_POST, item.id)) }

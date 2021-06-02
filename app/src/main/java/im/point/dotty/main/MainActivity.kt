@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        viewModel = ViewModelProvider(this, ViewModelFactory<Any>(this))
+        viewModel = ViewModelProvider(this, ViewModelFactory(this))
                 .get(MainViewModel::class.java)
         setSupportActionBar(binding.toolbar)
         binding.mainTabLayout.setupWithViewPager(binding.mainPager)

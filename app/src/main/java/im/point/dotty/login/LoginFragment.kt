@@ -27,7 +27,7 @@ class LoginFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity(), ViewModelFactory<Any>(requireActivity()))
+        viewModel = ViewModelProvider(requireActivity(), ViewModelFactory(requireActivity()))
                 .get(LoginViewModel::class.java)
     }
 

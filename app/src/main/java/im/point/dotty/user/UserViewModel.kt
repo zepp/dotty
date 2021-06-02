@@ -16,7 +16,10 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class UserViewModel(application: DottyApplication, private val userId: Long, userLogin: String) : DottyViewModel(application) {
+class UserViewModel(application: DottyApplication, vararg args: Any) : DottyViewModel(application) {
+    private val userId = args[0] as Long
+    private val userLogin = args[1] as String
+
     private val userRepo = application.repoFactory.getUserRepo()
     private val userPostRepo = application.repoFactory.getUserPostRepo(userId)
     private val api: PointAPI = application.mainApi

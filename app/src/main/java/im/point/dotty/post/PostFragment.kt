@@ -52,7 +52,7 @@ class PostFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity(), ViewModelFactory<Any>(requireActivity()))
+        viewModel = ViewModelProvider(requireActivity(), ViewModelFactory(requireActivity()))
                 .get(PostViewModel::class.java)
         adapter = CommentAdapter(lifecycleScope, viewModel::getAvatar)
         binding.postComments.adapter = adapter

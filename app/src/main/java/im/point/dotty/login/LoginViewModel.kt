@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
 @SuppressLint("CheckResult")
-class LoginViewModel internal constructor(application: DottyApplication) : DottyViewModel(application) {
+class LoginViewModel(application: DottyApplication, vararg args: Any) : DottyViewModel(application) {
     private val userRepo: UserRepo = UserRepo(application.mainApi, state, application.database.getUserDao())
 
     val isLoginEnabled = MutableStateFlow(false)

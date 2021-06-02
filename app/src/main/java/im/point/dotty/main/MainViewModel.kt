@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
-class MainViewModel internal constructor(application: DottyApplication) : DottyViewModel(application) {
+class MainViewModel internal constructor(application: DottyApplication, vararg args: Any) : DottyViewModel(application) {
     private val repoFactory = application.repoFactory
     private val recentRepo = repoFactory.getRecentPostRepo()
     private val commentedRepo = repoFactory.getCommentedPostRepo()

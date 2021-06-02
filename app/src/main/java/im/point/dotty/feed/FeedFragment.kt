@@ -36,7 +36,7 @@ abstract class FeedFragment<T : Post> : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity(), ViewModelFactory<Any>(requireActivity()))
+        viewModel = ViewModelProvider(requireActivity(), ViewModelFactory(requireActivity()))
                 .get(MainViewModel::class.java)
         adapter = FeedAdapter(lifecycleScope, viewModel::getAvatar)
     }
