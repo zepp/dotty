@@ -43,6 +43,8 @@ class UserActivity : AppCompatActivity() {
         viewModel = ViewModelProvider(this, ViewModelFactory(this,
                 intent.getLongExtra(USER_ID, -1), intent.getStringExtra(USER_LOGIN)!!))
                 .get(UserViewModel::class.java)
+        binding.viewModel = viewModel
+        binding.lifecycleOwner = this
         adapter = FeedAdapter(lifecycleScope, viewModel::getCommentAvatar)
         adapter.onItemClicked = { item -> startActivity(PostActivity.getIntent(this, PostType.USER_POST, item.id)) }
         binding.userPosts.adapter = adapter
@@ -91,14 +93,18 @@ class UserActivity : AppCompatActivity() {
         launch {
             viewModel.user.collect { user ->
                 binding.userToolbar.title = user.formattedLogin
+                binding.userName.visibility = if (user.name.isNullOrEmpty()) View.GONE else View.VISIBLE
                 binding.userName.text = user.name
+                binding.userAbout.visibility = if (user.about.isNullOrEmpty()) View.GONE else View.VISIBLE
                 binding.userAbout.text = user.about
                 binding.userSubscribe.isChecked = user.subscribed == true
                 binding.userRecommendSubscribe.isChecked = user.recSubscribed == true
                 binding.userBlock.isChecked = user.blocked == true
-                viewModel.getAvatar(user.login ?: throw Exception("empty login"))
-                        .collect { binding.userAvatar.setImageBitmap(it) }
             }
+        }
+
+        viewModel.getUserAvatar().collect {
+            binding.userAvatar.setImageBitmap(it)
         }
 
         launch {
@@ -125,4 +131,5 @@ class UserActivity : AppCompatActivity() {
             return intent
         }
     }
+
 }

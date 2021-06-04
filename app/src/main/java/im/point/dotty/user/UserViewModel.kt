@@ -37,10 +37,12 @@ class UserViewModel(application: DottyApplication, vararg args: Any) : DottyView
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            userRepo.fetchUser(userId).collect {
-                launch { userRepo.getItem(userId).collect { user.emit(it) } }
-                launch { userPostRepo.fetchAll().collect() }
-            }
+            userRepo.fetchUser(userId).onCompletion {
+                if (it == null) {
+                    launch { userRepo.getItem(userId).collect { user.emit(it) } }
+                    launch { userPostRepo.fetchAll().collect() }
+                }
+            }.collect()
         }
     }
 
@@ -56,15 +58,14 @@ class UserViewModel(application: DottyApplication, vararg args: Any) : DottyView
         onBlock_.emit(value)
     }
 
-    fun getAvatar(login: String) = avaRepo.getAvatar(login, Size.SIZE_280)
+    fun getUserAvatar() = avaRepo.getAvatar(userLogin, Size.SIZE_280)
 
     fun getCommentAvatar(login: String) = avaRepo.getAvatar(login, Size.SIZE_80)
 
     fun subscribe() = viewModelScope.async(Dispatchers.IO) {
         val model = user.value
         if (model.subscribed == false) {
-            with(api.subscribeToUser(model.login
-                    ?: throw Exception("user not found"))) {
+            with(api.subscribeToUser(model.login)) {
                 checkSuccessful()
                 return@async this
             }
@@ -75,8 +76,7 @@ class UserViewModel(application: DottyApplication, vararg args: Any) : DottyView
     fun unsubscribe() = viewModelScope.async(Dispatchers.IO) {
         val model = user.value
         if (model.subscribed == true) {
-            with(api.unsubscribeFromUser(model.login
-                    ?: throw Exception("user not found"))) {
+            with(api.unsubscribeFromUser(model.login)) {
                 checkSuccessful()
                 return@async this
             }
@@ -87,8 +87,7 @@ class UserViewModel(application: DottyApplication, vararg args: Any) : DottyView
     fun subscribeRecommendations() = viewModelScope.async(Dispatchers.IO) {
         val model = user.value
         if (model.recSubscribed == false) {
-            with(api.subscribeToUserRecommendations(model.login
-                    ?: throw Exception("user not found"))) {
+            with(api.subscribeToUserRecommendations(model.login)) {
                 checkSuccessful()
                 return@async this
             }
@@ -99,8 +98,7 @@ class UserViewModel(application: DottyApplication, vararg args: Any) : DottyView
     fun unsubscribeRecommendations() = viewModelScope.async(Dispatchers.IO) {
         val model = user.value
         if (model.recSubscribed == true) {
-            with(api.unsubscribeFromUserRecommendations(model.login
-                    ?: throw Exception("user not found"))) {
+            with(api.unsubscribeFromUserRecommendations(model.login)) {
                 checkSuccessful()
                 return@async this
             }
@@ -111,8 +109,7 @@ class UserViewModel(application: DottyApplication, vararg args: Any) : DottyView
     fun block() = viewModelScope.async(Dispatchers.IO) {
         val model = user.value
         if (model.blocked == false) {
-            with(api.blockUser(model.login
-                    ?: throw Exception("user not found"))) {
+            with(api.blockUser(model.login)) {
                 checkSuccessful()
                 return@async this
             }
@@ -123,8 +120,7 @@ class UserViewModel(application: DottyApplication, vararg args: Any) : DottyView
     fun unblock() = viewModelScope.async(Dispatchers.IO) {
         val model = user.value
         if (model.blocked == true) {
-            with(api.unblockUser(model.login
-                    ?: throw Exception("user not found"))) {
+            with(api.unblockUser(model.login)) {
                 checkSuccessful()
                 return@async this
             }
