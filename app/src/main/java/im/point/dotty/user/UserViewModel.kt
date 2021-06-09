@@ -12,10 +12,12 @@ import im.point.dotty.network.Envelope
 import im.point.dotty.network.PointAPI
 import im.point.dotty.repository.Size
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
+@FlowPreview
 class UserViewModel(application: DottyApplication, vararg args: Any) : DottyViewModel(application) {
     private val userId = args[0] as Long
     private val userLogin = args[1] as String
@@ -29,20 +31,21 @@ class UserViewModel(application: DottyApplication, vararg args: Any) : DottyView
     private val onRecSubscribe_ = MutableSharedFlow<Boolean>()
     private val onBlock_ = MutableSharedFlow<Boolean>()
 
+    // fetch data first or getItem and fetchAll throw exception
+    private val fetched = userRepo.fetchUser(userId).flowOn(Dispatchers.IO)
+
     val isActionsVisible = MutableStateFlow(state.id != userId)
-    val user = MutableStateFlow(User(userId, userLogin))
+    val user = fetched.flatMapConcat { userRepo.getItem(userId) }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, User(userId, userLogin))
+    val posts = fetched.flatMapConcat { userPostRepo.getAll() }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
     val onSubscribe = onSubscribe_.distinctUntilChanged()
     val onRecSubscribe = onRecSubscribe_.distinctUntilChanged()
     val onBlock = onBlock_.distinctUntilChanged()
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            userRepo.fetchUser(userId).onCompletion {
-                if (it == null) {
-                    launch { userRepo.getItem(userId).collect { user.emit(it) } }
-                    launch { userPostRepo.fetchAll().collect() }
-                }
-            }.collect()
+            launch { fetched.flatMapConcat { userPostRepo.fetchAll() }.collect() }
         }
     }
 
@@ -132,5 +135,4 @@ class UserViewModel(application: DottyApplication, vararg args: Any) : DottyView
             .flatMapConcat { userPostRepo.fetchAll() }
             .flowOn(Dispatchers.IO)
 
-    fun getPosts() = userPostRepo.getAll().flowOn(Dispatchers.IO)
 }

@@ -108,7 +108,7 @@ class UserActivity : AppCompatActivity() {
         }
 
         launch {
-            viewModel.getPosts().collect { items -> adapter.list = items }
+            viewModel.posts.collect { items -> adapter.list = items }
         }
     }
 

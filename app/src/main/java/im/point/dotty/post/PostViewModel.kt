@@ -26,29 +26,26 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
     private val api: PointAPI = application.mainApi
     private val avaRepository = application.avaRepo
 
-    private val isPinVisible_ = MutableStateFlow(false)
     private val onSubscribe_ = MutableSharedFlow<Boolean>(0)
     private val onRecommend_ = MutableSharedFlow<Boolean>(0)
     private val onBookmark_ = MutableSharedFlow<Boolean>(0)
 
-    val isPinVisible: StateFlow<Boolean> = isPinVisible_
     val onSubscribe = onSubscribe_.distinctUntilChanged()
     val onRecommend = onRecommend_.distinctUntilChanged()
     val onBookmark = onBookmark_.distinctUntilChanged()
-    val post = MutableStateFlow<Post>(object : Post(){
-        override val id: String = postId
-        override val authorId = 0L
-    })
-    val comments = MutableStateFlow<List<Comment>>(listOf())
+    val post = getPost(postId)
+            .stateIn(viewModelScope, SharingStarted.Eagerly, object : Post() {
+                override val id: String = postId
+                override val authorId = 0L
+            })
+    val isPinVisible = post.map { it.authorId == state.id }
+            .distinctUntilChanged()
+    val comments = getPostComments(postId)
+            .stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
 
     init {
         viewModelScope.launch(Dispatchers.IO + exceptionHandler) {
             launch { fetchPostComments().collect() }
-            launch { getPost(postId).collect {
-                isPinVisible_.emit(it.authorId == state.id)
-                post.emit(it) }
-            }
-            launch { getPostComments(postId).collect { comments.emit(it) } }
         }
     }
 
