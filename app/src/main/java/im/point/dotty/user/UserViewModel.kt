@@ -4,16 +4,15 @@
 
 package im.point.dotty.user
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import im.point.dotty.DottyApplication
 import im.point.dotty.common.DottyViewModel
 import im.point.dotty.model.User
-import im.point.dotty.network.Envelope
 import im.point.dotty.network.PointAPI
 import im.point.dotty.repository.Size
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -27,10 +26,6 @@ class UserViewModel(application: DottyApplication, vararg args: Any) : DottyView
     private val api: PointAPI = application.mainApi
     private val avaRepo = application.avaRepo
 
-    private val onSubscribe_ = MutableSharedFlow<Boolean>()
-    private val onRecSubscribe_ = MutableSharedFlow<Boolean>()
-    private val onBlock_ = MutableSharedFlow<Boolean>()
-
     // fetch data first or getItem and fetchAll throw exception
     private val fetched = userRepo.fetchUser(userId).flowOn(Dispatchers.IO)
 
@@ -39,9 +34,14 @@ class UserViewModel(application: DottyApplication, vararg args: Any) : DottyView
             .stateIn(viewModelScope, SharingStarted.Eagerly, User(userId, userLogin))
     val posts = fetched.flatMapConcat { userPostRepo.getAll() }
             .stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
-    val onSubscribe = onSubscribe_.distinctUntilChanged()
-    val onRecSubscribe = onRecSubscribe_.distinctUntilChanged()
-    val onBlock = onBlock_.distinctUntilChanged()
+
+    // initially all switches are turned off
+    val isSubscribed = user.map { it.subscribed == true }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val isRecSubscribed = user.map { it.recSubscribed == true }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val isBlocked = user.map { it.blocked == true }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -49,86 +49,74 @@ class UserViewModel(application: DottyApplication, vararg args: Any) : DottyView
         }
     }
 
-    fun onSubscribeChecked(value: Boolean) = viewModelScope.launch {
-        onSubscribe_.emit(value)
-    }
+    fun onSubscribeChecked(value: Boolean) = flowOf(value)
+            .filter { it.xor(isSubscribed.value) }
+            .flatMapConcat { if (value) subscribe() else unsubscribe() }
+            .flatMapConcat { userRepo.fetchUser(userId) }
+            .flowOn(Dispatchers.IO)
 
-    fun onRecSubscribeChecked(value: Boolean) = viewModelScope.launch {
-        onRecSubscribe_.emit(value)
-    }
+    fun onRecSubscribeChecked(value: Boolean) = flowOf(value)
+            .filter { it.xor(isRecSubscribed.value) }
+            .flatMapConcat { if (value) subscribeRecommendations() else unsubscribeRecommendations() }
+            .flatMapConcat { userRepo.fetchUser(userId) }
+            .flowOn(Dispatchers.IO)
 
-    fun onBlockChecked(value: Boolean) = viewModelScope.launch {
-        onBlock_.emit(value)
-    }
+    fun onBlockChecked(value: Boolean) = flowOf(value)
+            .filter { it.xor(isBlocked.value) }
+            .flatMapConcat { if (value) block() else unblock() }
+            .flatMapConcat { userRepo.fetchUser(userId) }
+            .flowOn(Dispatchers.IO)
 
     fun getUserAvatar() = avaRepo.getAvatar(userLogin, Size.SIZE_280)
 
     fun getCommentAvatar(login: String) = avaRepo.getAvatar(login, Size.SIZE_80)
 
-    fun subscribe() = viewModelScope.async(Dispatchers.IO) {
-        val model = user.value
-        if (model.subscribed == false) {
-            with(api.subscribeToUser(model.login)) {
-                checkSuccessful()
-                return@async this
-            }
+    private fun subscribe() = flow {
+        with(api.subscribeToUser(userLogin)) {
+            checkSuccessful()
+            emit(this)
+            Log.d(this::class.simpleName, "subscribed to a user")
         }
-        return@async Envelope()
     }
 
-    fun unsubscribe() = viewModelScope.async(Dispatchers.IO) {
-        val model = user.value
-        if (model.subscribed == true) {
-            with(api.unsubscribeFromUser(model.login)) {
-                checkSuccessful()
-                return@async this
-            }
+    private fun unsubscribe() = flow {
+        with(api.unsubscribeFromUser(userLogin)) {
+            checkSuccessful()
+            emit(this)
+            Log.d(this::class.simpleName, "unsubscribed from a user")
         }
-        return@async Envelope()
     }
 
-    fun subscribeRecommendations() = viewModelScope.async(Dispatchers.IO) {
-        val model = user.value
-        if (model.recSubscribed == false) {
-            with(api.subscribeToUserRecommendations(model.login)) {
-                checkSuccessful()
-                return@async this
-            }
+    private fun subscribeRecommendations() = flow {
+        with(api.subscribeToUserRecommendations(userLogin)) {
+            checkSuccessful()
+            emit(this)
+            Log.d(this::class.simpleName, "subscribed to recommendations")
         }
-        return@async Envelope()
     }
 
-    fun unsubscribeRecommendations() = viewModelScope.async(Dispatchers.IO) {
-        val model = user.value
-        if (model.recSubscribed == true) {
-            with(api.unsubscribeFromUserRecommendations(model.login)) {
-                checkSuccessful()
-                return@async this
-            }
+    private fun unsubscribeRecommendations() = flow {
+        with(api.unsubscribeFromUserRecommendations(userLogin)) {
+            checkSuccessful()
+            emit(this)
+            Log.d(this::class.simpleName, "unsubscribed from recommendations")
         }
-        return@async Envelope()
     }
 
-    fun block() = viewModelScope.async(Dispatchers.IO) {
-        val model = user.value
-        if (model.blocked == false) {
-            with(api.blockUser(model.login)) {
-                checkSuccessful()
-                return@async this
-            }
+    private fun block() = flow {
+        with(api.blockUser(userLogin)) {
+            checkSuccessful()
+            emit(this)
+            Log.d(this::class.simpleName, "user is blocked")
         }
-        return@async Envelope()
     }
 
-    fun unblock() = viewModelScope.async(Dispatchers.IO) {
-        val model = user.value
-        if (model.blocked == true) {
-            with(api.unblockUser(model.login)) {
-                checkSuccessful()
-                return@async this
-            }
+    private fun unblock() = flow {
+        with(api.unblockUser(userLogin)) {
+            checkSuccessful()
+            emit(this)
+            Log.d(this::class.simpleName, "user is unblocked")
         }
-        return@async Envelope()
     }
 
     fun fetchUserAndPosts() = userRepo.fetchUser(userId)

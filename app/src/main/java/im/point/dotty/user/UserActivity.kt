@@ -24,6 +24,7 @@ import im.point.dotty.model.PostType
 import im.point.dotty.model.UserPost
 import im.point.dotty.post.PostActivity
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -36,6 +37,7 @@ class UserActivity : AppCompatActivity() {
         showSnackbar(exception.localizedMessage)
     }
 
+    @FlowPreview
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityUserBinding.inflate(layoutInflater)
@@ -52,31 +54,33 @@ class UserActivity : AppCompatActivity() {
         binding.userAvatar.outlineProvider = AvatarOutline(64)
         binding.userAvatar.clipToOutline = true
 
-        binding.userSubscribe.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.onSubscribeChecked(isChecked)
+        lifecycleScope.launchWhenStarted {
+            binding.userSubscribe.setOnCheckedChangeListener { _, isChecked ->
+                launch(exceptionHandler) {
+                    viewModel.onSubscribeChecked(isChecked).collect()
+                }
+            }
+            viewModel.isSubscribed.collect { binding.userSubscribe.isChecked = it }
         }
-        binding.userRecommendSubscribe.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.onRecSubscribeChecked(isChecked)
+        lifecycleScope.launchWhenStarted {
+            binding.userRecommendSubscribe.setOnCheckedChangeListener { _, isChecked ->
+                launch(exceptionHandler) {
+                    viewModel.onRecSubscribeChecked(isChecked)
+                }
+            }
+            viewModel.isRecSubscribed.collect { binding.userRecommendSubscribe.isChecked = it }
         }
-        binding.userBlock.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.onBlockChecked(isChecked)
+        lifecycleScope.launchWhenStarted {
+            binding.userBlock.setOnCheckedChangeListener { _, isChecked ->
+                launch(exceptionHandler) {
+                    viewModel.onBlockChecked(isChecked)
+                }
+            }
+            viewModel.isBlocked.collect { binding.userBlock.isChecked = it }
         }
         binding.userRefresh.setOnRefreshListener {
             lifecycleScope.launch(exceptionHandler) {
                 viewModel.fetchUserAndPosts().collect { onFetched() }
-            }
-        }
-
-        lifecycleScope.launch(exceptionHandler) {
-            viewModel.onSubscribe.collect {
-                if (it) viewModel.subscribe().await() else viewModel.unsubscribe().await()
-            }
-            viewModel.onRecSubscribe.collect {
-                if (it) viewModel.subscribeRecommendations().await()
-                else viewModel.unsubscribeRecommendations().await()
-            }
-            viewModel.onBlock.collect {
-                if (it) viewModel.block().await() else viewModel.unblock().await()
             }
         }
 
@@ -97,9 +101,6 @@ class UserActivity : AppCompatActivity() {
                 binding.userName.text = user.name
                 binding.userAbout.visibility = if (user.about.isNullOrEmpty()) View.GONE else View.VISIBLE
                 binding.userAbout.text = user.about
-                binding.userSubscribe.isChecked = user.subscribed == true
-                binding.userRecommendSubscribe.isChecked = user.recSubscribed == true
-                binding.userBlock.isChecked = user.blocked == true
             }
         }
 
