@@ -17,9 +17,11 @@ import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.ActivityPostBinding
 import im.point.dotty.model.PostType
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
+@FlowPreview
 class PostActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPostBinding
     private lateinit var viewModel: PostViewModel
@@ -48,42 +50,42 @@ class PostActivity : AppCompatActivity() {
                 .get(PostViewModel::class.java)
         binding = ActivityPostBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        binding.postSubscribe.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.onSubscribeChecked(isChecked)
-        }
-        binding.postRecommend.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.onRecommendChecked(isChecked)
-        }
-        binding.postBookmark.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.onBookmarkChecked(isChecked)
-        }
-        lifecycleScope.launch(exceptionHandler) {
-            viewModel.onSubscribe.collect {
-                if (it) viewModel.subscribe().await() else viewModel.unsubscribe().await()
+        binding.viewModel = viewModel
+        binding.lifecycleOwner = this
+
+        lifecycleScope.launchWhenStarted {
+            binding.postSubscribe.setOnCheckedChangeListener { _, isChecked ->
+                launch(exceptionHandler) { viewModel.onSubscribeChecked(isChecked).collect { } }
             }
-        }
-        lifecycleScope.launch(exceptionHandler) {
-            viewModel.onRecommend.collect {
-                if (it) viewModel.recommend().await() else viewModel.unrecommend().await()
-            }
-        }
-        lifecycleScope.launch(exceptionHandler) {
-            viewModel.onBookmark.collect {
-                if (it) viewModel.bookmark().await() else viewModel.unbookmark().await()
-            }
+            viewModel.isSubscribed.collect { binding.postSubscribe.isChecked = it }
         }
         lifecycleScope.launchWhenStarted {
-            viewModel.post.collect { post ->
-                binding.toolbar.title = post.nameOrLogin
-                binding.postBookmark.isChecked = post.bookmarked == true
-                binding.postRecommend.isChecked = post.recommended == true
-                binding.postSubscribe.isChecked = post.subscribed == true
-                binding.postPin.isChecked = post.pinned == true
+            binding.postRecommend.setOnCheckedChangeListener { _, isChecked ->
+                launch(exceptionHandler) { viewModel.onRecommendChecked(isChecked).collect() }
             }
+            viewModel.isRecommended.collect { binding.postRecommend.isChecked = it }
+        }
+        lifecycleScope.launchWhenStarted {
+            binding.postBookmark.setOnCheckedChangeListener { _, isChecked ->
+                launch(exceptionHandler) { viewModel.onBookmarkChecked(isChecked).collect() }
+            }
+            viewModel.isBookmarked.collect { binding.postBookmark.isChecked = it }
+        }
+        lifecycleScope.launchWhenStarted {
+            binding.postPin.setOnCheckedChangeListener { _, isChecked ->
+                launch(exceptionHandler) { viewModel.onPinChecked(isChecked).collect() }
+            }
+            viewModel.isPinned.collect { binding.postPin.isChecked = it }
         }
         lifecycleScope.launchWhenStarted {
             viewModel.isPinVisible.collect {
                 binding.postPin.visibility = if (it) View.VISIBLE else View.GONE
+            }
+        }
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.post.collect { post ->
+                binding.toolbar.title = post.nameOrLogin
             }
         }
     }

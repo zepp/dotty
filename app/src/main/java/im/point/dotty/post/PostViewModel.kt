@@ -3,19 +3,20 @@
  */
 package im.point.dotty.post
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import im.point.dotty.DottyApplication
 import im.point.dotty.common.DottyViewModel
 import im.point.dotty.model.*
-import im.point.dotty.network.Envelope
 import im.point.dotty.network.PointAPI
 import im.point.dotty.repository.RepoFactory
 import im.point.dotty.repository.Size
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
+@FlowPreview
 class PostViewModel(application: DottyApplication, vararg args: Any)
     : DottyViewModel(application) {
 
@@ -26,22 +27,23 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
     private val api: PointAPI = application.mainApi
     private val avaRepository = application.avaRepo
 
-    private val onSubscribe_ = MutableSharedFlow<Boolean>(0)
-    private val onRecommend_ = MutableSharedFlow<Boolean>(0)
-    private val onBookmark_ = MutableSharedFlow<Boolean>(0)
-
-    val onSubscribe = onSubscribe_.distinctUntilChanged()
-    val onRecommend = onRecommend_.distinctUntilChanged()
-    val onBookmark = onBookmark_.distinctUntilChanged()
     val post = getPost(postId)
             .stateIn(viewModelScope, SharingStarted.Eagerly, object : Post() {
                 override val id: String = postId
                 override val authorId = 0L
             })
-    val isPinVisible = post.map { it.authorId == state.id }
-            .distinctUntilChanged()
     val comments = getPostComments(postId)
             .stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
+    val isPinVisible = post.map { it.authorId == state.id }
+            .distinctUntilChanged()
+    val isSubscribed = post.map { it.subscribed == true }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val isRecommended = post.map { it.recommended == true }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val isBookmarked = post.map { it.bookmarked == true }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val isPinned = post.map { it.pinned == true }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     init {
         viewModelScope.launch(Dispatchers.IO + exceptionHandler) {
@@ -49,17 +51,25 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
         }
     }
 
-    fun onSubscribeChecked(value: Boolean) = viewModelScope.launch {
-        onSubscribe_.emit(value)
-    }
+    fun onSubscribeChecked(value: Boolean) = flowOf(value)
+            .filter { it.xor(isSubscribed.value) }
+            .flatMapConcat { if (it) subscribe() else unsubscribe() }
+            .flowOn(Dispatchers.IO)
 
-    fun onRecommendChecked(value: Boolean) = viewModelScope.launch {
-        onRecommend_.emit(value)
-    }
+    fun onRecommendChecked(value: Boolean) = flowOf(value)
+            .filter { it.xor(isRecommended.value) }
+            .flatMapConcat { if (it) recommend() else unrecommend() }
+            .flowOn(Dispatchers.IO)
 
-    fun onBookmarkChecked(value: Boolean) = viewModelScope.launch {
-        onBookmark_.emit(value)
-    }
+    fun onBookmarkChecked(value: Boolean) = flowOf(value)
+            .filter { it.xor(isBookmarked.value) }
+            .flatMapConcat { if (it) bookmark() else unbookmark() }
+            .flowOn(Dispatchers.IO)
+
+    fun onPinChecked(value: Boolean) = flowOf(value)
+            .filter { it.xor(isPinned.value) }
+            .flatMapConcat { if (it) pin() else unpin() }
+            .flowOn(Dispatchers.IO)
 
     private fun getPost(id: String) = when (type) {
         PostType.RECENT_POST -> repoFactory.getRecentPostRepo().getItem(id)
@@ -90,82 +100,86 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
         PostType.USER_POST -> repoFactory.getUserCommentRepo(postId).fetchAll()
     }.flowOn(Dispatchers.IO)
 
-    fun subscribe() = viewModelScope.async(Dispatchers.IO) {
+    private fun subscribe() = flow {
         val model = post.value
-        if (model.subscribed == false) {
-            with(api.subscribeToPost(postId)) {
-                checkSuccessful()
-                model.subscribed = true
-                updatePost(model)
-                return@async this
-            }
+        with(api.subscribeToPost(postId)) {
+            checkSuccessful()
+            model.subscribed = true
+            updatePost(model)
+            Log.d(this::class.simpleName, "subscribed to a post")
+            emit(this)
         }
-        return@async Envelope()
     }
 
-    fun unsubscribe() = viewModelScope.async(Dispatchers.IO) {
+    private fun unsubscribe() = flow {
         val model = post.value
-        if (model.subscribed == true) {
-            with(api.unsubscribeFromPost(postId)) {
-                checkSuccessful()
-                model.subscribed = false
-                updatePost(model)
-                return@async this
-            }
+        with(api.unsubscribeFromPost(postId)) {
+            checkSuccessful()
+            model.subscribed = false
+            updatePost(model)
+            Log.d(this::class.simpleName, "unsubscribed from a post")
+            emit(this)
         }
-        return@async Envelope()
     }
 
-    fun recommend() = viewModelScope.async(Dispatchers.IO) {
+    private fun recommend() = flow {
         val model = post.value
-        if (model.recommended == false) {
-            with(api.recommendPost(postId)) {
-                checkSuccessful()
-                model.recommended = true
-                updatePost(model)
-                return@async this
-            }
+        with(api.recommendPost(postId)) {
+            checkSuccessful()
+            model.recommended = true
+            updatePost(model)
+            emit(this)
         }
-        return@async Envelope()
     }
 
-    fun unrecommend() = viewModelScope.async(Dispatchers.IO) {
+    private fun unrecommend() = flow {
         val model = post.value
-        if (model.recommended == true) {
-            with(api.unrecommendPost(postId)) {
-                checkSuccessful()
-                model.recommended = false
-                updatePost(model)
-                return@async this
-            }
+        with(api.unrecommendPost(postId)) {
+            checkSuccessful()
+            model.recommended = false
+            updatePost(model)
+            emit(this)
         }
-        return@async Envelope()
     }
 
-    fun bookmark() = viewModelScope.async(Dispatchers.IO) {
+    private fun bookmark() = flow {
         val model = post.value
-        if (model.bookmarked == false) {
-            with(api.bookmarkPost(postId)) {
-                checkSuccessful()
-                model.bookmarked = true
-                updatePost(model)
-                return@async this
-            }
+        with(api.bookmarkPost(postId)) {
+            checkSuccessful()
+            model.bookmarked = true
+            updatePost(model)
+            emit(this)
         }
-        return@async Envelope()
     }
 
-    fun unbookmark() = viewModelScope.async(Dispatchers.IO) {
+    private fun unbookmark() = flow {
         val model = post.value
-        if (model.bookmarked == true) {
-            with(api.unbookmarkPost(postId)) {
-                checkSuccessful()
-                model.bookmarked = false
-                updatePost(model)
-                return@async this
-            }
+        with(api.unbookmarkPost(postId)) {
+            checkSuccessful()
+            model.bookmarked = false
+            updatePost(model)
+            emit(this)
         }
-        return@async Envelope()
+    }
+
+    private fun pin() = flow {
+        val model = post.value
+        with(api.pinPost(postId)) {
+            checkSuccessful()
+            model.pinned = true
+            updatePost(model)
+            emit(this)
+        }
+    }
+
+    private fun unpin() = flow {
+        val model = post.value
+        with(api.unpinPost(postId)) {
+            checkSuccessful()
+            model.pinned = false
+            updatePost(model)
+            emit(this)
+        }
     }
 
     fun getAvatar(name: String) = avaRepository.getAvatar(name, Size.SIZE_40)
