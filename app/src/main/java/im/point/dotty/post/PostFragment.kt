@@ -8,25 +8,27 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
+import im.point.dotty.common.NavFragment
 import im.point.dotty.common.RecyclerItemDecorator
 import im.point.dotty.common.TagsAdapter
 import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.FragmentPostBinding
+import im.point.dotty.model.PostType
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-class PostFragment : Fragment() {
+@FlowPreview
+class PostFragment : NavFragment<PostViewModel>() {
     private lateinit var adapter: CommentAdapter
     private lateinit var binding: FragmentPostBinding
-    private lateinit var viewModel: PostViewModel
     private lateinit var layout: SwipeRefreshLayout
     private val tagsAdapter: TagsAdapter = TagsAdapter()
     private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
@@ -35,30 +37,70 @@ class PostFragment : Fragment() {
         showSnackbar(exception.localizedMessage)
     }
 
+    override fun provideViewModel(): PostViewModel {
+        requireArguments().let {
+            val postId = it.getString(POST_ID)!!
+            val post = it.getSerializable(POST_TYPE) as PostType
+            return ViewModelProvider(this, ViewModelFactory(requireActivity(), post, postId))
+                    .get(PostViewModel::class.java)
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        binding = FragmentPostBinding.inflate(layoutInflater, container, false);
+                              savedInstanceState: Bundle?): View {
+        binding = FragmentPostBinding.inflate(layoutInflater, container, false)
+        binding.viewModel = viewModel
+        binding.lifecycleOwner = this
         binding.postTags.adapter = tagsAdapter
         binding.postTags.addItemDecoration(RecyclerItemDecorator(requireContext(), LinearLayoutManager.HORIZONTAL, 4))
         binding.postTags.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        adapter = CommentAdapter(lifecycleScope, viewModel::getAvatar)
+        binding.postComments.adapter = adapter
+        adapter.onIdClicked = { id, pos -> binding.postComments.smoothScrollToPosition(pos) }
         layout = binding.postSwipeLayout
         layout.setOnRefreshListener {
             lifecycleScope.launch(exceptionHandler) {
                 viewModel.fetchPostComments().collect { layout.isRefreshing = false }
             }
         }
+        bind()
         return binding.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity(), ViewModelFactory(requireActivity()))
-                .get(PostViewModel::class.java)
-        adapter = CommentAdapter(lifecycleScope, viewModel::getAvatar)
-        binding.postComments.adapter = adapter
-        adapter.onIdClicked = { id, pos -> binding.postComments.smoothScrollToPosition(pos) }
+    private fun bind() {
+        lifecycleScope.launchWhenStarted {
+            binding.postSubscribe.setOnCheckedChangeListener { _, isChecked ->
+                launch(exceptionHandler) { viewModel.onSubscribeChecked(isChecked).collect { } }
+            }
+            viewModel.isSubscribed.collect { binding.postSubscribe.isChecked = it }
+        }
+        lifecycleScope.launchWhenStarted {
+            binding.postRecommend.setOnCheckedChangeListener { _, isChecked ->
+                launch(exceptionHandler) { viewModel.onRecommendChecked(isChecked).collect() }
+            }
+            viewModel.isRecommended.collect { binding.postRecommend.isChecked = it }
+        }
+        lifecycleScope.launchWhenStarted {
+            binding.postBookmark.setOnCheckedChangeListener { _, isChecked ->
+                launch(exceptionHandler) { viewModel.onBookmarkChecked(isChecked).collect() }
+            }
+            viewModel.isBookmarked.collect { binding.postBookmark.isChecked = it }
+        }
+        lifecycleScope.launchWhenStarted {
+            binding.postPin.setOnCheckedChangeListener { _, isChecked ->
+                launch(exceptionHandler) { viewModel.onPinChecked(isChecked).collect() }
+            }
+            viewModel.isPinned.collect { binding.postPin.isChecked = it }
+        }
+        lifecycleScope.launchWhenStarted {
+            viewModel.isPinVisible.collect {
+                binding.postPin.visibility = if (it) View.VISIBLE else View.GONE
+            }
+        }
+
         lifecycleScope.launchWhenStarted {
             viewModel.post.collect { post ->
+                binding.toolbar.title = post.nameOrLogin
                 binding.postText.text = post.text
                 if (post.tags.isNullOrEmpty()) {
                     binding.postTags.visibility = View.GONE
@@ -67,6 +109,7 @@ class PostFragment : Fragment() {
                 }
             }
         }
+
         lifecycleScope.launch(exceptionHandler) {
             viewModel.comments.collect { list -> adapter.list = list }
         }
@@ -74,5 +117,10 @@ class PostFragment : Fragment() {
 
     private fun showSnackbar(text: String) {
         Snackbar.make(requireActivity().findViewById(R.id.post_layout), text, Snackbar.LENGTH_LONG).show()
+    }
+
+    companion object {
+        const val POST_ID = "post-id"
+        const val POST_TYPE = "post-type"
     }
 }

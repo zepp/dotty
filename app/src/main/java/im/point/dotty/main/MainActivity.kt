@@ -6,106 +6,22 @@ package im.point.dotty.main
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import im.point.dotty.R
+import im.point.dotty.common.NavActivity
 import im.point.dotty.common.ViewModelFactory
-import im.point.dotty.databinding.ActivityMainBinding
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 
-class MainActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityMainBinding
-    private lateinit var viewModel: MainViewModel
-    private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
-        Log.e(this::class.simpleName, exception.message, exception)
-        Toast.makeText(this, exception.message, Toast.LENGTH_LONG).show()
-    }
-
+class MainActivity : NavActivity<MainViewModel>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        viewModel = ViewModelProvider(this, ViewModelFactory(this))
-                .get(MainViewModel::class.java)
-        setSupportActionBar(binding.toolbar)
-        binding.mainTabLayout.setupWithViewPager(binding.mainPager)
-        binding.mainPager.adapter = Adapter(supportFragmentManager)
-        binding.viewModel = viewModel
-        binding.lifecycleOwner = this
-
-        lifecycleScope.launchWhenStarted {
-            viewModel.unreadPosts()
-                    .collect { binding.mainUnreadPosts.text = it.toString() }
-        }
-        lifecycleScope.launchWhenStarted {
-            viewModel.unreadComments()
-                    .collect { binding.mainUnreadComments.text = it.toString() }
-        }
-        lifecycleScope.launchWhenStarted {
-            viewModel.unreadPrivatePosts()
-                    .collect { binding.mainPrivateUnreadPosts.text = it.toString() }
-        }
-        lifecycleScope.launchWhenStarted {
-            viewModel.unreadPrivateComments()
-                    .collect { binding.mainPrivateUnreadComments.text = it.toString() }
-        }
-
-        lifecycleScope.launch(exceptionHandler) {
-            viewModel.fetchUnreadCounters().await()
-        }
+        setNavGraph(R.navigation.navigation_main)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.main_menu, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.main_logout) {
-            lifecycleScope.launch(exceptionHandler) {
-                viewModel.logout().await()
-            }
-            return true
-        } else {
-            return super.onOptionsItemSelected(item)
-        }
-    }
-
-    private inner class Adapter internal constructor(fm: FragmentManager?) : FragmentStatePagerAdapter(fm!!) {
-        override fun getItem(position: Int): Fragment {
-            return when (position) {
-                0 -> RecentFragment()
-                1 -> CommentedFragment()
-                else -> AllFragment()
-            }
-        }
-
-        override fun getPageTitle(position: Int): CharSequence? {
-            return when (position) {
-                0 -> getString(R.string.main_recent)
-                1 -> getString(R.string.main_commented)
-                else -> getString(R.string.main_all)
-            }
-        }
-
-        override fun getCount(): Int {
-            return 3
-        }
-    }
+    override fun provideViewModel() =
+            ViewModelProvider(this, ViewModelFactory(this))
+                    .get(MainViewModel::class.java)
 
     companion object {
-        fun getIntent(context: Context?): Intent {
-            return Intent(context, MainActivity::class.java)
-        }
+        fun getIntent(context: Context) = Intent(context, MainActivity::class.java)
     }
 }

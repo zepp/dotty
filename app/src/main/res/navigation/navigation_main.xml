@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation_main"
+    app:startDestination="@id/main_fragment">
+
+    <fragment
+        android:id="@+id/main_fragment"
+        android:name="im.point.dotty.main.MainFragment"
+        tools:layout="@layout/fragment_main">
+        <action
+            android:id="@+id/action_main_fragment_to_userFragment"
+            app:destination="@id/user_fragment" />
+        <action
+            android:id="@+id/action_main_fragment_to_postFragment"
+            app:destination="@id/post_fragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/user_fragment"
+        android:name="im.point.dotty.user.UserFragment"
+        android:label="UserFragment"
+        tools:layout="@layout/fragment_user">
+        <action
+            android:id="@+id/action_userFragment_to_postFragment"
+            app:destination="@id/post_fragment" />
+        <argument
+            android:name="userId"
+            app:argType="long" />
+        <argument
+            android:name="userLogin"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/post_fragment"
+        android:name="im.point.dotty.post.PostFragment"
+        android:label="PostFragment"
+        tools:layout="@layout/fragment_post">
+        <argument
+            android:name="postType"
+            app:argType="im.point.dotty.model.PostType" />
+        <argument
+            android:name="postId"
+            app:argType="string" />
+    </fragment>
+</navigation>

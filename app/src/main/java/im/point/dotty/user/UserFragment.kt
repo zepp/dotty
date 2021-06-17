@@ -1,56 +1,60 @@
-/*
- * Copyright (c) 2019-2021 Pavel A. Sokolov
- */
-
 package im.point.dotty.user
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
+import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
 import im.point.dotty.common.AvatarOutline
+import im.point.dotty.common.NavFragment
 import im.point.dotty.common.RecyclerItemDecorator
 import im.point.dotty.common.ViewModelFactory
-import im.point.dotty.databinding.ActivityUserBinding
+import im.point.dotty.databinding.FragmentUserBinding
 import im.point.dotty.feed.FeedAdapter
 import im.point.dotty.model.PostType
 import im.point.dotty.model.UserPost
-import im.point.dotty.post.PostActivity
+import im.point.dotty.post.PostFragment
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-class UserActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityUserBinding
-    private lateinit var viewModel: UserViewModel
+@FlowPreview
+class UserFragment : NavFragment<UserViewModel>() {
+    private lateinit var binding: FragmentUserBinding
     private lateinit var adapter: FeedAdapter<UserPost>
     private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
         Log.e(this::class.simpleName, exception.message, exception)
         showSnackbar(exception.localizedMessage)
     }
 
-    @FlowPreview
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityUserBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        viewModel = ViewModelProvider(this, ViewModelFactory(this,
-                intent.getLongExtra(USER_ID, -1), intent.getStringExtra(USER_LOGIN)!!))
-                .get(UserViewModel::class.java)
+    override fun provideViewModel(): UserViewModel {
+        return requireArguments().let {
+            ViewModelProvider(this, ViewModelFactory(requireActivity(),
+                    it.getLong(USER_ID, -1), it.getString(USER_LOGIN)!!))
+                    .get(UserViewModel::class.java)
+        }
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        binding = FragmentUserBinding.inflate(layoutInflater, container, false)
         binding.viewModel = viewModel
         binding.lifecycleOwner = this
         adapter = FeedAdapter(lifecycleScope, viewModel::getCommentAvatar)
-        adapter.onItemClicked = { item -> startActivity(PostActivity.getIntent(this, PostType.USER_POST, item.id)) }
+        adapter.onItemClicked = { post ->
+            val bundle = Bundle()
+            bundle.putString(PostFragment.POST_ID, post.id)
+            bundle.putSerializable(PostFragment.POST_TYPE, PostType.USER_POST)
+            findNavController().navigate(R.id.action_userFragment_to_postFragment, bundle)
+        }
         binding.userPosts.adapter = adapter
-        binding.userPosts.addItemDecoration(RecyclerItemDecorator(this, DividerItemDecoration.VERTICAL, 4))
+        binding.userPosts.addItemDecoration(RecyclerItemDecorator(requireContext(), DividerItemDecoration.VERTICAL, 4))
         binding.userAvatar.outlineProvider = AvatarOutline(64)
         binding.userAvatar.clipToOutline = true
 
@@ -85,6 +89,7 @@ class UserActivity : AppCompatActivity() {
         }
 
         bind()
+        return binding.root
     }
 
     private fun bind() = lifecycleScope.launchWhenStarted {
@@ -118,19 +123,11 @@ class UserActivity : AppCompatActivity() {
     }
 
     private fun showSnackbar(text: String) {
-        Snackbar.make(findViewById(R.id.user_layout), text, Snackbar.LENGTH_LONG).show()
+        Snackbar.make(requireView(), text, Snackbar.LENGTH_LONG).show()
     }
 
     companion object {
-        private const val USER_ID = "user-id"
-        private const val USER_LOGIN = "user-login"
-
-        fun getIntent(context: Context, userId: Long, login: String): Intent {
-            val intent = Intent(context, UserActivity::class.java)
-            intent.putExtra(USER_ID, userId)
-            intent.putExtra(USER_LOGIN, login)
-            return intent
-        }
+        const val USER_ID = "user-id"
+        const val USER_LOGIN = "user-login"
     }
-
 }

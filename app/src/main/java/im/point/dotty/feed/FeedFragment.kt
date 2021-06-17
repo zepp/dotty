@@ -8,7 +8,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -16,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
+import im.point.dotty.common.NavFragment
 import im.point.dotty.common.RecyclerItemDecorator
 import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.FragmentFeedBinding
@@ -23,9 +23,8 @@ import im.point.dotty.main.MainViewModel
 import im.point.dotty.model.Post
 import kotlinx.coroutines.CoroutineExceptionHandler
 
-abstract class FeedFragment<T : Post> : Fragment() {
+abstract class FeedFragment<T : Post> : NavFragment<MainViewModel>() {
     protected lateinit var binding: FragmentFeedBinding
-    protected lateinit var viewModel: MainViewModel
     protected lateinit var adapter: FeedAdapter<T>
     protected lateinit var feedPosts: RecyclerView
     protected val exceptionHandler = CoroutineExceptionHandler { _, exception ->

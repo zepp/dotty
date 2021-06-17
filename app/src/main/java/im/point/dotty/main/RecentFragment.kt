@@ -6,22 +6,32 @@ package im.point.dotty.main
 import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import im.point.dotty.R
 import im.point.dotty.feed.FeedFragment
 import im.point.dotty.model.PostType
 import im.point.dotty.model.RecentPost
-import im.point.dotty.post.PostActivity
-import im.point.dotty.user.UserActivity
+import im.point.dotty.post.PostFragment
+import im.point.dotty.user.UserFragment
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
+@FlowPreview
 class RecentFragment : FeedFragment<RecentPost>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         adapter.onItemClicked = { post ->
-            startActivity(PostActivity.getIntent(requireContext(), PostType.RECENT_POST, post.id))
+            val bundle = Bundle()
+            bundle.putString(PostFragment.POST_ID, post.id)
+            bundle.putSerializable(PostFragment.POST_TYPE, PostType.RECENT_POST)
+            findNavController().navigate(R.id.action_main_fragment_to_postFragment, bundle)
         }
         adapter.onUserClicked = { id, login ->
-            startActivity(UserActivity.getIntent(requireContext(), id, login))
+            val bundle = Bundle()
+            bundle.putLong(UserFragment.USER_ID, id)
+            bundle.putString(UserFragment.USER_LOGIN, login)
+            findNavController().navigate(R.id.action_main_fragment_to_userFragment, bundle)
         }
         lifecycleScope.launchWhenStarted {
             viewModel.recent.collect { list -> adapter.list = list }
