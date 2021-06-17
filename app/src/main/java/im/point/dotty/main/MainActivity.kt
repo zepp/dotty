@@ -40,6 +40,8 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
         binding.mainTabLayout.setupWithViewPager(binding.mainPager)
         binding.mainPager.adapter = Adapter(supportFragmentManager)
+        binding.viewModel = viewModel
+        binding.lifecycleOwner = this
 
         lifecycleScope.launchWhenStarted {
             viewModel.unreadPosts()

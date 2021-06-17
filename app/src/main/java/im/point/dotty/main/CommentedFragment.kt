@@ -24,7 +24,7 @@ class CommentedFragment : FeedFragment<CommentedPost>() {
             startActivity(UserActivity.getIntent(requireContext(), id, login))
         }
         lifecycleScope.launchWhenStarted {
-            viewModel.getCommented().collect { list -> adapter.list = list }
+            viewModel.commented.collect { list -> adapter.list = list }
         }
     }
 

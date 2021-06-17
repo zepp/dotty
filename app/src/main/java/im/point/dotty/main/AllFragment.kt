@@ -24,7 +24,7 @@ class AllFragment : FeedFragment<AllPost>() {
             startActivity(UserActivity.getIntent(requireContext(), id, login))
         }
         lifecycleScope.launchWhenStarted {
-            viewModel.getAll().collect { list -> adapter.list = list }
+            viewModel.all.collect { list -> adapter.list = list }
         }
     }
 

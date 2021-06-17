@@ -24,7 +24,7 @@ class RecentFragment : FeedFragment<RecentPost>() {
             startActivity(UserActivity.getIntent(requireContext(), id, login))
         }
         lifecycleScope.launchWhenStarted {
-            viewModel.getRecent().collect { list -> adapter.list = list }
+            viewModel.recent.collect { list -> adapter.list = list }
         }
     }
 
