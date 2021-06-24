@@ -18,7 +18,7 @@ class UserPostRepo(private val api: PointAPI,
                    private val mapper: Mapper<UserPost, MetaPost> = UserPostMapper(userId)) : Repository<UserPost, String> {
 
     override fun getAll(): Flow<List<UserPost>> {
-        return userPostDao.getUserPosts(userId)
+        return userPostDao.getUserPostsFlow(userId)
     }
 
     override fun getItem(id: String): Flow<UserPost> {
@@ -27,6 +27,7 @@ class UserPostRepo(private val api: PointAPI,
 
     override fun fetchAll() = flow {
         val login = userDao.getItem(userId)?.login ?: throw Exception("user login is empty")
+        userPostDao.getUserPosts(userId).let { if (it.isNotEmpty()) emit(it) }
         with(api.getUserPosts(login, null)) {
             checkSuccessful()
             posts?.let {

@@ -23,6 +23,7 @@ import im.point.dotty.post.PostFragment
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 
 @FlowPreview
@@ -84,7 +85,7 @@ class UserFragment : NavFragment<UserViewModel>() {
         }
         binding.userRefresh.setOnRefreshListener {
             lifecycleScope.launch(exceptionHandler) {
-                viewModel.fetchUserAndPosts().collect { onFetched() }
+                viewModel.fetchUserAndPosts().onCompletion { onFetched() }.collect()
             }
         }
 

@@ -23,6 +23,7 @@ import im.point.dotty.model.PostType
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 
 @FlowPreview
@@ -60,7 +61,7 @@ class PostFragment : NavFragment<PostViewModel>() {
         layout = binding.postSwipeLayout
         layout.setOnRefreshListener {
             lifecycleScope.launch(exceptionHandler) {
-                viewModel.fetchPostComments().collect { layout.isRefreshing = false }
+                viewModel.fetchPostComments().onCompletion { layout.isRefreshing = false }.collect()
             }
         }
         bind()

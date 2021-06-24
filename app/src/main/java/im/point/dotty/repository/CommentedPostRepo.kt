@@ -23,6 +23,7 @@ class CommentedPostRepo(private val api: PointAPI,
 
     @SuppressLint("CheckResult")
     fun fetch(isBefore: Boolean) = flow {
+        dao.getAll().let { if (it.isNotEmpty()) emit(it) }
         with(api.getComments(if (isBefore) state.commentedPageId else null)) {
             checkSuccessful()
             posts?.let {

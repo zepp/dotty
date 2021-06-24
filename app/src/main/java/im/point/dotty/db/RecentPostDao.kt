@@ -14,6 +14,9 @@ interface RecentPostDao : CommonDao<RecentPost, String> {
     override fun getItem(id: String): RecentPost?
 
     @Query("SELECT * FROM recent_posts ORDER BY page_id DESC")
+    fun getAll(): List<RecentPost>
+
+    @Query("SELECT * FROM recent_posts ORDER BY page_id DESC")
     fun getAllFlow(): Flow<List<RecentPost>>
 
     @Query("SELECT * FROM recent_posts WHERE id = :id")

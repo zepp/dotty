@@ -14,6 +14,9 @@ interface AllPostDao : CommonDao<AllPost, String> {
     override fun getItem(id: String): AllPost?
 
     @Query("SELECT * FROM all_posts ORDER BY page_id ASC")
+    fun getAll(): List<AllPost>
+
+    @Query("SELECT * FROM all_posts ORDER BY page_id ASC")
     fun getAllFlow(): Flow<List<AllPost>>
 
     @Query("SELECT * FROM all_posts WHERE id = :id")

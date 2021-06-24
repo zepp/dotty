@@ -15,6 +15,7 @@ import im.point.dotty.post.PostFragment
 import im.point.dotty.user.UserFragment
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 
 @FlowPreview
@@ -40,13 +41,13 @@ class AllFragment : FeedFragment<AllPost>() {
 
     override fun onFeedUpdate() {
         lifecycleScope.launch(exceptionHandler) {
-            viewModel.fetchAll(false).collect { finishUpdate() }
+            viewModel.fetchAll(false).onCompletion { finishUpdate() }.collect()
         }
     }
 
     override fun onFeedUpdateBefore() {
         lifecycleScope.launch(exceptionHandler) {
-            viewModel.fetchAll(true).collect { finishUpdate() }
+            viewModel.fetchAll(true).onCompletion { finishUpdate() }.collect()
         }
     }
 }

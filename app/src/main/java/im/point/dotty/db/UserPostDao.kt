@@ -14,7 +14,10 @@ interface UserPostDao : CommonDao<UserPost, String> {
     override fun getItem(id: String): UserPost?
 
     @Query("SELECT * FROM user_posts WHERE user_id = :userId ORDER BY page_id DESC")
-    fun getUserPosts(userId: Long): Flow<List<UserPost>>
+    fun getUserPosts(userId: Long): List<UserPost>
+
+    @Query("SELECT * FROM user_posts WHERE user_id = :userId ORDER BY page_id DESC")
+    fun getUserPostsFlow(userId: Long): Flow<List<UserPost>>
 
     @Query("SELECT * FROM user_posts WHERE id = :id")
     fun getItemFlow(id: String): Flow<UserPost?>

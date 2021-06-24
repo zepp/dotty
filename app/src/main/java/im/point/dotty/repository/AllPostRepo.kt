@@ -17,29 +17,30 @@ import kotlinx.coroutines.flow.map
 
 class AllPostRepo(private val api: PointAPI,
                   private val state: AppState,
-                  private val allPostDao: AllPostDao,
+                  private val dao: AllPostDao,
                   private val mapper: Mapper<AllPost, MetaPost> = AllPostMapper())
     : Repository<AllPost, String> {
 
     @SuppressLint("CheckResult")
     fun fetch(isBefore: Boolean) = flow {
+        dao.getAll().let { if (it.isNotEmpty()) emit(it) }
         with(api.getAll(if (isBefore) state.allPageId else null)) {
             checkSuccessful()
             posts?.let {
                 val list = it.map { post -> mapper.map(post) }
                 state.allPageId = list.last().pageId
-                allPostDao.insertAll(list)
+                dao.insertAll(list)
                 emit(list)
             }
         }
     }
 
     override fun getAll(): Flow<List<AllPost>> {
-        return allPostDao.getAllFlow()
+        return dao.getAllFlow()
     }
 
     override fun getItem(id: String): Flow<AllPost> {
-        return allPostDao.getItemFlow(id).map { it ?: throw Exception("post not found") }
+        return dao.getItemFlow(id).map { it ?: throw Exception("post not found") }
     }
 
     override fun fetchAll(): Flow<List<AllPost>> {
@@ -47,7 +48,7 @@ class AllPostRepo(private val api: PointAPI,
     }
 
     override fun updateItem(model: AllPost) {
-        allPostDao.insertItem(model)
+        dao.insertItem(model)
     }
 
     fun fetchBefore(): Flow<List<AllPost>> {

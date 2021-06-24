@@ -26,7 +26,7 @@ class CommentRepo<in T : Post>(private val api: PointAPI,
                                private val postMapper: RawPostMapper<T> = RawPostMapper()) : Repository<Comment, String> {
 
     override fun getAll(): Flow<List<Comment>> {
-        return commentDao.getPostComments(id)
+        return commentDao.getPostCommentsFlow(id)
     }
 
     override fun getItem(id: String): Flow<Comment> {
@@ -36,6 +36,7 @@ class CommentRepo<in T : Post>(private val api: PointAPI,
     }
 
     override fun fetchAll() = flow {
+        commentDao.getPostComments(id).let { if (it.isNotEmpty()) emit(it) }
         with(api.getPost(id)) {
             checkSuccessful()
             postDao.insertItem(postMapper.merge(model.first() ?: throw Exception("post not found"),

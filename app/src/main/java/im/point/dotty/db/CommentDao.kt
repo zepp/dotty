@@ -15,7 +15,10 @@ interface CommentDao : CommonDao<Comment, String> {
     override fun getItem(id: String): Comment?
 
     @Query("SELECT * FROM comments WHERE post_id = :id ORDER BY id")
-    fun getPostComments(id: String): Flow<List<Comment>>
+    fun getPostComments(id: String): List<Comment>
+
+    @Query("SELECT * FROM comments WHERE post_id = :id ORDER BY id")
+    fun getPostCommentsFlow(id: String): Flow<List<Comment>>
 
     @Query("SELECT * FROM comments WHERE post_id = :postId AND id = :id")
     fun geItemFlow(postId: String, id: Long): Flow<Comment?>

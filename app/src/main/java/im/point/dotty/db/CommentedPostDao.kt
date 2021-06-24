@@ -14,6 +14,9 @@ interface CommentedPostDao : CommonDao<CommentedPost, String> {
     override fun getItem(id: String): CommentedPost?
 
     @Query("SELECT * FROM commented_posts ORDER BY page_id ASC")
+    fun getAll(): List<CommentedPost>
+
+    @Query("SELECT * FROM commented_posts ORDER BY page_id ASC")
     fun getAllFlow(): Flow<List<CommentedPost>>
 
     @Query("SELECT * FROM commented_posts WHERE id = :id")
