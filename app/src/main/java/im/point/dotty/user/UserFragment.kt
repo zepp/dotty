@@ -109,8 +109,10 @@ class UserFragment : NavFragment<UserViewModel>() {
             }
         }
 
-        viewModel.getUserAvatar().collect {
-            binding.userAvatar.setImageBitmap(it)
+        launch {
+            viewModel.getUserAvatar().collect {
+                binding.userAvatar.setImageBitmap(it)
+            }
         }
 
         launch {

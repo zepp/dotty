@@ -16,10 +16,13 @@ interface UserDao {
     fun insertUser(user: User)
 
     @Query("SELECT * FROM users")
-    fun getAll(): Flow<List<User>>
+    fun getAllUserFlow(): Flow<List<User>>
 
     @Query("SELECT * FROM users WHERE id = :id")
-    fun getUser(id: Long): Flow<User?>
+    fun getUserFlow(id: Long): Flow<User?>
+
+    @Query("SELECT * FROM users WHERE id = :id")
+    fun getUser(id: Long): User?
 
     @Query("DELETE FROM users")
     fun deleteAll()

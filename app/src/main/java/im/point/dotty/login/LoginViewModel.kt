@@ -40,7 +40,7 @@ class LoginViewModel(application: DottyApplication, vararg args: Any) : DottyVie
                     ?: throw Exception("CSRF token is empty")
             state.token = token ?: throw Exception("token is empty")
             resetActivityBackStack()
-            userRepo.fetchMe()
+            userRepo.fetchMe().collect()
             this
         }
     }.flowOn(Dispatchers.IO)

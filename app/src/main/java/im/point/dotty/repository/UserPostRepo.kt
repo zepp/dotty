@@ -8,7 +8,6 @@ import im.point.dotty.model.UserPost
 import im.point.dotty.network.MetaPost
 import im.point.dotty.network.PointAPI
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
@@ -27,7 +26,7 @@ class UserPostRepo(private val api: PointAPI,
     }
 
     override fun fetchAll() = flow {
-        val login = userDao.getUser(userId).first()?.login ?: throw Exception("user login is empty")
+        val login = userDao.getUser(userId)?.login ?: throw Exception("user login is empty")
         with(api.getUserPosts(login, null)) {
             checkSuccessful()
             posts?.let {

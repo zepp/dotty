@@ -9,7 +9,6 @@ import im.point.dotty.mapper.UserMapper
 import im.point.dotty.model.User
 import im.point.dotty.network.PointAPI
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
@@ -18,11 +17,11 @@ class UserRepo(private val api: PointAPI,
                private val dao: UserDao,
                private val mapper: UserMapper = UserMapper()) : Repository<User, Long> {
     override fun getAll(): Flow<List<User>> {
-        return dao.getAll()
+        return dao.getAllUserFlow()
     }
 
     override fun getItem(id: Long): Flow<User> {
-        return dao.getUser(id).map { it ?: throw Exception("user not found in DB") }
+        return dao.getUserFlow(id).map { it ?: throw Exception("user not found in DB") }
     }
 
     override fun fetchAll(): Flow<List<User>> {
@@ -38,6 +37,7 @@ class UserRepo(private val api: PointAPI,
     }
 
     fun fetchUser(id: Long) = flow {
+        dao.getUser(id)?.let { emit(it) }
         with(api.getUser(id)) {
             checkSuccessful()
             with(mapper.map(this)) {
@@ -48,6 +48,11 @@ class UserRepo(private val api: PointAPI,
     }
 
     fun fetchMe() = flow {
+        with(state.id) {
+            if (this != null) {
+                dao.getUser(this)?.let { emit(it) }
+            }
+        }
         with(api.getMe()) {
             checkSuccessful()
             with(mapper.map(this)) {
@@ -58,11 +63,7 @@ class UserRepo(private val api: PointAPI,
         }
     }
 
-    fun getMe(): Flow<User?> {
-        return if (state.id == null) {
-            fetchMe().flatMapConcat { user -> dao.getUser(user.id) }
-        } else {
-            dao.getUser(state.id ?: throw Exception("user ID is not initialized"))
-        }
+    fun getMe(): Flow<User> {
+        return getItem(state.id ?: throw Exception("user ID is empty"));
     }
 }

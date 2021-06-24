@@ -27,7 +27,9 @@ class UserViewModel(application: DottyApplication, vararg args: Any) : DottyView
     private val avaRepo = application.avaRepo
 
     // fetch data first or getItem and fetchAll throw exception
-    private val fetched = userRepo.fetchUser(userId).flowOn(Dispatchers.IO)
+    private val fetched = userRepo.fetchUser(userId)
+            .catch { Log.e(this@UserViewModel::class.simpleName, "error: ", it) }
+            .flowOn(Dispatchers.IO)
 
     val isActionsVisible = MutableStateFlow(state.id != userId)
     val user = fetched.flatMapConcat { userRepo.getItem(userId) }
@@ -44,7 +46,7 @@ class UserViewModel(application: DottyApplication, vararg args: Any) : DottyView
             .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     init {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO + exceptionHandler) {
             launch { fetched.flatMapConcat { userPostRepo.fetchAll() }.collect() }
         }
     }
