@@ -6,6 +6,7 @@ package im.point.dotty.main
 import androidx.lifecycle.viewModelScope
 import im.point.dotty.DottyApplication
 import im.point.dotty.common.DottyViewModel
+import im.point.dotty.db.DottyDatabase
 import im.point.dotty.model.AllPost
 import im.point.dotty.model.CommentedPost
 import im.point.dotty.model.RecentPost
@@ -24,6 +25,7 @@ class MainViewModel internal constructor(application: DottyApplication, vararg a
     private val userRepo = repoFactory.getUserRepo()
     private val api: PointAPI = application.mainApi
     private val avaRepo = application.avaRepo
+    private val db: DottyDatabase = application.database
 
     val recent = recentRepo.getAll().stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
     val commented = commentedRepo.getAll().stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
@@ -60,10 +62,7 @@ class MainViewModel internal constructor(application: DottyApplication, vararg a
     fun logout() = viewModelScope.async(Dispatchers.IO) {
         with(authAPI.logout(state.token, state.csrfToken)) {
             state.isLoggedIn = false
-            allRepo.purge()
-            recentRepo.purge()
-            commentedRepo.purge()
-            userRepo.purge()
+            db.clearAllTables()
             resetActivityBackStack()
             this
         }

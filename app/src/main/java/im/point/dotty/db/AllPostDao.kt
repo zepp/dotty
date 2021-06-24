@@ -9,13 +9,13 @@ import im.point.dotty.model.AllPost
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface AllPostDao : PostDao<AllPost>{
+interface AllPostDao : CommonDao<AllPost, String> {
+    @Query("SELECT * FROM all_posts WHERE id = :id")
+    override fun getItem(id: String): AllPost?
+
     @Query("SELECT * FROM all_posts ORDER BY page_id ASC")
-    fun getAll(): Flow<List<AllPost>>
+    fun getAllFlow(): Flow<List<AllPost>>
 
     @Query("SELECT * FROM all_posts WHERE id = :id")
-    fun getPost(id: String): Flow<AllPost?>
-
-    @Query("DELETE FROM all_posts")
-    fun deleteAll()
+    fun getItemFlow(id: String): Flow<AllPost?>
 }

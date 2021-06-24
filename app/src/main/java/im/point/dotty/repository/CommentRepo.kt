@@ -4,7 +4,7 @@
 package im.point.dotty.repository
 
 import im.point.dotty.db.CommentDao
-import im.point.dotty.db.PostDao
+import im.point.dotty.db.CommonDao
 import im.point.dotty.mapper.CommentMapper
 import im.point.dotty.mapper.Mapper
 import im.point.dotty.mapper.RawPostMapper
@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.map
 
 class CommentRepo<in T : Post>(private val api: PointAPI,
                                private val commentDao: CommentDao,
-                               private val postDao: PostDao<T>,
+                               private val postDao: CommonDao<T, String>,
                                private val id: String,
                                private var model: Flow<T?>,
                                private val mapper: Mapper<Comment, RawComment> = CommentMapper(),
@@ -31,7 +31,7 @@ class CommentRepo<in T : Post>(private val api: PointAPI,
 
     override fun getItem(id: String): Flow<Comment> {
         val bits = id.split('/')
-        return commentDao.geComment(bits.first(), bits.last().toLong())
+        return commentDao.geItemFlow(bits.first(), bits.last().toLong())
                 .map { it ?: throw Exception("comment not found") }
     }
 
@@ -50,9 +50,5 @@ class CommentRepo<in T : Post>(private val api: PointAPI,
 
     override fun updateItem(model: Comment) {
         commentDao.insertItem(model)
-    }
-
-    override fun purge() {
-        commentDao.deleteAll()
     }
 }

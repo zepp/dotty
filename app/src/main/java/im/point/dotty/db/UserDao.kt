@@ -4,26 +4,18 @@
 package im.point.dotty.db
 
 import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import im.point.dotty.model.User
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface UserDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertUser(user: User)
+interface UserDao : CommonDao<User, Long> {
+    @Query("SELECT * FROM users WHERE id = :id")
+    override fun getItem(id: Long): User?
 
     @Query("SELECT * FROM users")
-    fun getAllUserFlow(): Flow<List<User>>
+    fun getAllFlow(): Flow<List<User>>
 
     @Query("SELECT * FROM users WHERE id = :id")
-    fun getUserFlow(id: Long): Flow<User?>
-
-    @Query("SELECT * FROM users WHERE id = :id")
-    fun getUser(id: Long): User?
-
-    @Query("DELETE FROM users")
-    fun deleteAll()
+    fun getItemFlow(id: Long): Flow<User?>
 }

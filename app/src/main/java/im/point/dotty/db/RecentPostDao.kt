@@ -9,13 +9,13 @@ import im.point.dotty.model.RecentPost
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface RecentPostDao : PostDao<RecentPost> {
+interface RecentPostDao : CommonDao<RecentPost, String> {
+    @Query("SELECT * FROM recent_posts WHERE id = :id")
+    override fun getItem(id: String): RecentPost?
+
     @Query("SELECT * FROM recent_posts ORDER BY page_id DESC")
-    fun getAll(): Flow<List<RecentPost>>
+    fun getAllFlow(): Flow<List<RecentPost>>
 
     @Query("SELECT * FROM recent_posts WHERE id = :id")
-    fun getPost(id: String): Flow<RecentPost?>
-
-    @Query("DELETE FROM recent_posts")
-    fun deleteAll()
+    fun getItemFlow(id: String): Flow<RecentPost?>
 }

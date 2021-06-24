@@ -10,5 +10,4 @@ interface Repository<T, K> {
     fun fetchAll(): Flow<List<T>>
     fun getItem(id: K): Flow<T>
     fun updateItem(model: T)
-    fun purge()
 }

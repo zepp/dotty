@@ -22,11 +22,11 @@ class UserPostRepo(private val api: PointAPI,
     }
 
     override fun getItem(id: String): Flow<UserPost> {
-        return userPostDao.getPost(id).map { it ?: throw Exception("post not found") }
+        return userPostDao.getItemFlow(id).map { it ?: throw Exception("post not found") }
     }
 
     override fun fetchAll() = flow {
-        val login = userDao.getUser(userId)?.login ?: throw Exception("user login is empty")
+        val login = userDao.getItem(userId)?.login ?: throw Exception("user login is empty")
         with(api.getUserPosts(login, null)) {
             checkSuccessful()
             posts?.let {
@@ -39,9 +39,5 @@ class UserPostRepo(private val api: PointAPI,
 
     override fun updateItem(model: UserPost) {
         userPostDao.insertItem(model)
-    }
-
-    override fun purge() {
-        userPostDao.deleteAll()
     }
 }

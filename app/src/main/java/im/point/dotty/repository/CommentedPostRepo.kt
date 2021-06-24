@@ -37,11 +37,11 @@ class CommentedPostRepo(private val api: PointAPI,
     }
 
     override fun getAll(): Flow<List<CommentedPost>> {
-        return dao.getAll()
+        return dao.getAllFlow()
     }
 
     override fun getItem(id: String): Flow<CommentedPost> {
-        return dao.getPost(id)
+        return dao.getItemFlow(id)
                 .map { it ?: throw Exception("post not found") }
     }
 
@@ -55,9 +55,5 @@ class CommentedPostRepo(private val api: PointAPI,
 
     override fun updateItem(model: CommentedPost) {
         dao.insertItem(model)
-    }
-
-    override fun purge() {
-        dao.deleteAll()
     }
 }

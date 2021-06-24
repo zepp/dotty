@@ -9,13 +9,13 @@ import im.point.dotty.model.UserPost
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface UserPostDao : PostDao<UserPost> {
+interface UserPostDao : CommonDao<UserPost, String> {
+    @Query("SELECT * FROM user_posts WHERE id = :id")
+    override fun getItem(id: String): UserPost?
+
     @Query("SELECT * FROM user_posts WHERE user_id = :userId ORDER BY page_id DESC")
     fun getUserPosts(userId: Long): Flow<List<UserPost>>
 
     @Query("SELECT * FROM user_posts WHERE id = :id")
-    fun getPost(id: String): Flow<UserPost?>
-
-    @Query("DELETE FROM user_posts")
-    fun deleteAll()
+    fun getItemFlow(id: String): Flow<UserPost?>
 }

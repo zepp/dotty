@@ -1,16 +1,18 @@
-/*
- * Copyright (c) 2019-2021 Pavel A. Sokolov
- */
 package im.point.dotty.db
 
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
-import im.point.dotty.model.Post
+import androidx.room.Update
 
-interface PostDao<in T : Post> {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll(posts: List<T>)
+interface CommonDao<T, K> {
+    fun getItem(id: K): T?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertItem(post: T)
+    fun insertAll(items: List<T>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertItem(item: T)
+
+    @Update
+    fun updateItem(item: T)
 }

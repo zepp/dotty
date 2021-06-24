@@ -35,11 +35,11 @@ class AllPostRepo(private val api: PointAPI,
     }
 
     override fun getAll(): Flow<List<AllPost>> {
-        return allPostDao.getAll()
+        return allPostDao.getAllFlow()
     }
 
     override fun getItem(id: String): Flow<AllPost> {
-        return allPostDao.getPost(id).map { it ?: throw Exception("post not found") }
+        return allPostDao.getItemFlow(id).map { it ?: throw Exception("post not found") }
     }
 
     override fun fetchAll(): Flow<List<AllPost>> {
@@ -48,10 +48,6 @@ class AllPostRepo(private val api: PointAPI,
 
     override fun updateItem(model: AllPost) {
         allPostDao.insertItem(model)
-    }
-
-    override fun purge() {
-        allPostDao.deleteAll()
     }
 
     fun fetchBefore(): Flow<List<AllPost>> {
