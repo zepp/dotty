@@ -8,10 +8,10 @@ import android.graphics.BitmapFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
@@ -20,43 +20,34 @@ import java.util.*
 class AvaRepository(private val client: OkHttpClient,
                     private val path: File) {
     private val nameRegex = Regex("(.*):(\\d+)\\.jpg$");
+    private val map24 = Collections.synchronizedMap(mutableMapOf<String, Bitmap>())
     private val map40 = Collections.synchronizedMap(mutableMapOf<String, Bitmap>())
     private val map80 = Collections.synchronizedMap(mutableMapOf<String, Bitmap>())
     private val map280 = Collections.synchronizedMap(mutableMapOf<String, Bitmap>())
 
-    fun getAvatar(name: String, size: Size): Flow<Bitmap> {
-        with(when (size) {
-            Size.SIZE_40 -> map40.get(name)
-            Size.SIZE_80 -> map80.get(name)
-            Size.SIZE_280 -> map280.get(name)
-            else -> null
-        })
-        {
-            return if (this == null) {
-                fetchAvatar(name, size).flowOn(Dispatchers.IO)
-            } else {
-                flowOf(this)
-            }
-        }
+    fun getAvatar(name: String, size: Size): Flow<Bitmap> =
+            flowOf(map(size)[name]).map { it ?: fetchAvatar(name, size) }
+
+    private fun map(size: Size): MutableMap<String, Bitmap> = when (size) {
+        Size.SIZE_24 -> map24
+        Size.SIZE_40 -> map40
+        Size.SIZE_80 -> map80
+        Size.SIZE_280 -> map280
     }
 
-    fun fetchAvatar(name: String, size: Size) = flow {
+    private suspend fun fetchAvatar(name: String, size: Size) = withContext(Dispatchers.IO) {
         with(File(path, "$name:${size.dim}.jpg")) {
             val response = client.newCall(getRequest(name, size)).execute()
             if (response.isSuccessful) {
                 delete()
                 val bytes = response.body()?.bytes() ?: throw Exception("empty response body")
                 writeBytes(bytes)
-                with(BitmapFactory.decodeByteArray(bytes, 0, bytes.size)) {
-                    if (this == null) {
+                BitmapFactory.decodeByteArray(bytes, 0, bytes.size).also {
+                    if (it == null) {
                         throw Exception("failed to decode file")
+                    } else {
+                        map(size)[name] = it
                     }
-                    when (size) {
-                        Size.SIZE_40 -> map40[name] = this
-                        Size.SIZE_80 -> map80[name] = this
-                        Size.SIZE_280 -> map280[name] = this
-                    }
-                    emit(this)
                 }
             } else {
                 throw Exception(response.message())
@@ -74,15 +65,10 @@ class AvaRepository(private val client: OkHttpClient,
         GlobalScope.launch {
             path.listFiles()?.forEach {
                 nameRegex.matchEntire(it.name)?.groups?.apply {
-                    val name = get(1)?.value
+                    val name = get(1)?.value ?: throw Exception("avatar name is not specified")
                     val size = get(2)?.value?.toInt()
-                            ?: throw Exception("avatar size is not specifid")
-                    val bitmap = BitmapFactory.decodeFile(it.absolutePath)
-                    when (Size.fromDim(size)) {
-                        Size.SIZE_40 -> map40[name] = bitmap
-                        Size.SIZE_80 -> map80[name] = bitmap
-                        Size.SIZE_280 -> map280[name] = bitmap
-                    }
+                            ?: throw Exception("avatar size is not specified")
+                    map(Size.fromDim(size))[name] = BitmapFactory.decodeFile(it.absolutePath)
                 }
             }
         }
@@ -102,7 +88,7 @@ enum class Size(val dim: Int) {
                 SIZE_40.dim -> SIZE_40
                 SIZE_80.dim -> SIZE_80
                 SIZE_280.dim -> SIZE_280
-                else -> throw Exception("unknown dimensin")
+                else -> throw Exception("unknown avatar size")
             }
         }
     }
