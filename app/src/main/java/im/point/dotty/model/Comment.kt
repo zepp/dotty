@@ -5,12 +5,15 @@ package im.point.dotty.model
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
 import java.util.*
 
-@Entity(tableName = "comments", primaryKeys = ["post_id", "id"])
-data class Comment(@ColumnInfo(name = "post_id")
+@Entity(tableName = "comments")
+data class Comment(@PrimaryKey
+                   val id: String,
+                   @ColumnInfo(name = "post_id")
                    val postId: String,
-                   val id: Int,
                    @ColumnInfo(name = "user_id")
                    val userId: Long,
                    @ColumnInfo(name = "parent_id")
@@ -20,8 +23,8 @@ data class Comment(@ColumnInfo(name = "post_id")
                    var login: String? = null,
                    var name: String? = null) {
 
-    val fullId: String
-        get() = "$postId/$id"
+    @Ignore
+    val number = id.split('/').last().toInt()
 
     val nameOrLogin: String?
         get() = if (name.isNullOrEmpty()) login else name

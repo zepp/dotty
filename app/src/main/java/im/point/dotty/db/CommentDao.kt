@@ -10,16 +10,15 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CommentDao : CommonDao<Comment, String> {
-    // TO BE FIXED
     @Query("SELECT * FROM comments WHERE post_id = :id ")
     override fun getItem(id: String): Comment?
 
-    @Query("SELECT * FROM comments WHERE post_id = :id ORDER BY id")
+    @Query("SELECT * FROM comments WHERE id = :id")
+    fun geItemFlow(id: String): Flow<Comment?>
+
+    @Query("SELECT * FROM comments WHERE post_id = :id")
     fun getPostComments(id: String): List<Comment>
 
-    @Query("SELECT * FROM comments WHERE post_id = :id ORDER BY id")
+    @Query("SELECT * FROM comments WHERE post_id = :id")
     fun getPostCommentsFlow(id: String): Flow<List<Comment>>
-
-    @Query("SELECT * FROM comments WHERE post_id = :postId AND id = :id")
-    fun geItemFlow(postId: String, id: Long): Flow<Comment?>
 }

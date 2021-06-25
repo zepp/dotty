@@ -25,15 +25,11 @@ class CommentRepo<in T : Post>(private val api: PointAPI,
                                private val mapper: Mapper<Comment, RawComment> = CommentMapper(),
                                private val postMapper: RawPostMapper<T> = RawPostMapper()) : Repository<Comment, String> {
 
-    override fun getAll(): Flow<List<Comment>> {
-        return commentDao.getPostCommentsFlow(id)
-    }
+    override fun getAll(): Flow<List<Comment>> =
+            commentDao.getPostCommentsFlow(id)
 
-    override fun getItem(id: String): Flow<Comment> {
-        val bits = id.split('/')
-        return commentDao.geItemFlow(bits.first(), bits.last().toLong())
-                .map { it ?: throw Exception("comment not found") }
-    }
+    override fun getItem(id: String): Flow<Comment> =
+            commentDao.geItemFlow(id).map { it ?: throw Exception("comment not found") }
 
     override fun fetchAll() = flow {
         commentDao.getPostComments(id).let { if (it.isNotEmpty()) emit(it) }

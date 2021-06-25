@@ -45,7 +45,7 @@ class CommentAdapter(val scope: CoroutineScope, val factory: (name: String) -> F
                 .collect { bitmap -> holder.bind(item, position, bitmap, onIdClicked) }
     }.let { Unit }
 
-    override fun getItemId(position: Int): Long = list[position].id.toLong()
+    override fun getItemId(position: Int): Long = list[position].number.toLong()
 
     init {
         setHasStableIds(true)
@@ -64,10 +64,10 @@ class CommentHolder(view: View) : RecyclerView.ViewHolder(view) {
         avatar.setImageBitmap(avatarBitmap)
         author.text = comment.nameOrLogin
         text.text = comment.text
-        id.text = comment.id.toString()
+        id.text = comment.number.toString()
         arrow.visibility = if (comment.replyTo == null) View.GONE else View.VISIBLE
         replyTo.visibility = if (comment.replyTo == null) View.GONE else View.VISIBLE
-        id.setOnClickListener { v -> onIdClicked(comment.id, pos) }
+        id.setOnClickListener { v -> onIdClicked(comment.number, pos) }
         comment.replyTo?.let {
             replyTo.text = it.toString()
             replyTo.setOnClickListener { v -> onIdClicked(it, pos) }

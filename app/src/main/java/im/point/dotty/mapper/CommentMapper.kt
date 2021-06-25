@@ -10,8 +10,8 @@ import java.util.*
 
 class CommentMapper : Mapper<Comment, RawComment> {
     override fun map(comment: RawComment): Comment {
-        val result = Comment(comment.postId ?: throw Exception("Post id is not provided"),
-                comment.id ?: throw Exception("Comment id is not provided"),
+        val result = Comment("${comment.postId}/${comment.id}",
+                comment.postId ?: throw Exception("Post id is not provided"),
                 comment.author?.id ?: throw Exception("Comment's author id is not provided"))
         return merge(result, comment)
     }

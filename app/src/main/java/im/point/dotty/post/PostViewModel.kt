@@ -33,6 +33,7 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
                 override val authorId = 0L
             })
     val comments = getPostComments(postId)
+            .map { it.toMutableList().apply { sortBy { entry -> entry.number } } }
             .stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
     val isPinVisible = post.map { it.authorId == state.id }
             .distinctUntilChanged()
