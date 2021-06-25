@@ -47,7 +47,7 @@ class UserFragment : NavFragment<UserViewModel>() {
         binding = FragmentUserBinding.inflate(layoutInflater, container, false)
         binding.viewModel = viewModel
         binding.lifecycleOwner = this
-        adapter = FeedAdapter(lifecycleScope, viewModel::getCommentAvatar)
+        adapter = FeedAdapter(lifecycleScope, viewModel::getPostAvatar)
         adapter.onItemClicked = { post ->
             val bundle = Bundle()
             bundle.putString(PostFragment.POST_ID, post.id)

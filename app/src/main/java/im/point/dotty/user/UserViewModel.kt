@@ -75,7 +75,7 @@ class UserViewModel(application: DottyApplication, vararg args: Any) : DottyView
 
     fun getUserAvatar() = avaRepo.getAvatar(userLogin, Size.SIZE_280)
 
-    fun getCommentAvatar(login: String) = avaRepo.getAvatar(login, Size.SIZE_80)
+    fun getPostAvatar(login: String) = avaRepo.getAvatar(login, Size.SIZE_80)
 
     private fun logAndRethrow(e: Throwable) {
         Log.e(this::class.simpleName, "error: ", e)
