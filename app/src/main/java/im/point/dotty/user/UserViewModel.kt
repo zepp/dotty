@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @FlowPreview
 class UserViewModel(application: DottyApplication, vararg args: Any) : DottyViewModel(application) {
@@ -53,70 +54,72 @@ class UserViewModel(application: DottyApplication, vararg args: Any) : DottyView
 
     fun onSubscribeChecked(value: Boolean) = flowOf(value)
             .filter { it.xor(isSubscribed.value) }
-            .flatMapConcat { if (value) subscribe() else unsubscribe() }
+            .map { if (value) subscribe() else unsubscribe() }
             .flatMapConcat { userRepo.fetchUser(userId) }
+            .catch { logAndRethrow(it) }
             .flowOn(Dispatchers.IO)
 
     fun onRecSubscribeChecked(value: Boolean) = flowOf(value)
             .filter { it.xor(isRecSubscribed.value) }
-            .flatMapConcat { if (value) subscribeRecommendations() else unsubscribeRecommendations() }
+            .map { if (value) subscribeRecommendations() else unsubscribeRecommendations() }
             .flatMapConcat { userRepo.fetchUser(userId) }
+            .catch { logAndRethrow(it) }
             .flowOn(Dispatchers.IO)
 
     fun onBlockChecked(value: Boolean) = flowOf(value)
             .filter { it.xor(isBlocked.value) }
-            .flatMapConcat { if (value) block() else unblock() }
+            .map { if (value) block() else unblock() }
             .flatMapConcat { userRepo.fetchUser(userId) }
+            .catch { logAndRethrow(it) }
             .flowOn(Dispatchers.IO)
 
     fun getUserAvatar() = avaRepo.getAvatar(userLogin, Size.SIZE_280)
 
     fun getCommentAvatar(login: String) = avaRepo.getAvatar(login, Size.SIZE_80)
 
-    private fun subscribe() = flow {
-        with(api.subscribeToUser(userLogin)) {
+    private fun logAndRethrow(e: Throwable) {
+        Log.e(this::class.simpleName, "error: ", e)
+        throw e
+    }
+
+    private suspend fun subscribe() = withContext(Dispatchers.IO) {
+        api.subscribeToUser(userLogin).apply {
             checkSuccessful()
-            emit(this)
             Log.d(this::class.simpleName, "subscribed to a user")
         }
     }
 
-    private fun unsubscribe() = flow {
-        with(api.unsubscribeFromUser(userLogin)) {
+    private suspend fun unsubscribe() = withContext(Dispatchers.IO) {
+        api.unsubscribeFromUser(userLogin).apply {
             checkSuccessful()
-            emit(this)
             Log.d(this::class.simpleName, "unsubscribed from a user")
         }
     }
 
-    private fun subscribeRecommendations() = flow {
-        with(api.subscribeToUserRecommendations(userLogin)) {
+    private suspend fun subscribeRecommendations() = withContext(Dispatchers.IO) {
+        api.subscribeToUserRecommendations(userLogin).apply {
             checkSuccessful()
-            emit(this)
             Log.d(this::class.simpleName, "subscribed to recommendations")
         }
     }
 
-    private fun unsubscribeRecommendations() = flow {
-        with(api.unsubscribeFromUserRecommendations(userLogin)) {
+    private suspend fun unsubscribeRecommendations() = withContext(Dispatchers.IO) {
+        api.unsubscribeFromUserRecommendations(userLogin).apply {
             checkSuccessful()
-            emit(this)
             Log.d(this::class.simpleName, "unsubscribed from recommendations")
         }
     }
 
-    private fun block() = flow {
-        with(api.blockUser(userLogin)) {
+    private suspend fun block() = withContext(Dispatchers.IO) {
+        api.blockUser(userLogin).apply {
             checkSuccessful()
-            emit(this)
             Log.d(this::class.simpleName, "user is blocked")
         }
     }
 
-    private fun unblock() = flow {
-        with(api.unblockUser(userLogin)) {
+    private suspend fun unblock() = withContext(Dispatchers.IO) {
+        api.unblockUser(userLogin).apply {
             checkSuccessful()
-            emit(this)
             Log.d(this::class.simpleName, "user is unblocked")
         }
     }

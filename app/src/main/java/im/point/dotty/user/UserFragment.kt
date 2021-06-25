@@ -59,28 +59,28 @@ class UserFragment : NavFragment<UserViewModel>() {
         binding.userAvatar.outlineProvider = AvatarOutline(64)
         binding.userAvatar.clipToOutline = true
 
-        lifecycleScope.launchWhenStarted {
-            binding.userSubscribe.setOnCheckedChangeListener { _, isChecked ->
-                launch(exceptionHandler) {
-                    viewModel.onSubscribeChecked(isChecked).collect()
-                }
+        binding.userSubscribe.setOnCheckedChangeListener { _, isChecked ->
+            lifecycleScope.launch(exceptionHandler) {
+                viewModel.onSubscribeChecked(isChecked).collect()
             }
+        }
+        lifecycleScope.launchWhenStarted {
             viewModel.isSubscribed.collect { binding.userSubscribe.isChecked = it }
         }
-        lifecycleScope.launchWhenStarted {
-            binding.userRecommendSubscribe.setOnCheckedChangeListener { _, isChecked ->
-                launch(exceptionHandler) {
-                    viewModel.onRecSubscribeChecked(isChecked)
-                }
+        binding.userRecommendSubscribe.setOnCheckedChangeListener { _, isChecked ->
+            lifecycleScope.launch(exceptionHandler) {
+                viewModel.onRecSubscribeChecked(isChecked).collect()
             }
-            viewModel.isRecSubscribed.collect { binding.userRecommendSubscribe.isChecked = it }
         }
         lifecycleScope.launchWhenStarted {
-            binding.userBlock.setOnCheckedChangeListener { _, isChecked ->
-                launch(exceptionHandler) {
-                    viewModel.onBlockChecked(isChecked)
-                }
+            viewModel.isRecSubscribed.collect { binding.userRecommendSubscribe.isChecked = it }
+        }
+        binding.userBlock.setOnCheckedChangeListener { _, isChecked ->
+            lifecycleScope.launch(exceptionHandler) {
+                viewModel.onBlockChecked(isChecked).collect()
             }
+        }
+        lifecycleScope.launchWhenStarted {
             viewModel.isBlocked.collect { binding.userBlock.isChecked = it }
         }
         binding.userRefresh.setOnRefreshListener {
