@@ -10,26 +10,18 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
-import im.point.dotty.common.ViewModelFactory
+import im.point.dotty.common.NavFragment
 import im.point.dotty.common.setTextAndCursor
 import im.point.dotty.databinding.FragmentLoginBinding
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-class LoginFragment : Fragment() {
+class LoginFragment : NavFragment<LoginViewModel>() {
     private lateinit var binding: FragmentLoginBinding
-    private lateinit var viewModel: LoginViewModel
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity(), ViewModelFactory(requireActivity()))
-                .get(LoginViewModel::class.java)
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentLoginBinding.inflate(inflater, container, false)

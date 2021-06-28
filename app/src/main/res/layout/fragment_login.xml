@@ -11,6 +11,7 @@
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/login_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context="im.point.dotty.login.LoginFragment">
@@ -50,7 +51,8 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="196dp"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="16dp"
+                app:passwordToggleEnabled="true">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/login_password"
