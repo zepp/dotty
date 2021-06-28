@@ -42,8 +42,10 @@ abstract class FeedFragment<T : Post> : NavFragment<MainViewModel>() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        binding = FragmentFeedBinding.inflate(inflater, container, false);
-        return binding.root;
+        binding = FragmentFeedBinding.inflate(inflater, container, false)
+        binding.viewModel = viewModel
+        binding.lifecycleOwner = this
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
