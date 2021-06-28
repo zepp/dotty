@@ -110,7 +110,7 @@ class UserFragment : NavFragment<UserViewModel>() {
             }
         }
 
-        launch {
+        launch(exceptionHandler) {
             viewModel.getUserAvatar().collect {
                 binding.userAvatar.setImageBitmap(it)
             }

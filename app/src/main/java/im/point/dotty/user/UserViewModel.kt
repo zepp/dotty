@@ -46,6 +46,9 @@ class UserViewModel(application: DottyApplication, vararg args: Any) : DottyView
     val isBlocked = user.map { it.blocked == true }
             .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
+    private val login = user.map { it.login }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, userLogin)
+
     init {
         viewModelScope.launch(Dispatchers.IO + exceptionHandler) {
             launch { fetched.flatMapConcat { userPostRepo.fetchAll() }.collect() }
@@ -73,7 +76,7 @@ class UserViewModel(application: DottyApplication, vararg args: Any) : DottyView
             .catch { logAndRethrow(it) }
             .flowOn(Dispatchers.IO)
 
-    fun getUserAvatar() = avaRepo.getAvatar(userLogin, Size.SIZE_280)
+    fun getUserAvatar() = avaRepo.getAvatar(login.value, Size.SIZE_280)
 
     fun getPostAvatar(login: String) = avaRepo.getAvatar(login, Size.SIZE_80)
 
@@ -83,42 +86,42 @@ class UserViewModel(application: DottyApplication, vararg args: Any) : DottyView
     }
 
     private suspend fun subscribe() = withContext(Dispatchers.IO) {
-        api.subscribeToUser(userLogin).apply {
+        api.subscribeToUser(login.value).apply {
             checkSuccessful()
             Log.d(this::class.simpleName, "subscribed to a user")
         }
     }
 
     private suspend fun unsubscribe() = withContext(Dispatchers.IO) {
-        api.unsubscribeFromUser(userLogin).apply {
+        api.unsubscribeFromUser(login.value).apply {
             checkSuccessful()
             Log.d(this::class.simpleName, "unsubscribed from a user")
         }
     }
 
     private suspend fun subscribeRecommendations() = withContext(Dispatchers.IO) {
-        api.subscribeToUserRecommendations(userLogin).apply {
+        api.subscribeToUserRecommendations(login.value).apply {
             checkSuccessful()
             Log.d(this::class.simpleName, "subscribed to recommendations")
         }
     }
 
     private suspend fun unsubscribeRecommendations() = withContext(Dispatchers.IO) {
-        api.unsubscribeFromUserRecommendations(userLogin).apply {
+        api.unsubscribeFromUserRecommendations(login.value).apply {
             checkSuccessful()
             Log.d(this::class.simpleName, "unsubscribed from recommendations")
         }
     }
 
     private suspend fun block() = withContext(Dispatchers.IO) {
-        api.blockUser(userLogin).apply {
+        api.blockUser(login.value).apply {
             checkSuccessful()
             Log.d(this::class.simpleName, "user is blocked")
         }
     }
 
     private suspend fun unblock() = withContext(Dispatchers.IO) {
-        api.unblockUser(userLogin).apply {
+        api.unblockUser(login.value).apply {
             checkSuccessful()
             Log.d(this::class.simpleName, "user is unblocked")
         }
