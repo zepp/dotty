@@ -30,23 +30,23 @@ class RepoFactory(private val api: PointAPI, private val database: DottyDatabase
         return UserRepo(api, state, database.getUserDao())
     }
 
-    fun getRecentCommentRepo(id: String): Repository<Comment, String> {
+    fun getRecentCommentRepo(postId: String): Repository<Comment, String> {
         val dao = database.getRecentPostDao()
-        return CommentRepo(api, database.getCommentDao(), dao, id, dao.getItemFlow(id))
+        return CommentRepo(api, database.getCommentDao(), dao, postId)
     }
 
-    fun getCommentedCommentRepo(id: String): Repository<Comment, String> {
+    fun getCommentedCommentRepo(postId: String): Repository<Comment, String> {
         val dao = database.getCommentedPostDao()
-        return CommentRepo(api, database.getCommentDao(), dao, id, dao.getItemFlow(id))
+        return CommentRepo(api, database.getCommentDao(), dao, postId)
     }
 
-    fun getAllCommentRepo(id: String): Repository<Comment, String> {
+    fun getAllCommentRepo(postId: String): Repository<Comment, String> {
         val dao = database.getAllPostDao()
-        return CommentRepo(api, database.getCommentDao(), dao, id, dao.getItemFlow(id))
+        return CommentRepo(api, database.getCommentDao(), dao, postId)
     }
 
-    fun getUserCommentRepo(id: String): Repository<Comment, String> {
+    fun getUserCommentRepo(postId: String): Repository<Comment, String> {
         val dao = database.getUserPostsDao()
-        return CommentRepo(api, database.getCommentDao(), dao, id, dao.getItemFlow(id))
+        return CommentRepo(api, database.getCommentDao(), dao, postId)
     }
 }
