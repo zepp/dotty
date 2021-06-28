@@ -11,6 +11,8 @@
         android:id="@+id/comment_author_avatar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        tools:layout_width="80px"
+        tools:layout_height="80px"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"
@@ -46,7 +48,7 @@
         android:id="@+id/comment_arrow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
+        android:gravity="center"
         android:text="→"
         app:layout_constraintBottom_toBottomOf="@id/comment_id"
         app:layout_constraintEnd_toStartOf="@id/comment_reply_to"
@@ -57,11 +59,18 @@
         style="@style/IdTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
         app:layout_constraintBottom_toBottomOf="@id/comment_id"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/comment_reply_margin"
         app:layout_constraintTop_toTopOf="@id/comment_id"
         tools:text="1" />
+
+    <Space
+        android:id="@+id/comment_reply_margin"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/comment_reply_to"
+        app:layout_constraintBottom_toBottomOf="@id/comment_reply_to"
+        android:layout_width="8dp"
+        android:layout_height="wrap_content"/>
 
     <TextView
         android:id="@+id/comment_text"

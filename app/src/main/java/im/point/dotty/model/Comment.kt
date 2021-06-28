@@ -28,4 +28,7 @@ data class Comment(@PrimaryKey
 
     val nameOrLogin: String?
         get() = if (name.isNullOrEmpty()) login else name
+
+    val alogin:String
+        get() = "@$login"
 }

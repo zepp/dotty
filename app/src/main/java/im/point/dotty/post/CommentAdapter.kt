@@ -32,18 +32,20 @@ class CommentAdapter(val scope: CoroutineScope, val factory: (name: String) -> F
             notifyDataSetChanged()
         }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommentHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.list_item_comment, parent, false)
-        return CommentHolder(view)
-    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+        LayoutInflater.from(parent.context).inflate(R.layout.list_item_comment, parent, false)
+            .let { CommentHolder(it)}
 
     override fun getItemCount(): Int = list.size
 
-    override fun onBindViewHolder(holder: CommentHolder, position: Int) = scope.launch(Dispatchers.Main) {
-        val item = list[position]
-        factory(item.login ?: throw Exception("empty login"))
-                .collect { bitmap -> holder.bind(item, position, bitmap, onIdClicked) }
-    }.let { Unit }
+    override fun onBindViewHolder(holder: CommentHolder, position: Int) {
+        scope.launch(Dispatchers.Main) {
+            with (list[position]) {
+                factory(login ?: throw Exception("empty login"))
+                    .collect { bitmap -> holder.bind(this, position, bitmap, onIdClicked) }
+            }
+        }
+    }
 
     override fun getItemId(position: Int): Long = list[position].number.toLong()
 
@@ -62,15 +64,15 @@ class CommentHolder(view: View) : RecyclerView.ViewHolder(view) {
 
     fun bind(comment: Comment, pos: Int, avatarBitmap: Bitmap, onIdClicked: (id: Int, pos: Int) -> Unit) {
         avatar.setImageBitmap(avatarBitmap)
-        author.text = comment.nameOrLogin
+        author.text = comment.alogin
         text.text = comment.text
         id.text = comment.number.toString()
         arrow.visibility = if (comment.replyTo == null) View.GONE else View.VISIBLE
         replyTo.visibility = if (comment.replyTo == null) View.GONE else View.VISIBLE
-        id.setOnClickListener { v -> onIdClicked(comment.number, pos) }
+        id.setOnClickListener { onIdClicked(comment.number, pos) }
         comment.replyTo?.let {
             replyTo.text = it.toString()
-            replyTo.setOnClickListener { v -> onIdClicked(it, pos) }
+            replyTo.setOnClickListener { _ -> onIdClicked(it, pos) }
         }
     }
 

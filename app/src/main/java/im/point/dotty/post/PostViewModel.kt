@@ -183,5 +183,5 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
         }
     }
 
-    fun getAvatar(name: String) = avaRepository.getAvatar(name, Size.SIZE_40)
+    fun getAvatar(name: String) = avaRepository.getAvatar(name, Size.SIZE_80)
 }
