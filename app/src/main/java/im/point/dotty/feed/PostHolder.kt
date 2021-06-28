@@ -33,7 +33,7 @@ class PostHolder<T : Post>(itemView: View) : RecyclerView.ViewHolder(itemView) {
         avatar.setOnClickListener { onUserClicked(post.authorId, post.login!!) }
         bookmarked.visibility = if (post.bookmarked == true) View.VISIBLE else View.GONE
         recommended.visibility = if (post.recommended == true) View.VISIBLE else View.GONE
-        author.text = post.nameOrLogin
+        author.text = post.alogin
         author.setOnClickListener { onUserClicked(post.authorId, post.login!!) }
         id.text = "#" + post.id
         text.text = post.text

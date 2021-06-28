@@ -4,6 +4,7 @@
 package im.point.dotty.model
 
 import androidx.room.ColumnInfo
+import androidx.room.Ignore
 import java.util.*
 
 abstract class Post {
@@ -28,4 +29,7 @@ abstract class Post {
 
     val nameOrLogin: String?
         get() = if (name.isNullOrEmpty()) login else name
+
+    val alogin:String
+        get() = "@$login"
 }
