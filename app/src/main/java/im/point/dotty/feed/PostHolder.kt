@@ -30,11 +30,11 @@ class PostHolder<T : Post>(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     fun bind(post: T, bitmap: Bitmap, onItemClicked: (item: T) -> Unit, onUserClicked: (id: Long, login: String) -> Unit) {
         avatar.setImageBitmap(bitmap)
-        avatar.setOnClickListener { onUserClicked(post.authorId, post.login!!) }
+        avatar.setOnClickListener { onUserClicked(post.authorId, post.authorLogin) }
         bookmarked.visibility = if (post.bookmarked == true) View.VISIBLE else View.GONE
         recommended.visibility = if (post.recommended == true) View.VISIBLE else View.GONE
         author.text = post.alogin
-        author.setOnClickListener { onUserClicked(post.authorId, post.login!!) }
+        author.setOnClickListener { onUserClicked(post.authorId, post.authorLogin) }
         id.text = "#" + post.id
         text.text = post.text
         if (post.tags.isNullOrEmpty()) {

@@ -11,4 +11,5 @@ import androidx.room.PrimaryKey
 data class RecentPost(@PrimaryKey
                       override val id: String,
                       @ColumnInfo(name = "author_id")
-                      override val authorId: Long) : Post()
+                      override val authorId: Long,
+                      override var authorLogin: String) : Post()

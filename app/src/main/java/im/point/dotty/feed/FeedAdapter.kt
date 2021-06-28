@@ -34,8 +34,9 @@ class FeedAdapter<T : Post> internal constructor(val scope: CoroutineScope, val 
     override fun onBindViewHolder(holder: PostHolder<T>, position: Int) {
         scope.launch(Dispatchers.Main) {
             with(list[position]) {
-                factory(login ?: throw Exception("empty name"))
-                        .collect { bitmap -> holder.bind(this, bitmap, onItemClicked, onUserClicked) }
+                factory(authorLogin).collect { bitmap ->
+                    holder.bind(this, bitmap, onItemClicked, onUserClicked)
+                }
             }
         }
     }

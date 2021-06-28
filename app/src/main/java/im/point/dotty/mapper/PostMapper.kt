@@ -21,7 +21,7 @@ open class PostMapper <T : Post> {
     protected fun mergeRawPost(model: T, post: RawPost): T {
         model.pinned = post.isPinned
         model.private = post.isPrivate
-        model.login = post.author?.login
+        model.authorLogin = post.author?.login ?: throw Exception("invalid author login")
         model.name = post.author?.name
         model.text = post.text
         model.timestamp = post.created?.let { format.parse(it) }

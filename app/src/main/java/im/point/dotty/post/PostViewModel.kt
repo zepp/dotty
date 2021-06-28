@@ -31,6 +31,7 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
             .stateIn(viewModelScope, SharingStarted.Eagerly, object : Post() {
                 override val id: String = postId
                 override val authorId = 0L
+                override var authorLogin = ""
             })
     val comments = getPostComments(postId)
             .map { it.toMutableList().apply { sortBy { entry -> entry.number } } }

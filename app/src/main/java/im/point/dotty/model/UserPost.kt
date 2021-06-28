@@ -12,5 +12,6 @@ data class UserPost(@PrimaryKey
                     override val id: String,
                     @ColumnInfo(name = "author_id")
                     override val authorId: Long,
+                    override var authorLogin: String,
                     @ColumnInfo(name = "user_id")
                     val userId: Long) : Post()
