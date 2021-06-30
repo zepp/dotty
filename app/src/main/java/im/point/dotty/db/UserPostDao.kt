@@ -5,20 +5,25 @@ package im.point.dotty.db
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Transaction
+import im.point.dotty.model.CompleteUserPost
 import im.point.dotty.model.UserPost
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface UserPostDao : CommonDao<UserPost, String> {
-    @Query("SELECT * FROM user_posts WHERE id = :id")
-    override fun getItem(id: String): UserPost?
-
+interface UserPostDao : CommonDao<UserPost> {
+    @Transaction
     @Query("SELECT * FROM user_posts WHERE user_id = :userId ORDER BY page_id DESC")
-    fun getUserPosts(userId: Long): List<UserPost>
+    fun getUserPosts(userId: Long): List<CompleteUserPost>
 
+    @Transaction
     @Query("SELECT * FROM user_posts WHERE user_id = :userId ORDER BY page_id DESC")
-    fun getUserPostsFlow(userId: Long): Flow<List<UserPost>>
+    fun getUserPostsFlow(userId: Long): Flow<List<CompleteUserPost>>
 
-    @Query("SELECT * FROM user_posts WHERE id = :id")
-    fun getItemFlow(id: String): Flow<UserPost?>
+    @Transaction
+    @Query("SELECT * FROM user_posts WHERE id = :id AND user_id = :userId")
+    fun getItemFlow(id: String, userId: Long): Flow<CompleteUserPost?>
+
+    @Query("SELECT * FROM user_posts WHERE id = :id AND user_id = :userId")
+    fun getMetaPostFlow(id: String, userId: Long): Flow<UserPost?>
 }

@@ -7,9 +7,6 @@ import androidx.lifecycle.viewModelScope
 import im.point.dotty.DottyApplication
 import im.point.dotty.common.DottyViewModel
 import im.point.dotty.db.DottyDatabase
-import im.point.dotty.model.AllPost
-import im.point.dotty.model.CommentedPost
-import im.point.dotty.model.RecentPost
 import im.point.dotty.network.PointAPI
 import im.point.dotty.repository.*
 import kotlinx.coroutines.Dispatchers
@@ -31,20 +28,17 @@ class MainViewModel internal constructor(application: DottyApplication, vararg a
     val commented = commentedRepo.getAll().stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
     val all = allRepo.getAll().stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
 
-    fun fetchRecent(isBefore: Boolean): Flow<List<RecentPost>> {
-        return (if (isBefore) recentRepo.fetchBefore() else recentRepo.fetchAll())
-                .flowOn(Dispatchers.IO)
-    }
+    fun fetchRecent(isBefore: Boolean) =
+            (if (isBefore) recentRepo.fetchBefore() else recentRepo.fetchAll())
+                    .flowOn(Dispatchers.IO)
 
-    fun fetchAll(isBefore: Boolean): Flow<List<AllPost>> {
-        return (if (isBefore) allRepo.fetchBefore() else allRepo.fetchAll())
-                .flowOn(Dispatchers.IO)
-    }
+    fun fetchAll(isBefore: Boolean) =
+            (if (isBefore) allRepo.fetchBefore() else allRepo.fetchAll())
+                    .flowOn(Dispatchers.IO)
 
-    fun fetchCommented(isBefore: Boolean): Flow<List<CommentedPost>> {
-        return (if (isBefore) commentedRepo.fetchBefore() else commentedRepo.fetchAll())
-                .flowOn(Dispatchers.IO)
-    }
+    fun fetchCommented(isBefore: Boolean) =
+            (if (isBefore) commentedRepo.fetchBefore() else commentedRepo.fetchAll())
+                    .flowOn(Dispatchers.IO)
 
     fun fetchUnreadCounters() = viewModelScope.async(Dispatchers.IO) {
         with(api.getUnreadCounters()) {

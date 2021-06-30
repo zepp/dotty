@@ -42,5 +42,8 @@
         <argument
             android:name="postId"
             app:argType="string" />
+        <argument
+            android:name="userId"
+            app:argType="long" />
     </fragment>
 </navigation>

@@ -9,7 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import im.point.dotty.R
 import im.point.dotty.feed.FeedFragment
-import im.point.dotty.model.AllPost
+import im.point.dotty.model.CompleteAllPost
 import im.point.dotty.model.PostType
 import im.point.dotty.post.PostFragment
 import im.point.dotty.user.UserFragment
@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 
 @FlowPreview
-class AllFragment : FeedFragment<AllPost>() {
+class AllFragment : FeedFragment<CompleteAllPost>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         adapter.onItemClicked = { post ->

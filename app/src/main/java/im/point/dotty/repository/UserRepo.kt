@@ -28,10 +28,6 @@ class UserRepo(private val api: PointAPI,
         throw Exception("operation is not supported")
     }
 
-    override fun updateItem(model: User) {
-        dao.insertItem(model)
-    }
-
     fun fetchUser(id: Long) = flow {
         dao.getItem(id)?.let { emit(it) }
         with(api.getUser(id)) {

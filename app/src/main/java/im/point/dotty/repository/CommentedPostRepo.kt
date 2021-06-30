@@ -5,10 +5,11 @@ package im.point.dotty.repository
 
 import android.annotation.SuppressLint
 import im.point.dotty.common.AppState
-import im.point.dotty.db.CommentedPostDao
+import im.point.dotty.db.DottyDatabase
 import im.point.dotty.mapper.CommentedPostMapper
 import im.point.dotty.mapper.Mapper
 import im.point.dotty.model.CommentedPost
+import im.point.dotty.model.CompleteCommentedPost
 import im.point.dotty.network.MetaPost
 import im.point.dotty.network.PointAPI
 import kotlinx.coroutines.flow.Flow
@@ -17,44 +18,48 @@ import kotlinx.coroutines.flow.map
 
 class CommentedPostRepo(private val api: PointAPI,
                         private val state: AppState,
-                        private val dao: CommentedPostDao,
-                        private val mapper: Mapper<CommentedPost, MetaPost> = CommentedPostMapper())
-    : Repository<CommentedPost, String> {
+                        db: DottyDatabase,
+                        private val mapper: Mapper<CompleteCommentedPost, MetaPost> = CommentedPostMapper())
+    : Repository<CompleteCommentedPost, String> {
+
+    private val metaPostDao = db.getCommentedPostDao()
+    private val postDao = db.getPostDao()
 
     @SuppressLint("CheckResult")
     fun fetch(isBefore: Boolean) = flow {
-        dao.getAll().let { if (it.isNotEmpty()) emit(it) }
+        metaPostDao.getAll().let { if (it.isNotEmpty()) emit(it) }
         with(api.getComments(if (isBefore) state.commentedPageId else null)) {
             checkSuccessful()
-            posts?.let {
-                val list = it.map { post -> mapper.map(post) }
-                if (!list.isEmpty()) {
-                    dao.insertAll(list)
-                    state.commentedPageId = list.last().pageId
+            with(posts.map { mapper.map(it) }) {
+                if (size > 0) {
+                    state.commentedPageId = last().metapost.pageId
+                    metaPostDao.insertAll(map { it.metapost })
+                    postDao.insertAll(map { it.post })
+                    emit(this)
                 }
-                emit(list)
             }
         }
     }
 
-    override fun getAll(): Flow<List<CommentedPost>> {
-        return dao.getAllFlow()
+    override fun getAll(): Flow<List<CompleteCommentedPost>> {
+        return metaPostDao.getAllFlow()
     }
 
-    override fun getItem(id: String): Flow<CommentedPost> {
-        return dao.getItemFlow(id)
+    override fun getItem(id: String): Flow<CompleteCommentedPost> {
+        return metaPostDao.getItemFlow(id)
                 .map { it ?: throw Exception("post not found") }
     }
 
-    override fun fetchAll(): Flow<List<CommentedPost>> {
+    override fun fetchAll(): Flow<List<CompleteCommentedPost>> {
         return fetch(false)
     }
 
-    fun fetchBefore(): Flow<List<CommentedPost>> {
+    fun fetchBefore(): Flow<List<CompleteCommentedPost>> {
         return fetch(true)
     }
 
-    override fun updateItem(model: CommentedPost) {
-        dao.insertItem(model)
-    }
+    fun getMetaPost(postId: String) = metaPostDao.getMetaPostFlow(postId)
+            .map { it ?: throw Exception("Post not found") }
+
+    fun updateMetaPost(post: CommentedPost) = metaPostDao.insertItem(post)
 }

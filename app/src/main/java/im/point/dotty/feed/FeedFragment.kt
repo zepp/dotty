@@ -20,10 +20,10 @@ import im.point.dotty.common.RecyclerItemDecorator
 import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.FragmentFeedBinding
 import im.point.dotty.main.MainViewModel
-import im.point.dotty.model.Post
+import im.point.dotty.model.CompletePost
 import kotlinx.coroutines.CoroutineExceptionHandler
 
-abstract class FeedFragment<T : Post> : NavFragment<MainViewModel>() {
+abstract class FeedFragment<T : CompletePost<*>> : NavFragment<MainViewModel>() {
     protected lateinit var binding: FragmentFeedBinding
     protected lateinit var adapter: FeedAdapter<T>
     protected lateinit var feedPosts: RecyclerView

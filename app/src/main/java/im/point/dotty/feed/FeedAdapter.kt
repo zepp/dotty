@@ -8,14 +8,14 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import im.point.dotty.R
-import im.point.dotty.model.Post
+import im.point.dotty.model.CompletePost
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-class FeedAdapter<T : Post> internal constructor(val scope: CoroutineScope, val factory: (name: String) -> Flow<Bitmap>) : RecyclerView.Adapter<PostHolder<T>>() {
+class FeedAdapter<T : CompletePost<*>> internal constructor(val scope: CoroutineScope, val factory: (name: String) -> Flow<Bitmap>) : RecyclerView.Adapter<PostHolder<T>>() {
     var list: List<T> = listOf()
         get() = field
         set(value) {

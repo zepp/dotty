@@ -42,7 +42,8 @@ class PostFragment : NavFragment<PostViewModel>() {
         requireArguments().let {
             val postId = it.getString(POST_ID)!!
             val post = it.getSerializable(POST_TYPE) as PostType
-            return ViewModelProvider(this, ViewModelFactory(requireActivity(), post, postId))
+            val userId = it.getLong(USER_ID)
+            return ViewModelProvider(this, ViewModelFactory(requireActivity(), post, postId, userId))
                     .get(PostViewModel::class.java)
         }
     }
@@ -123,5 +124,6 @@ class PostFragment : NavFragment<PostViewModel>() {
     companion object {
         const val POST_ID = "post-id"
         const val POST_TYPE = "post-type"
+        const val USER_ID = "user-id"
     }
 }

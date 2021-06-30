@@ -16,7 +16,7 @@ class CommentMapper : Mapper<Comment, RawComment> {
         return merge(result, comment)
     }
 
-    override fun merge(model: Comment, comment: RawComment): Comment {
+    private fun merge(model: Comment, comment: RawComment): Comment {
         model.replyTo = comment.toCommentId
         model.text = comment.text
         model.timestamp = format.parse(comment.created)

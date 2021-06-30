@@ -22,29 +22,42 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
 
     private val type = args[0] as PostType
     private val postId = args[1] as String
+    private val userId = args[2] as Long
 
     private val repoFactory: RepoFactory = application.repoFactory
     private val api: PointAPI = application.mainApi
     private val avaRepository = application.avaRepo
 
-    val post = getPost(postId)
-            .stateIn(viewModelScope, SharingStarted.Eagerly, object : Post() {
+    private val postRepo = repoFactory.getPostRepo()
+
+    private val recentPostRepo = repoFactory.getRecentPostRepo()
+    private val commentedPostRepo = repoFactory.getCommentedPostRepo()
+    private val allPostRepo = repoFactory.getAllPostRepo()
+    private val userPostRepo = repoFactory.getUserPostRepo(userId)
+
+    private val metaPost = getMetaPost(postId)
+            .stateIn(viewModelScope, SharingStarted.Eagerly, object : MetaPost() {
                 override val id: String = postId
                 override val authorId = 0L
-                override var authorLogin = ""
             })
-    val comments = getPostComments(postId)
+
+    val post = postRepo.getItem(postId)
+            .stateIn(viewModelScope, SharingStarted.Eagerly, Post(postId, 0L, ""))
+
+    val comments = postRepo.getPostComments(postId)
             .map { it.toMutableList().apply { sortBy { entry -> entry.number } } }
             .stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
+
     val isPinVisible = post.map { it.authorId == state.id }
             .distinctUntilChanged()
-    val isSubscribed = post.map { it.subscribed == true }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
-    val isRecommended = post.map { it.recommended == true }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
-    val isBookmarked = post.map { it.bookmarked == true }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
     val isPinned = post.map { it.pinned == true }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val isSubscribed = metaPost.map { it.bookmarked }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val isRecommended = metaPost.map { it.recommended }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val isBookmarked = metaPost.map { it.bookmarked }
             .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     init {
@@ -71,39 +84,29 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
     fun onPinChecked(value: Boolean) = flowOf(value)
             .filter { it.xor(isPinned.value) }
             .flatMapConcat { if (it) pin() else unpin() }
+            .flatMapConcat { postRepo.fetchPostAndComments(postId) }
             .flowOn(Dispatchers.IO)
 
-    private fun getPost(id: String) = when (type) {
-        PostType.RECENT_POST -> repoFactory.getRecentPostRepo().getItem(id)
-        PostType.COMMENTED_POST -> repoFactory.getCommentedPostRepo().getItem(id)
-        PostType.ALL_POST -> repoFactory.getAllPostRepo().getItem(id)
-        PostType.USER_POST -> repoFactory.getUserPostRepo().getItem(id)
+    private fun getMetaPost(id: String) = when (type) {
+        PostType.RECENT_POST -> recentPostRepo.getMetaPost(id)
+        PostType.COMMENTED_POST -> commentedPostRepo.getMetaPost(id)
+        PostType.ALL_POST -> allPostRepo.getMetaPost(id)
+        PostType.USER_POST -> userPostRepo.getMetaPost(id)
     }
 
-    private fun updatePost(model: Post) = when (model) {
-        is RecentPost -> repoFactory.getRecentPostRepo().updateItem(model)
-        is CommentedPost -> repoFactory.getCommentedPostRepo().updateItem(model)
-        is AllPost -> repoFactory.getAllPostRepo().updateItem(model)
-        is UserPost -> repoFactory.getUserPostRepo().updateItem(model)
+    private fun updatePost(post: MetaPost) = when (post) {
+        is RecentPost -> recentPostRepo.updateMetaPost(post)
+        is CommentedPost -> commentedPostRepo.updateMetaPost(post)
+        is AllPost -> allPostRepo.updateMetaPost(post)
+        is UserPost -> userPostRepo.updateMetaPost(post)
         else -> throw Exception("unknown model type")
     }
 
-    private fun getPostComments(id:String) = when (type) {
-        PostType.RECENT_POST -> repoFactory.getRecentCommentRepo(id).getAll()
-        PostType.COMMENTED_POST -> repoFactory.getCommentedCommentRepo(id).getAll()
-        PostType.ALL_POST -> repoFactory.getAllCommentRepo(id).getAll()
-        PostType.USER_POST -> repoFactory.getUserCommentRepo(id).getAll()
-    }
-
-    fun fetchPostComments() = when (type) {
-        PostType.RECENT_POST -> repoFactory.getRecentCommentRepo(postId).fetchAll()
-        PostType.COMMENTED_POST -> repoFactory.getCommentedCommentRepo(postId).fetchAll()
-        PostType.ALL_POST -> repoFactory.getAllCommentRepo(postId).fetchAll()
-        PostType.USER_POST -> repoFactory.getUserCommentRepo(postId).fetchAll()
-    }.flowOn(Dispatchers.IO)
+    fun fetchPostComments() =
+            postRepo.fetchPostAndComments(postId).flowOn(Dispatchers.IO)
 
     private fun subscribe() = flow {
-        val model = post.value
+        val model = metaPost.value
         with(api.subscribeToPost(postId)) {
             checkSuccessful()
             model.subscribed = true
@@ -114,7 +117,7 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
     }
 
     private fun unsubscribe() = flow {
-        val model = post.value
+        val model = metaPost.value
         with(api.unsubscribeFromPost(postId)) {
             checkSuccessful()
             model.subscribed = false
@@ -125,7 +128,7 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
     }
 
     private fun recommend() = flow {
-        val model = post.value
+        val model = metaPost.value
         with(api.recommendPost(postId)) {
             checkSuccessful()
             model.recommended = true
@@ -135,7 +138,7 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
     }
 
     private fun unrecommend() = flow {
-        val model = post.value
+        val model = metaPost.value
         with(api.unrecommendPost(postId)) {
             checkSuccessful()
             model.recommended = false
@@ -145,7 +148,7 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
     }
 
     private fun bookmark() = flow {
-        val model = post.value
+        val model = metaPost.value
         with(api.bookmarkPost(postId)) {
             checkSuccessful()
             model.bookmarked = true
@@ -155,7 +158,7 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
     }
 
     private fun unbookmark() = flow {
-        val model = post.value
+        val model = metaPost.value
         with(api.unbookmarkPost(postId)) {
             checkSuccessful()
             model.bookmarked = false
@@ -165,21 +168,15 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
     }
 
     private fun pin() = flow {
-        val model = post.value
         with(api.pinPost(postId)) {
             checkSuccessful()
-            model.pinned = true
-            updatePost(model)
             emit(this)
         }
     }
 
     private fun unpin() = flow {
-        val model = post.value
         with(api.unpinPost(postId)) {
             checkSuccessful()
-            model.pinned = false
-            updatePost(model)
             emit(this)
         }
     }

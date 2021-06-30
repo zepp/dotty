@@ -3,5 +3,5 @@
  */
 package im.point.dotty.network
 
-data class PostReply (var post: RawPost? = null,
-                      var comments: List<RawComment>? = null): Envelope()
+data class PostReply(var post: RawPost,
+                     var comments: List<RawComment> = listOf()) : Envelope()

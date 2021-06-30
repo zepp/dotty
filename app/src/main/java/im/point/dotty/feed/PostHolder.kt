@@ -14,10 +14,10 @@ import im.point.dotty.R
 import im.point.dotty.common.AvatarOutline
 import im.point.dotty.common.RecyclerItemDecorator
 import im.point.dotty.common.TagsAdapter
-import im.point.dotty.model.Post
+import im.point.dotty.model.CompletePost
 
 
-class PostHolder<T : Post>(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class PostHolder<T : CompletePost<*>>(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val avatar: ImageView = itemView.findViewById(R.id.post_author_avatar)
     private val author: TextView = itemView.findViewById(R.id.post_author)
     private val id: TextView = itemView.findViewById(R.id.post_id)
@@ -30,19 +30,24 @@ class PostHolder<T : Post>(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     fun bind(post: T, bitmap: Bitmap, onItemClicked: (item: T) -> Unit, onUserClicked: (id: Long, login: String) -> Unit) {
         avatar.setImageBitmap(bitmap)
-        avatar.setOnClickListener { onUserClicked(post.authorId, post.authorLogin) }
-        bookmarked.visibility = if (post.bookmarked == true) View.VISIBLE else View.GONE
-        recommended.visibility = if (post.recommended == true) View.VISIBLE else View.GONE
-        author.text = post.alogin
-        author.setOnClickListener { onUserClicked(post.authorId, post.authorLogin) }
-        id.text = "#" + post.id
-        text.text = post.text
-        if (post.tags.isNullOrEmpty()) {
-            tags.visibility = View.GONE;
-        } else {
-            adapter.replaceList(post.tags!!)
+        post.metapost.let {
+            bookmarked.visibility = if (it.bookmarked) View.VISIBLE else View.GONE
+            recommended.visibility = if (it.recommended) View.VISIBLE else View.GONE
         }
-        commentsCount.text = post.commentCount.toString()
+        post.post.let {
+            avatar.setOnClickListener { _ -> onUserClicked(it.authorId, it.authorLogin) }
+            author.text = it.alogin
+            author.setOnClickListener { _ -> onUserClicked(it.authorId, it.authorLogin) }
+            id.text = "#" + post.id
+            text.text = it.text
+            if (it.tags.isNullOrEmpty()) {
+                tags.visibility = View.GONE;
+            } else {
+                adapter.replaceList(it.tags!!)
+            }
+            commentsCount.text = it.commentCount.toString()
+        }
+
         itemView.setOnClickListener { onItemClicked(post) }
     }
 

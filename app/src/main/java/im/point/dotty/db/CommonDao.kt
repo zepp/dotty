@@ -4,9 +4,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Update
 
-interface CommonDao<T, K> {
-    fun getItem(id: K): T?
-
+interface CommonDao<T> {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(items: List<T>)
 

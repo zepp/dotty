@@ -9,9 +9,9 @@ import im.point.dotty.model.Comment
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface CommentDao : CommonDao<Comment, String> {
+interface CommentDao : CommonDao<Comment> {
     @Query("SELECT * FROM comments WHERE post_id = :id ")
-    override fun getItem(id: String): Comment?
+    fun getItem(id: String): Comment?
 
     @Query("SELECT * FROM comments WHERE id = :id")
     fun geItemFlow(id: String): Flow<Comment?>

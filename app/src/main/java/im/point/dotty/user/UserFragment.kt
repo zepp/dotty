@@ -17,8 +17,8 @@ import im.point.dotty.common.RecyclerItemDecorator
 import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.FragmentUserBinding
 import im.point.dotty.feed.FeedAdapter
+import im.point.dotty.model.CompleteUserPost
 import im.point.dotty.model.PostType
-import im.point.dotty.model.UserPost
 import im.point.dotty.post.PostFragment
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.FlowPreview
@@ -29,7 +29,7 @@ import kotlinx.coroutines.launch
 @FlowPreview
 class UserFragment : NavFragment<UserViewModel>() {
     private lateinit var binding: FragmentUserBinding
-    private lateinit var adapter: FeedAdapter<UserPost>
+    private lateinit var adapter: FeedAdapter<CompleteUserPost>
     private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
         Log.e(this::class.simpleName, exception.message, exception)
         showSnackbar(exception.localizedMessage)
@@ -51,6 +51,7 @@ class UserFragment : NavFragment<UserViewModel>() {
         adapter.onItemClicked = { post ->
             val bundle = Bundle()
             bundle.putString(PostFragment.POST_ID, post.id)
+            bundle.putLong(PostFragment.USER_ID, post.metapost.userId)
             bundle.putSerializable(PostFragment.POST_TYPE, PostType.USER_POST)
             findNavController().navigate(R.id.action_userFragment_to_postFragment, bundle)
         }

@@ -5,20 +5,29 @@ package im.point.dotty.db
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Transaction
 import im.point.dotty.model.AllPost
+import im.point.dotty.model.CompleteAllPost
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface AllPostDao : CommonDao<AllPost, String> {
+interface AllPostDao : CommonDao<AllPost> {
+    @Transaction
     @Query("SELECT * FROM all_posts WHERE id = :id")
-    override fun getItem(id: String): AllPost?
+    fun getItem(id: String): CompleteAllPost?
 
+    @Transaction
     @Query("SELECT * FROM all_posts ORDER BY page_id ASC")
-    fun getAll(): List<AllPost>
+    fun getAll(): List<CompleteAllPost>
 
+    @Transaction
     @Query("SELECT * FROM all_posts ORDER BY page_id ASC")
-    fun getAllFlow(): Flow<List<AllPost>>
+    fun getAllFlow(): Flow<List<CompleteAllPost>>
+
+    @Transaction
+    @Query("SELECT * FROM all_posts WHERE id = :id")
+    fun getItemFlow(id: String): Flow<CompleteAllPost?>
 
     @Query("SELECT * FROM all_posts WHERE id = :id")
-    fun getItemFlow(id: String): Flow<AllPost?>
+    fun getMetaPostFlow(id: String): Flow<AllPost?>
 }

@@ -4,9 +4,10 @@
 package im.point.dotty.repository
 
 import im.point.dotty.common.AppState
-import im.point.dotty.db.RecentPostDao
+import im.point.dotty.db.DottyDatabase
 import im.point.dotty.mapper.Mapper
 import im.point.dotty.mapper.RecentPostMapper
+import im.point.dotty.model.CompleteRecentPost
 import im.point.dotty.model.RecentPost
 import im.point.dotty.network.MetaPost
 import im.point.dotty.network.PointAPI
@@ -16,43 +17,46 @@ import kotlinx.coroutines.flow.map
 
 class RecentPostRepo(private val api: PointAPI,
                      private val state: AppState,
-                     private val dao: RecentPostDao,
-                     private val mapper: Mapper<RecentPost, MetaPost> = RecentPostMapper()) :
-        Repository<RecentPost, String> {
+                     db: DottyDatabase,
+                     private val mapper: Mapper<CompleteRecentPost, MetaPost> = RecentPostMapper()) :
+        Repository<CompleteRecentPost, String> {
+
+    private val metaPostDao = db.getRecentPostDao()
+    private val postDao = db.getPostDao()
 
     private fun fetch(isBefore: Boolean) = flow {
-        dao.getAll().let { if (it.isNotEmpty()) emit(it) }
+        metaPostDao.getAll().let { if (it.isNotEmpty()) emit(it) }
         with(api.getRecent(if (isBefore) state.recentPageId else null)) {
             checkSuccessful()
-            posts?.let {
-                val list = it.map { post -> mapper.map(post) }
-                // recent feed is empty in case of a new user
-                if (!list.isEmpty()) {
-                    state.recentPageId = list.last().pageId
-                    dao.insertAll(list)
+            with(posts.map { mapper.map(it) }) {
+                if (size > 0) {
+                    state.recentPageId = last().metapost.pageId
+                    metaPostDao.insertAll(map { it.metapost })
+                    postDao.insertAll(map { it.post })
+                    emit(this)
                 }
-                emit(list)
             }
         }
     }
 
-    override fun getAll(): Flow<List<RecentPost>> {
-        return dao.getAllFlow()
+    override fun getAll(): Flow<List<CompleteRecentPost>> {
+        return metaPostDao.getAllFlow()
     }
 
-    override fun getItem(id: String): Flow<RecentPost> {
-        return dao.getItemFlow(id).map { it ?: throw Exception("post not found") }
+    override fun getItem(id: String): Flow<CompleteRecentPost> {
+        return metaPostDao.getItemFlow(id).map { it ?: throw Exception("post not found") }
     }
 
-    override fun fetchAll(): Flow<List<RecentPost>> {
+    override fun fetchAll(): Flow<List<CompleteRecentPost>> {
         return fetch(false)
     }
 
-    override fun updateItem(model: RecentPost) {
-        updateItem(model)
-    }
-
-    fun fetchBefore(): Flow<List<RecentPost>> {
+    fun fetchBefore(): Flow<List<CompleteRecentPost>> {
         return fetch(true)
     }
+
+    fun getMetaPost(postId: String) = metaPostDao.getMetaPostFlow(postId)
+            .map { it ?: throw Exception("Post not found") }
+
+    fun updateMetaPost(post: RecentPost) = metaPostDao.insertItem(post)
 }

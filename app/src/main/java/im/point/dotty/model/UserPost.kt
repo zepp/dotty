@@ -5,13 +5,10 @@ package im.point.dotty.model
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 
-@Entity(tableName = "user_posts")
-data class UserPost(@PrimaryKey
-                    override val id: String,
+@Entity(tableName = "user_posts", primaryKeys = ["id", "user_id"])
+data class UserPost(override val id: String,
                     @ColumnInfo(name = "author_id")
                     override val authorId: Long,
-                    override var authorLogin: String,
                     @ColumnInfo(name = "user_id")
-                    val userId: Long) : Post()
+                    val userId: Long) : MetaPost()

@@ -9,9 +9,9 @@ import im.point.dotty.model.User
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface UserDao : CommonDao<User, Long> {
+interface UserDao : CommonDao<User> {
     @Query("SELECT * FROM users WHERE id = :id")
-    override fun getItem(id: Long): User?
+    fun getItem(id: Long): User?
 
     @Query("SELECT * FROM users")
     fun getAllFlow(): Flow<List<User>>

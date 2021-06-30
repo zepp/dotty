@@ -15,7 +15,7 @@ class UserMapper : Mapper<User, UserReply> {
                 user.login ?: throw Exception("User login is not provided")), user)
     }
 
-    override fun merge(model: User, user: UserReply): User {
+    private fun merge(model: User, user: UserReply): User {
         model.name = user.name
         model.registrationDate = regFormat.parse(user.created)
         user.birthdate?.let { model.birthDate = birthFormat.parse(it) }
