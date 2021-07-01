@@ -39,23 +39,26 @@ class UserRepo(private val api: PointAPI,
         }
     }
 
-    fun fetchMe() = flow {
-        with(state.id) {
-            if (this != null) {
-                dao.getItem(this)?.let { emit(it) }
-            }
-        }
-        with(api.getMe()) {
+    fun fetchUser(login: String) = flow {
+        with(api.getUser(login)) {
             checkSuccessful()
             with(mapper.map(this)) {
-                state.id = id
                 dao.insertItem(this)
                 emit(this)
             }
         }
     }
 
-    fun getMe(): Flow<User> {
-        return getItem(state.id ?: throw Exception("user ID is empty"));
+    fun fetchMe() = flow {
+        dao.getItem(state.id)?.let { emit(it) }
+        with(api.getUser(state.id)) {
+            checkSuccessful()
+            with(mapper.map(this)) {
+                dao.insertItem(this)
+                emit(this)
+            }
+        }
     }
+
+    fun getMe() = getItem(state.id)
 }

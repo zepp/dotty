@@ -7,7 +7,6 @@ import android.annotation.SuppressLint
 import androidx.lifecycle.viewModelScope
 import im.point.dotty.DottyApplication
 import im.point.dotty.common.DottyViewModel
-import im.point.dotty.network.LoginReply
 import im.point.dotty.repository.UserRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,7 +29,7 @@ class LoginViewModel(application: DottyApplication, vararg args: Any) : DottyVie
         isLoginEnabled.emit(!(login.value.isBlank() || password.value.isBlank()))
     }
 
-    fun login() = flow<LoginReply> {
+    fun login() = flow {
         val login = login.value
         with(authAPI.login(login, password.value)) {
             checkSuccessful()
@@ -39,9 +38,11 @@ class LoginViewModel(application: DottyApplication, vararg args: Any) : DottyVie
             state.csrfToken = csrfToken
                     ?: throw Exception("CSRF token is empty")
             state.token = token ?: throw Exception("token is empty")
+            userRepo.fetchUser(login).collect {
+                state.id = it.id
+            }
+            emit(this)
             resetActivityBackStack()
-            userRepo.fetchMe().collect()
-            this
         }
     }.flowOn(Dispatchers.IO)
 

@@ -31,33 +31,33 @@ class AppState (context: Context) {
     private val preferences: SharedPreferences = context.getSharedPreferences(this::class.simpleName,
             Context.MODE_PRIVATE)
 
-    var isLoggedIn: Boolean?
+    var isLoggedIn: Boolean
         get() = preferences.getBoolean(IS_LOGGED_IN, false)
         set(value) = preferences.edit().run {
-            if (value == null) remove(IS_LOGGED_IN).commit() else putBoolean(IS_LOGGED_IN, value).commit()
+            putBoolean(IS_LOGGED_IN, value).commit()
         }
 
-    var userLogin: String?
-        get() = preferences.getString(USER_LOGIN, null)
+    var userLogin: String
+        get() = preferences.getString(USER_LOGIN, null) ?: throw Exception("user login is null")
         set(value) = preferences.edit().run {
-            if (value == null) remove(USER_LOGIN).commit() else putString(USER_LOGIN, value).commit()
+            if (value.isEmpty()) remove(USER_LOGIN).commit() else putString(USER_LOGIN, value).commit()
         }
 
     var token: String
-        get() = preferences.getString(TOKEN, null) ?: throw Exception("API token is empty")
+        get() = preferences.getString(TOKEN, null) ?: throw Exception("API token is null")
         set(value) = preferences.edit().run {
             if (value.isEmpty()) remove(TOKEN).commit() else putString(TOKEN, value).commit()
         }
 
     var csrfToken: String
-        get() = preferences.getString(CSRF_TOKEN, null) ?: throw Exception("CSRF token is empty")
+        get() = preferences.getString(CSRF_TOKEN, null) ?: throw Exception("CSRF token is null")
         set(value) = preferences.edit().run {
             if (value.isEmpty()) remove(CSRF_TOKEN).commit() else putString(CSRF_TOKEN, value).commit()
         }
 
-    var id: Long?
-        get() = with(preferences.getLong(USER_ID, -1)) {
-            if (this == -1L) null else this
+    var id: Long
+        get() = (preferences.getLong(USER_ID, -1)).also {
+            if (it == -1L) throw Exception("user ID is null")
         }
         set(value) = preferences.edit().run {
             if (value == null) remove(USER_ID).commit() else putLong(USER_ID, value).commit()

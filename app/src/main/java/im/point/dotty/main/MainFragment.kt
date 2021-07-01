@@ -1,7 +1,5 @@
 package im.point.dotty.main
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -31,7 +29,20 @@ class MainFragment : NavFragment<MainViewModel>() {
         binding.mainPager.adapter = Adapter(childFragmentManager)
         binding.viewModel = viewModel
         binding.lifecycleOwner = this
+        return binding.root
+    }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        bind()
+    }
+
+    fun bind() {
+        lifecycleScope.launchWhenStarted {
+            viewModel.user.collect {
+                binding.toolbar.title = it.formattedLogin
+            }
+        }
         lifecycleScope.launchWhenStarted {
             viewModel.unreadPosts()
                     .collect { binding.mainUnreadPosts.text = it.toString() }
@@ -52,7 +63,6 @@ class MainFragment : NavFragment<MainViewModel>() {
         lifecycleScope.launch(exceptionHandler) {
             viewModel.fetchUnreadCounters().await()
         }
-        return binding.root
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -89,12 +99,6 @@ class MainFragment : NavFragment<MainViewModel>() {
 
         override fun getCount(): Int {
             return 3
-        }
-    }
-
-    companion object {
-        fun getIntent(context: Context?): Intent {
-            return Intent(context, MainActivity::class.java)
         }
     }
 }

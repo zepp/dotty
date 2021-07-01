@@ -102,7 +102,7 @@ class PostFragment : NavFragment<PostViewModel>() {
 
         lifecycleScope.launchWhenStarted {
             viewModel.post.collect { post ->
-                binding.toolbar.title = post.nameOrLogin
+                binding.toolbar.title = post.alogin
                 binding.postText.text = post.text
                 if (post.tags.isNullOrEmpty()) {
                     binding.postTags.visibility = View.GONE

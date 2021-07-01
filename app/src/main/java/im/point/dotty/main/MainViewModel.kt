@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import im.point.dotty.DottyApplication
 import im.point.dotty.common.DottyViewModel
 import im.point.dotty.db.DottyDatabase
+import im.point.dotty.model.User
 import im.point.dotty.network.PointAPI
 import im.point.dotty.repository.*
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +25,9 @@ class MainViewModel internal constructor(application: DottyApplication, vararg a
     private val avaRepo = application.avaRepo
     private val db: DottyDatabase = application.database
 
+    val user = userRepo.fetchMe()
+            .flowOn(Dispatchers.IO)
+            .stateIn(viewModelScope, SharingStarted.Eagerly, User(state.id, state.userLogin))
     val recent = recentRepo.getAll().stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
     val commented = commentedRepo.getAll().stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
     val all = allRepo.getAll().stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
