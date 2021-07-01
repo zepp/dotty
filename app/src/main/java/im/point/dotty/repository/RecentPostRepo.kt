@@ -31,8 +31,8 @@ class RecentPostRepo(private val api: PointAPI,
             with(posts.map { mapper.map(it) }) {
                 if (size > 0) {
                     state.recentPageId = last().metapost.pageId
-                    metaPostDao.insertAll(map { it.metapost })
                     postDao.insertAll(map { it.post })
+                    metaPostDao.insertAll(map { it.metapost })
                     emit(this)
                 }
             }

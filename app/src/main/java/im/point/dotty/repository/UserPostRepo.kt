@@ -36,8 +36,8 @@ class UserPostRepo(private val api: PointAPI,
             checkSuccessful()
             with(posts.map { mapper.map(it) }) {
                 if (size > 0) {
-                    metaPostDao.insertAll(map { it.metapost })
                     postDao.insertAll(map { it.post })
+                    metaPostDao.insertAll(map { it.metapost })
                     emit(this)
                 }
             }

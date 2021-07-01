@@ -31,8 +31,8 @@ class AllPostRepo(private val api: PointAPI,
             with(posts.map { mapper.map(it) }) {
                 if (size > 0) {
                     state.allPageId = last().metapost.pageId
-                    metaPostDao.insertAll(map { it.metapost })
                     postDao.insertAll(map { it.post })
+                    metaPostDao.insertAll(map { it.metapost })
                     emit(this)
                 }
             }
