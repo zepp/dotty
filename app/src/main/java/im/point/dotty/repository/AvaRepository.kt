@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -26,7 +27,9 @@ class AvaRepository(private val client: OkHttpClient,
     private val map280 = Collections.synchronizedMap(mutableMapOf<String, Bitmap>())
 
     fun getAvatar(name: String, size: Size): Flow<Bitmap> =
-            flowOf(map(size)[name]).map { it ?: fetchAvatar(name, size) }
+            flowOf(map(size)[name]).map { it ?: fetchAvatar(name, size) }.catch {
+                Bitmap.createBitmap(size.dim, size.dim, Bitmap.Config.ARGB_8888)
+            }
 
     private fun map(size: Size): MutableMap<String, Bitmap> = when (size) {
         Size.SIZE_24 -> map24
