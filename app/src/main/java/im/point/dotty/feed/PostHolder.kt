@@ -15,9 +15,13 @@ import im.point.dotty.common.AvatarOutline
 import im.point.dotty.common.RecyclerItemDecorator
 import im.point.dotty.common.TagsAdapter
 import im.point.dotty.model.CompletePost
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 
-class PostHolder<T : CompletePost<*>>(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class PostHolder<T : CompletePost<*>>(itemView: View, private val scope:CoroutineScope) : RecyclerView.ViewHolder(itemView) {
     private val avatar: ImageView = itemView.findViewById(R.id.post_author_avatar)
     private val author: TextView = itemView.findViewById(R.id.post_author)
     private val id: TextView = itemView.findViewById(R.id.post_id)
@@ -27,9 +31,13 @@ class PostHolder<T : CompletePost<*>>(itemView: View) : RecyclerView.ViewHolder(
     private val recommended: ImageView = itemView.findViewById(R.id.post_recommended)
     private val bookmarked: ImageView = itemView.findViewById(R.id.post_bookmarked)
     private val adapter: TagsAdapter = TagsAdapter()
+    private var job = scope.launch {  }
 
-    fun bind(post: T, bitmap: Bitmap, onItemClicked: (item: T) -> Unit, onUserClicked: (id: Long, login: String) -> Unit) {
-        avatar.setImageBitmap(bitmap)
+    fun bind(post: T, bitmap: Flow<Bitmap>, onItemClicked: (item: T) -> Unit, onUserClicked: (id: Long, login: String) -> Unit) {
+        job.cancel()
+        job = scope.launch {
+            bitmap.collect { avatar.setImageBitmap(it) }
+        }
         post.metapost.let {
             bookmarked.visibility = if (it.bookmarked) View.VISIBLE else View.GONE
             recommended.visibility = if (it.recommended) View.VISIBLE else View.GONE

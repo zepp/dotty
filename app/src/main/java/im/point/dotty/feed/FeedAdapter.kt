@@ -17,7 +17,6 @@ import kotlinx.coroutines.launch
 
 class FeedAdapter<T : CompletePost<*>> internal constructor(val scope: CoroutineScope, val factory: (name: String) -> Flow<Bitmap>) : RecyclerView.Adapter<PostHolder<T>>() {
     var list: List<T> = listOf()
-        get() = field
         set(value) {
             field = value
             notifyDataSetChanged()
@@ -29,16 +28,10 @@ class FeedAdapter<T : CompletePost<*>> internal constructor(val scope: Coroutine
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostHolder<T> =
             LayoutInflater.from(parent.context).inflate(R.layout.post, parent, false)
-                    .let { PostHolder(it) }
+                    .let { PostHolder(it, scope) }
 
-    override fun onBindViewHolder(holder: PostHolder<T>, position: Int) {
-        scope.launch(Dispatchers.Main) {
-            with(list[position]) {
-                factory(authorLogin).collect { bitmap ->
-                    holder.bind(this, bitmap, onItemClicked, onUserClicked)
-                }
-            }
-        }
+    override fun onBindViewHolder(holder: PostHolder<T>, position: Int) = with(list[position]) {
+            holder.bind(this, factory(authorLogin), onItemClicked, onUserClicked)
     }
 
     override fun getItemCount(): Int = list.size
