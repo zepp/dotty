@@ -7,10 +7,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -21,37 +18,35 @@ import java.util.*
 class AvaRepository(private val client: OkHttpClient,
                     private val path: File) {
     private val nameRegex = Regex("(.*):(\\d+)\\.jpg$");
-    private val map24 = Collections.synchronizedMap(mutableMapOf<String, Bitmap>())
-    private val map40 = Collections.synchronizedMap(mutableMapOf<String, Bitmap>())
-    private val map80 = Collections.synchronizedMap(mutableMapOf<String, Bitmap>())
-    private val map280 = Collections.synchronizedMap(mutableMapOf<String, Bitmap>())
+    private val map24 = mutableMapOf<String, Flow<Bitmap>>()
+    private val map40 = mutableMapOf<String, Flow<Bitmap>>()
+    private val map80 = mutableMapOf<String, Flow<Bitmap>>()
+    private val map280 = mutableMapOf<String, Flow<Bitmap>>()
 
-    fun getAvatar(name: String, size: Size): Flow<Bitmap> =
-            flowOf(map(size)[name]).map { it ?: fetchAvatar(name, size) }.catch {
-                Bitmap.createBitmap(size.dim, size.dim, Bitmap.Config.ARGB_8888)
-            }
+    fun getAvatar(name: String, size: Size): Flow<Bitmap> {
+        return map(size).getOrPut(name, {
+            fetchAvatar(name, size)
+                .flowOn(Dispatchers.IO)
+                .stateIn(GlobalScope, SharingStarted.Eagerly,
+                    Bitmap.createBitmap(size.dim, size.dim, Bitmap.Config.ARGB_8888))})
+    }
 
-    private fun map(size: Size): MutableMap<String, Bitmap> = when (size) {
+    private fun map(size: Size): MutableMap<String, Flow<Bitmap>> = when (size) {
         Size.SIZE_24 -> map24
         Size.SIZE_40 -> map40
         Size.SIZE_80 -> map80
         Size.SIZE_280 -> map280
     }
 
-    private suspend fun fetchAvatar(name: String, size: Size) = withContext(Dispatchers.IO) {
+    private fun fetchAvatar(name: String, size: Size) = flow {
         with(File(path, "$name:${size.dim}.jpg")) {
             val response = client.newCall(getRequest(name, size)).execute()
             if (response.isSuccessful) {
                 delete()
                 val bytes = response.body()?.bytes() ?: throw Exception("empty response body")
                 writeBytes(bytes)
-                BitmapFactory.decodeByteArray(bytes, 0, bytes.size).also {
-                    if (it == null) {
-                        throw Exception("failed to decode file")
-                    } else {
-                        map(size)[name] = it
-                    }
-                }
+                emit(BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    ?: throw Exception("failed to decode file"))
             } else {
                 throw Exception(response.message())
             }
@@ -71,7 +66,7 @@ class AvaRepository(private val client: OkHttpClient,
                     val name = get(1)?.value ?: throw Exception("avatar name is not specified")
                     val size = get(2)?.value?.toInt()
                             ?: throw Exception("avatar size is not specified")
-                    map(Size.fromDim(size))[name] = BitmapFactory.decodeFile(it.absolutePath)
+                    map(Size.fromDim(size))[name] = flowOf(BitmapFactory.decodeFile(it.absolutePath))
                 }
             }
         }
