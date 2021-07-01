@@ -59,7 +59,7 @@ class AvaRepository(private val client: OkHttpClient,
     }
 
     private fun getRequest(name: String, size: Size): Request {
-        return Request.Builder().url("https://i.point.im/a/${size.dim}/$name.jpg")
+        return Request.Builder().url("https://point.im/avatar/$name/${size.dim}")
                 .build()
     }
 
