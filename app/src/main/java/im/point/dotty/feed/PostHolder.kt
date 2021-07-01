@@ -43,7 +43,7 @@ class PostHolder<T : CompletePost<*>>(itemView: View) : RecyclerView.ViewHolder(
             if (it.tags.isNullOrEmpty()) {
                 tags.visibility = View.GONE;
             } else {
-                adapter.replaceList(it.tags!!)
+                adapter.list = it.tags!!
             }
             commentsCount.text = it.commentCount.toString()
         }
