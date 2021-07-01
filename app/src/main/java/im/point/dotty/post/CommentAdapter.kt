@@ -34,17 +34,13 @@ class CommentAdapter(val scope: CoroutineScope, val factory: (name: String) -> F
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         LayoutInflater.from(parent.context).inflate(R.layout.list_item_comment, parent, false)
-            .let { CommentHolder(it)}
+            .let { CommentHolder(it, scope)}
 
     override fun getItemCount(): Int = list.size
 
-    override fun onBindViewHolder(holder: CommentHolder, position: Int) {
-        scope.launch(Dispatchers.Main) {
-            with (list[position]) {
-                factory(login ?: throw Exception("empty login"))
-                    .collect { bitmap -> holder.bind(this, position, bitmap, onIdClicked) }
-            }
-        }
+    override fun onBindViewHolder(holder: CommentHolder, position: Int) = with (list[position]) {
+        holder.bind(this, position,
+            factory(login ?: throw Exception("empty login")), onIdClicked)
     }
 
     override fun getItemId(position: Int): Long = list[position].number.toLong()
@@ -54,16 +50,18 @@ class CommentAdapter(val scope: CoroutineScope, val factory: (name: String) -> F
     }
 }
 
-class CommentHolder(view: View) : RecyclerView.ViewHolder(view) {
+class CommentHolder(view: View, val scope: CoroutineScope) : RecyclerView.ViewHolder(view) {
     private val avatar: ImageView = view.findViewById(R.id.comment_author_avatar)
     private val author: TextView = view.findViewById(R.id.comment_author)
     private val text: TextView = view.findViewById(R.id.comment_text)
     private val id: TextView = view.findViewById(R.id.comment_id)
     private val replyTo: TextView = view.findViewById(R.id.comment_reply_to)
     private val arrow: TextView = view.findViewById(R.id.comment_arrow)
+    private var job = scope.launch {  }
 
-    fun bind(comment: Comment, pos: Int, avatarBitmap: Bitmap, onIdClicked: (id: Int, pos: Int) -> Unit) {
-        avatar.setImageBitmap(avatarBitmap)
+    fun bind(comment: Comment, pos: Int, avatarBitmap: Flow<Bitmap>, onIdClicked: (id: Int, pos: Int) -> Unit) {
+        job.cancel()
+        job = scope.launch { avatarBitmap.collect { avatar.setImageBitmap(it) } }
         author.text = comment.alogin
         text.text = comment.text
         id.text = comment.number.toString()
