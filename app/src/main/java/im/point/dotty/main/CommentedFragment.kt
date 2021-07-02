@@ -35,6 +35,7 @@ class CommentedFragment : FeedFragment<CompleteCommentedPost>() {
     override fun onFeedUpdate() {
         lifecycleScope.launch(exceptionHandler) {
             viewModel.fetchCommented(false).onCompletion { finishUpdate() }.collect()
+            viewModel.fetchUnreadCounters().await()
         }
     }
 

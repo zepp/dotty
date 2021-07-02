@@ -35,6 +35,7 @@ class RecentFragment : FeedFragment<CompleteRecentPost>() {
     override fun onFeedUpdate() {
         lifecycleScope.launch(exceptionHandler) {
             viewModel.fetchRecent(false).onCompletion { finishUpdate() }.collect()
+            viewModel.fetchUnreadCounters().await()
         }
     }
 
