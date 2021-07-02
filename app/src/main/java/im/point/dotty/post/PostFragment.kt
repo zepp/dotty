@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.snackbar.Snackbar
@@ -20,6 +21,7 @@ import im.point.dotty.common.TagsAdapter
 import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.FragmentPostBinding
 import im.point.dotty.model.PostType
+import im.point.dotty.user.UserFragment
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collect
@@ -59,6 +61,12 @@ class PostFragment : NavFragment<PostViewModel>() {
         adapter = CommentAdapter(lifecycleScope, viewModel::getAvatar)
         binding.postComments.adapter = adapter
         adapter.onIdClicked = { id, pos -> binding.postComments.smoothScrollToPosition(pos) }
+        adapter.onUserClicked = { id, login ->
+            val bundle = Bundle()
+            bundle.putLong(UserFragment.USER_ID, id)
+            bundle.putString(UserFragment.USER_LOGIN, login)
+            findNavController().navigate(R.id.action_post_fragment_to_user_fragment, bundle)
+        }
         layout = binding.postSwipeLayout
         layout.setOnRefreshListener {
             lifecycleScope.launch(exceptionHandler) {

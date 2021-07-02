@@ -14,7 +14,6 @@ import im.point.dotty.R
 import im.point.dotty.common.AvatarOutline
 import im.point.dotty.model.Comment
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -32,15 +31,20 @@ class CommentAdapter(val scope: CoroutineScope, val factory: (name: String) -> F
             notifyDataSetChanged()
         }
 
+    var onUserClicked: (id: Long, login: String) -> Unit = { _, _ -> }
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-        LayoutInflater.from(parent.context).inflate(R.layout.list_item_comment, parent, false)
-            .let { CommentHolder(it, scope)}
+            LayoutInflater.from(parent.context).inflate(R.layout.list_item_comment, parent, false)
+                    .let { CommentHolder(it, scope) }
 
     override fun getItemCount(): Int = list.size
 
-    override fun onBindViewHolder(holder: CommentHolder, position: Int) = with (list[position]) {
-        holder.bind(this, position,
-            factory(login ?: throw Exception("empty login")), onIdClicked)
+    override fun onBindViewHolder(holder: CommentHolder, position: Int) = with(list[position]) {
+        holder.bind(this, position, factory(login), onIdClicked, onUserClicked)
     }
 
     override fun getItemId(position: Int): Long = list[position].number.toLong()
@@ -57,12 +61,15 @@ class CommentHolder(view: View, val scope: CoroutineScope) : RecyclerView.ViewHo
     private val id: TextView = view.findViewById(R.id.comment_id)
     private val replyTo: TextView = view.findViewById(R.id.comment_reply_to)
     private val arrow: TextView = view.findViewById(R.id.comment_arrow)
-    private var job = scope.launch {  }
+    private var job = scope.launch { }
 
-    fun bind(comment: Comment, pos: Int, avatarBitmap: Flow<Bitmap>, onIdClicked: (id: Int, pos: Int) -> Unit) {
+    fun bind(comment: Comment, pos: Int, avatarBitmap: Flow<Bitmap>,
+             onIdClicked: (id: Int, pos: Int) -> Unit, onUserClicked: (id: Long, login: String) -> Unit) {
         job.cancel()
         job = scope.launch { avatarBitmap.collect { avatar.setImageBitmap(it) } }
-        author.text = comment.alogin
+        avatar.setOnClickListener { _ -> onUserClicked(comment.userId, comment.login) }
+        author.text = comment.formattedLogin
+        author.setOnClickListener { _ -> onUserClicked(comment.userId, comment.login) }
         text.text = comment.text
         id.text = comment.number.toString()
         arrow.visibility = if (comment.replyTo == null) View.GONE else View.VISIBLE

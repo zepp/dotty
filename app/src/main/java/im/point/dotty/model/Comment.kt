@@ -16,19 +16,16 @@ data class Comment(@PrimaryKey
                    val postId: String,
                    @ColumnInfo(name = "user_id")
                    val userId: Long,
+                   var login: String,
                    @ColumnInfo(name = "parent_id")
                    var replyTo: Int? = 0,
                    var text: String? = null,
                    var timestamp: Date? = null,
-                   var login: String? = null,
                    var name: String? = null) {
 
     @Ignore
     val number = id.split('/').last().toInt()
 
-    val nameOrLogin: String?
-        get() = if (name.isNullOrEmpty()) login else name
-
-    val alogin:String
+    val formattedLogin: String
         get() = "@$login"
 }

@@ -12,7 +12,8 @@ class CommentMapper : Mapper<Comment, RawComment> {
     override fun map(comment: RawComment): Comment {
         val result = Comment("${comment.postId}/${comment.id}",
                 comment.postId ?: throw Exception("Post id is not provided"),
-                comment.author?.id ?: throw Exception("Comment's author id is not provided"))
+                comment.author?.id ?: throw Exception("Comment's author id is not provided"),
+                comment.author?.login ?: throw Exception("Comment's author login is not provided"))
         return merge(result, comment)
     }
 
@@ -21,7 +22,6 @@ class CommentMapper : Mapper<Comment, RawComment> {
         model.text = comment.text
         model.timestamp = format.parse(comment.created)
         model.name = comment.author?.name
-        model.login = comment.author?.login
         return model
     }
 

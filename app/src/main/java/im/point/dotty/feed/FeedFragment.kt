@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,6 +22,7 @@ import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.FragmentFeedBinding
 import im.point.dotty.main.MainViewModel
 import im.point.dotty.model.CompletePost
+import im.point.dotty.user.UserFragment
 import kotlinx.coroutines.CoroutineExceptionHandler
 
 abstract class FeedFragment<T : CompletePost<*>> : NavFragment<MainViewModel>() {
@@ -38,6 +40,12 @@ abstract class FeedFragment<T : CompletePost<*>> : NavFragment<MainViewModel>() 
         viewModel = ViewModelProvider(requireActivity(), ViewModelFactory(requireActivity()))
                 .get(MainViewModel::class.java)
         adapter = FeedAdapter(lifecycleScope, viewModel::getAvatar)
+        adapter.onUserClicked = { id, login ->
+            val bundle = Bundle()
+            bundle.putLong(UserFragment.USER_ID, id)
+            bundle.putString(UserFragment.USER_LOGIN, login)
+            findNavController().navigate(R.id.action_main_fragment_to_userFragment, bundle)
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
