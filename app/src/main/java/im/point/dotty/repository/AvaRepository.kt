@@ -13,7 +13,6 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
-import java.util.*
 
 class AvaRepository(private val client: OkHttpClient,
                     private val path: File) {
@@ -39,6 +38,7 @@ class AvaRepository(private val client: OkHttpClient,
     }
 
     private fun fetchAvatar(name: String, size: Size) = flow {
+        path.mkdir()
         with(File(path, "$name:${size.dim}.jpg")) {
             val response = client.newCall(getRequest(name, size)).execute()
             if (response.isSuccessful) {
@@ -46,7 +46,7 @@ class AvaRepository(private val client: OkHttpClient,
                 val bytes = response.body()?.bytes() ?: throw Exception("empty response body")
                 writeBytes(bytes)
                 emit(BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                    ?: throw Exception("failed to decode file"))
+                        ?: throw Exception("failed to decode file"))
             } else {
                 throw Exception(response.message())
             }
@@ -58,9 +58,13 @@ class AvaRepository(private val client: OkHttpClient,
                 .build()
     }
 
+    suspend fun cleanup() = withContext(Dispatchers.IO) {
+        path.deleteRecursively()
+    }
+
     init {
         path.mkdir()
-        GlobalScope.launch {
+        GlobalScope.launch(Dispatchers.IO) {
             path.listFiles()?.forEach {
                 nameRegex.matchEntire(it.name)?.groups?.apply {
                     val name = get(1)?.value ?: throw Exception("avatar name is not specified")

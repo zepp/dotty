@@ -107,6 +107,7 @@ class PostFragment : NavFragment<PostViewModel>() {
                 if (post.tags.isNullOrEmpty()) {
                     binding.postTags.visibility = View.GONE
                 } else {
+                    binding.postTags.visibility = View.VISIBLE
                     tagsAdapter.list = post.tags!!
                 }
             }
