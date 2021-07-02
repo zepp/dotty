@@ -34,14 +34,14 @@ class UserFragment : NavFragment<UserViewModel>() {
         Log.e(this::class.simpleName, exception.message, exception)
         showSnackbar(exception.localizedMessage)
     }
+    private val userId by lazy { requireArguments().getLong(USER_ID, -1) }
 
-    override fun provideViewModel(): UserViewModel {
-        return requireArguments().let {
+    private val userLogin by lazy { requireArguments().getString(USER_LOGIN)!! }
+
+    override fun provideViewModel() =
             ViewModelProvider(this, ViewModelFactory(requireActivity(),
-                    it.getLong(USER_ID, -1), it.getString(USER_LOGIN)!!))
+                    userId, userLogin))
                     .get(UserViewModel::class.java)
-        }
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentUserBinding.inflate(layoutInflater, container, false)
@@ -54,6 +54,14 @@ class UserFragment : NavFragment<UserViewModel>() {
             bundle.putLong(PostFragment.USER_ID, post.metapost.userId)
             bundle.putSerializable(PostFragment.POST_TYPE, PostType.USER_POST)
             findNavController().navigate(R.id.action_userFragment_to_postFragment, bundle)
+        }
+        adapter.onUserClicked = { id, login ->
+            if (id != userId) {
+                val bundle = Bundle()
+                bundle.putLong(USER_ID, id)
+                bundle.putString(USER_LOGIN, login)
+                findNavController().navigate(R.id.action_user_fragment_self, bundle)
+            }
         }
         binding.userPosts.adapter = adapter
         binding.userPosts.addItemDecoration(RecyclerItemDecorator(requireContext(), DividerItemDecoration.VERTICAL, 4))
