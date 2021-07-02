@@ -7,14 +7,12 @@ import androidx.room.TypeConverter
 
 class StringListConverter {
     @TypeConverter
-    fun fromString(value: String?): List<String>? {
-        return value?.split(',')
-    }
+    fun fromString(value: String) =
+        if (value.isNullOrEmpty()) listOf() else value.split(',')
 
     @TypeConverter
-    fun fromList(value: List<String>?) : String? {
-        var buf = StringBuilder()
-        value?.joinTo(buf, ",")
-        return if (buf.isEmpty()) null else buf.toString()
+    fun fromList(value: List<String>) = with(StringBuilder()) {
+        value.joinTo(this, ",")
+        toString()
     }
 }
