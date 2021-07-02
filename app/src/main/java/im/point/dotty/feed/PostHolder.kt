@@ -8,7 +8,6 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import im.point.dotty.R
 import im.point.dotty.common.AvatarOutline
@@ -61,7 +60,6 @@ class PostHolder<T : CompletePost<*>>(itemView: View, private val scope:Coroutin
 
     init {
         tags.adapter = adapter
-        tags.layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
         tags.addItemDecoration(RecyclerItemDecorator(itemView.context, DividerItemDecoration.HORIZONTAL, 4))
         avatar.outlineProvider = outline
         avatar.clipToOutline = true
