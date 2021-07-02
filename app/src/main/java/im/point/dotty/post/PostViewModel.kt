@@ -49,8 +49,8 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
             .stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
 
     val isPinVisible = post.map { it.authorId == state.id }
-            .distinctUntilChanged()
-    val isPinned = post.map { it.pinned == true }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val isPinned = post.map { it.isPinned }
             .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val isSubscribed = metaPost.map { it.bookmarked }

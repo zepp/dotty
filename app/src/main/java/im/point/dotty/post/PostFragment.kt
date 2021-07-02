@@ -110,14 +110,14 @@ class PostFragment : NavFragment<PostViewModel>() {
 
         lifecycleScope.launchWhenStarted {
             viewModel.post.collect { post ->
-                binding.toolbar.title = post.alogin
+                binding.toolbar.title = post.formattedLogin
                 binding.postText.text = post.text
-                if (post.tags.isNullOrEmpty()) {
-                    binding.postTags.visibility = View.GONE
+                binding.postTags.visibility = if (post.tags.isEmpty()) {
+                    View.GONE
                 } else {
-                    binding.postTags.visibility = View.VISIBLE
-                    tagsAdapter.list = post.tags!!
+                    View.VISIBLE
                 }
+                tagsAdapter.list = post.tags
             }
         }
 

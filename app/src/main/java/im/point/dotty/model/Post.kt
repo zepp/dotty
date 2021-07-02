@@ -14,20 +14,20 @@ data class Post(@PrimaryKey
                 @ColumnInfo(name = "author_id")
                 val authorId: Long,
                 @ColumnInfo(name = "author_login")
-                var authorLogin: String) {
-    var name: String? = null
+                var authorLogin: String,
+                var authorName: String = "",
 
-    var text: String? = null
-    var tags: List<String>? = null
-    var timestamp: Date? = null
-    var commentCount: Int? = null
+                var text: String = "",
+                var tags: List<String> = listOf(),
+                var timestamp: Date? = null,
+                var commentCount: Int = 0,
 
-    var pinned: Boolean? = null
-    var private: Boolean? = null
+                var isPinned: Boolean = false,
+                var isPrivate: Boolean = false) {
 
-    val nameOrLogin: String?
-        get() = if (name.isNullOrEmpty()) authorLogin else name
-
-    val alogin:String
+    val formattedLogin: String
         get() = "@$authorLogin"
+
+    val formattedId: String
+        get() = "#$id"
 }

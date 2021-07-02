@@ -43,9 +43,9 @@ class PostHolder<T : CompletePost<*>>(itemView: View, private val scope:Coroutin
         }
         post.post.let {
             avatar.setOnClickListener { _ -> onUserClicked(it.authorId, it.authorLogin) }
-            author.text = it.alogin
+            author.text = it.formattedLogin
             author.setOnClickListener { _ -> onUserClicked(it.authorId, it.authorLogin) }
-            id.text = "#" + post.id
+            id.text = it.formattedId
             text.text = it.text
             if (it.tags.isNullOrEmpty()) {
                 tags.visibility = View.GONE;

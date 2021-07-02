@@ -13,22 +13,23 @@ import java.util.*
 open class MetaPostMapper<T : CompletePost<*>> {
     protected fun mergeMetaPost(model: T, post: MetaPost): T {
         model.metapost.pageId = post.uid
-        model.metapost.bookmarked = post.isBookmarked == true
-        model.metapost.recommended = post.isRecommended == true
-        model.metapost.subscribed = post.isSubscribed == true
-        mergeRawPost(model.post, post.post ?: throw Exception("invalid raw post"))
+        model.metapost.bookmarked = post.isBookmarked ?: false
+        model.metapost.recommended = post.isRecommended ?: false
+        model.metapost.subscribed = post.isSubscribed ?: false
+        mergeRawPost(model.post, post.post ?: throw Exception("Raw post is not provided"))
         return model
     }
 
     protected fun mergeRawPost(model: Post, post: RawPost): Post {
-        model.pinned = post.isPinned
-        model.private = post.isPrivate
-        model.authorLogin = post.author?.login ?: throw Exception("invalid author login")
-        model.name = post.author?.name
-        model.text = post.text
+        model.isPinned = post.isPinned ?: false
+        model.isPrivate = post.isPrivate ?: false
+        model.authorLogin = post.author?.login
+                ?: throw Exception("Post's author login is not provided")
+        model.authorName = post.author?.name ?: ""
+        model.text = post.text ?: throw Exception("Post's text is not provided")
         model.timestamp = post.created?.let { format.parse(it) }
-        model.tags = post.tags
-        model.commentCount = post.commentsCount
+        model.tags = post.tags ?: listOf()
+        model.commentCount = post.commentsCount ?: 0
         return model
     }
 
