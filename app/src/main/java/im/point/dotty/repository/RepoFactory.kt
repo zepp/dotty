@@ -17,6 +17,8 @@ class RepoFactory(private val api: PointAPI, private val database: DottyDatabase
 
     fun getUserPostRepo(userId: Long = 0) = UserPostRepo(api, database, userId)
 
+    fun getTaggedPostRepo(tag: String) = TaggedPostRepo(api, database, tag)
+
     fun getUserRepo() = UserRepo(api, state, database.getUserDao())
 
     fun getPostRepo() = PostRepo(api, database)

@@ -30,9 +30,11 @@ class PostHolder<T : CompletePost<*>>(itemView: View, private val scope:Coroutin
     private val recommended: ImageView = itemView.findViewById(R.id.post_recommended)
     private val bookmarked: ImageView = itemView.findViewById(R.id.post_bookmarked)
     private val adapter: TagsAdapter = TagsAdapter()
-    private var job = scope.launch {  }
+    private var job = scope.launch { }
 
-    fun bind(post: T, bitmap: Flow<Bitmap>, onItemClicked: (item: T) -> Unit, onUserClicked: (id: Long, login: String) -> Unit) {
+    fun bind(post: T, bitmap: Flow<Bitmap>, onItemClicked: (item: T) -> Unit,
+             onUserClicked: (id: Long, login: String) -> Unit,
+             onTagClicked: (tag: String) -> Unit) {
         job.cancel()
         job = scope.launch {
             bitmap.collect { avatar.setImageBitmap(it) }
@@ -50,7 +52,8 @@ class PostHolder<T : CompletePost<*>>(itemView: View, private val scope:Coroutin
             if (it.tags.isNullOrEmpty()) {
                 tags.visibility = View.GONE;
             } else {
-                adapter.list = it.tags!!
+                adapter.list = it.tags
+                adapter.onTagClicked = onTagClicked
             }
             commentsCount.text = it.commentCount.toString()
         }

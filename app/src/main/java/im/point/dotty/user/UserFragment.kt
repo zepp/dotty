@@ -47,8 +47,8 @@ class UserFragment : NavFragment<UserViewModel>() {
         binding = FragmentUserBinding.inflate(layoutInflater, container, false)
         binding.viewModel = viewModel
         binding.lifecycleOwner = this
-        adapter = FeedAdapter(lifecycleScope, viewModel::getPostAvatar)
-        adapter.onItemClicked = { post ->
+        adapter = FeedAdapter(lifecycleScope)
+        adapter.onPostClicked = { post ->
             val bundle = Bundle()
             bundle.putString(PostFragment.POST_ID, post.id)
             bundle.putLong(PostFragment.USER_ID, post.metapost.userId)
@@ -94,7 +94,7 @@ class UserFragment : NavFragment<UserViewModel>() {
         }
         binding.userRefresh.setOnRefreshListener {
             lifecycleScope.launch(exceptionHandler) {
-                viewModel.fetchUserAndPosts().onCompletion { onFetched() }.collect()
+                viewModel.fetchUserAndPosts().onCompletion { finishRefreshing() }.collect()
             }
         }
 
@@ -130,7 +130,7 @@ class UserFragment : NavFragment<UserViewModel>() {
         }
     }
 
-    private fun onFetched() {
+    private fun finishRefreshing() {
         binding.userRefresh.isRefreshing = false
     }
 

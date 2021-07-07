@@ -8,27 +8,21 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
-import im.point.dotty.common.NavFragment
-import im.point.dotty.common.RecyclerItemDecorator
-import im.point.dotty.common.ViewModelFactory
+import im.point.dotty.common.*
 import im.point.dotty.databinding.FragmentFeedBinding
-import im.point.dotty.main.MainViewModel
 import im.point.dotty.model.CompletePost
+import im.point.dotty.tag.TagFragment
 import im.point.dotty.user.UserFragment
 import kotlinx.coroutines.CoroutineExceptionHandler
 
-abstract class FeedFragment<T : CompletePost<*>> : NavFragment<MainViewModel>() {
+abstract class FeedFragment<M : DottyViewModel, T : CompletePost<*>> : NavFragment<M>() {
     protected lateinit var binding: FragmentFeedBinding
     protected lateinit var adapter: FeedAdapter<T>
-    protected lateinit var feedPosts: RecyclerView
     protected val exceptionHandler = CoroutineExceptionHandler { _, exception ->
         Log.e(this::class.simpleName, exception.message, exception)
         finishUpdate()
@@ -37,41 +31,34 @@ abstract class FeedFragment<T : CompletePost<*>> : NavFragment<MainViewModel>() 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity(), ViewModelFactory(requireActivity()))
-                .get(MainViewModel::class.java)
-        adapter = FeedAdapter(lifecycleScope, viewModel::getAvatar)
+        adapter = FeedAdapter(lifecycleScope)
         adapter.onUserClicked = { id, login ->
             val bundle = Bundle()
             bundle.putLong(UserFragment.USER_ID, id)
             bundle.putString(UserFragment.USER_LOGIN, login)
-            findNavController().navigate(R.id.action_main_fragment_to_userFragment, bundle)
+            findNavController().navigate(R.id.action_main_to_user, bundle)
+        }
+        adapter.onTagClicked = { tag ->
+            val bundle = Bundle()
+            bundle.putString(TagFragment.TAG, tag)
+            findNavController().navigate(R.id.action_main_to_tag, bundle)
         }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         binding = FragmentFeedBinding.inflate(inflater, container, false)
-        binding.viewModel = viewModel
         binding.lifecycleOwner = this
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        feedPosts = binding.feedPosts
-        feedPosts.addItemDecoration(RecyclerItemDecorator(requireContext(), DividerItemDecoration.VERTICAL, 4))
-        feedPosts.adapter = adapter
-        feedPosts.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            val manager = feedPosts.layoutManager as LinearLayoutManager
-            override fun onScrolled(view: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(view, dx, dy)
-                if (view.scrollState == RecyclerView.SCROLL_STATE_SETTLING && dy > 0
-                        && manager.findLastCompletelyVisibleItemPosition() == adapter.itemCount - 1) {
-                    binding.feedRefreshLayout.isRefreshing = true
-                    onFeedUpdateBefore()
-                }
-            }
-        })
+        with(binding.feedPosts) {
+            addItemDecoration(RecyclerItemDecorator(requireContext(), DividerItemDecoration.VERTICAL, 4))
+            adapter = this@FeedFragment.adapter
+            addOnLastItemDisplayedListener { onFeedUpdateBefore() }
+        }
         binding.feedRefreshLayout.setOnRefreshListener(this::onFeedUpdate)
     }
 

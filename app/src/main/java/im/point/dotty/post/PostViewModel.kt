@@ -22,7 +22,8 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
 
     private val type = args[0] as PostType
     private val postId = args[1] as String
-    private val userId = args[2] as Long
+    private val userId = if (type == PostType.USER_POST) args[2] as Long else null
+    private val tag = if (type == PostType.TAGGED_POST) args[2] as String else null
 
     private val repoFactory: RepoFactory = application.repoFactory
     private val api: PointAPI = application.mainApi
@@ -33,7 +34,8 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
     private val recentPostRepo = repoFactory.getRecentPostRepo()
     private val commentedPostRepo = repoFactory.getCommentedPostRepo()
     private val allPostRepo = repoFactory.getAllPostRepo()
-    private val userPostRepo = repoFactory.getUserPostRepo(userId)
+    private val userPostRepo = repoFactory.getUserPostRepo(userId ?: 0)
+    private val taggedPostRepo = repoFactory.getTaggedPostRepo(tag ?: "")
 
     private val metaPost = getMetaPost(postId)
             .stateIn(viewModelScope, SharingStarted.Eagerly, object : MetaPost() {
@@ -92,6 +94,7 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
         PostType.COMMENTED_POST -> commentedPostRepo.getMetaPost(id)
         PostType.ALL_POST -> allPostRepo.getMetaPost(id)
         PostType.USER_POST -> userPostRepo.getMetaPost(id)
+        PostType.TAGGED_POST -> taggedPostRepo.getMetaPost(id)
     }
 
     private fun updatePost(post: MetaPost) = when (post) {
@@ -99,6 +102,7 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
         is CommentedPost -> commentedPostRepo.updateMetaPost(post)
         is AllPost -> allPostRepo.updateMetaPost(post)
         is UserPost -> userPostRepo.updateMetaPost(post)
+        is TaggedPost -> taggedPostRepo.updateMetaPost(post)
         else -> throw Exception("unknown model type")
     }
 

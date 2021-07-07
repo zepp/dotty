@@ -17,17 +17,27 @@ class TagsAdapter : RecyclerView.Adapter<TagHolder>() {
             notifyDataSetChanged()
         }
 
+    var onTagClicked: (tag: String) -> Unit = {}
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
             LayoutInflater.from(parent.context).inflate(R.layout.list_item_tag, parent, false)
                     .let { TagHolder(it) }
 
     override fun getItemCount(): Int = list.size
 
-    override fun onBindViewHolder(holder: TagHolder, position: Int) = holder.bind(list[position])
+    override fun onBindViewHolder(holder: TagHolder, position: Int) =
+            holder.bind(list[position], onTagClicked)
 }
 
 class TagHolder(view: View) : RecyclerView.ViewHolder(view) {
-    fun bind(tag: String) {
-        (itemView as TextView).text = tag
+    fun bind(tag: String, onTagClicked: (tag: String) -> Unit) {
+        with(itemView as TextView) {
+            text = tag
+            setOnClickListener { onTagClicked(tag) }
+        }
     }
 }

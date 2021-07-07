@@ -42,11 +42,15 @@ class PostFragment : NavFragment<PostViewModel>() {
 
     override fun provideViewModel(): PostViewModel {
         requireArguments().let {
+            val type = it.getSerializable(POST_TYPE) as PostType
             val postId = it.getString(POST_ID)!!
-            val post = it.getSerializable(POST_TYPE) as PostType
-            val userId = it.getLong(USER_ID)
-            return ViewModelProvider(this, ViewModelFactory(requireActivity(), post, postId, userId))
-                    .get(PostViewModel::class.java)
+            return if (type == PostType.TAGGED_POST) {
+                val tag = it.getString(TAG)!!
+                ViewModelProvider(this, ViewModelFactory(requireActivity(), type, postId, tag))
+            } else {
+                val userId = it.getLong(USER_ID)
+                ViewModelProvider(this, ViewModelFactory(requireActivity(), type, postId, userId))
+            }.get(PostViewModel::class.java)
         }
     }
 
@@ -134,5 +138,6 @@ class PostFragment : NavFragment<PostViewModel>() {
         const val POST_ID = "post-id"
         const val POST_TYPE = "post-type"
         const val USER_ID = "user-id"
+        const val TAG = "tag"
     }
 }

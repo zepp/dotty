@@ -10,11 +10,14 @@
         android:name="im.point.dotty.main.MainFragment"
         tools:layout="@layout/fragment_main">
         <action
-            android:id="@+id/action_main_fragment_to_userFragment"
+            android:id="@+id/action_main_to_user"
             app:destination="@id/user_fragment" />
         <action
-            android:id="@+id/action_main_fragment_to_postFragment"
+            android:id="@+id/action_main_to_post"
             app:destination="@id/post_fragment" />
+        <action
+            android:id="@+id/action_main_to_tag"
+            app:destination="@id/tag_fragment" />
     </fragment>
     <fragment
         android:id="@+id/user_fragment"
@@ -51,5 +54,26 @@
         <action
             android:id="@+id/action_post_fragment_to_user_fragment"
             app:destination="@id/user_fragment" />
+        <argument
+            android:name="tag"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/tag_fragment"
+        android:name="im.point.dotty.tag.TagFragment"
+        android:label="TagFragment"
+        tools:layout="@layout/fragment_tag">
+        <argument
+            android:name="tag"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_tag_to_post"
+            app:destination="@id/post_fragment" />
+        <action
+            android:id="@+id/action_tag_to_user"
+            app:destination="@id/user_fragment" />
+        <action
+            android:id="@+id/action_tag_to_tag"
+            app:destination="@id/tag_fragment" />
     </fragment>
 </navigation>

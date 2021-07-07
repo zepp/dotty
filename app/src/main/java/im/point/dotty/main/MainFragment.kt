@@ -7,9 +7,11 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import im.point.dotty.R
 import im.point.dotty.common.NavFragment
+import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.FragmentMainBinding
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.collect
@@ -21,6 +23,10 @@ class MainFragment : NavFragment<MainViewModel>() {
         Log.e(this::class.simpleName, exception.message, exception)
         Toast.makeText(requireContext(), exception.message, Toast.LENGTH_LONG).show()
     }
+
+    override fun provideViewModel(): MainViewModel =
+            ViewModelProvider(requireActivity(), ViewModelFactory(requireActivity()))
+                    .get(MainViewModel::class.java)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         setHasOptionsMenu(true)

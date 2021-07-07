@@ -10,5 +10,5 @@ import androidx.room.Entity
 data class UserPost(override val id: String,
                     @ColumnInfo(name = "author_id")
                     override val authorId: Long,
-                    @ColumnInfo(name = "user_id")
+                    @ColumnInfo(name = "user_id", index = true)
                     val userId: Long) : MetaPost()
