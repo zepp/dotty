@@ -4,6 +4,7 @@ import im.point.dotty.db.DottyDatabase
 import im.point.dotty.mapper.Mapper
 import im.point.dotty.mapper.UserPostMapper
 import im.point.dotty.model.CompleteUserPost
+import im.point.dotty.model.UserData
 import im.point.dotty.model.UserPost
 import im.point.dotty.network.MetaPost
 import im.point.dotty.network.PointAPI
@@ -20,6 +21,24 @@ class UserPostRepo(private val api: PointAPI,
     private val userDao = db.getUserDao()
     private val metaPostDao = db.getUserPostsDao()
     private val postDao = db.getPostDao()
+    private val userDataDao = db.getUserDataDao()
+
+    private fun fetch(isBefore: Boolean) = flow {
+        val login = userDao.getItem(userId)?.login ?: throw Exception("user login is empty")
+        val lastPageId = userDataDao.getItem(userId)?.lastPageId
+        metaPostDao.getUserPosts(userId).let { if (it.isNotEmpty()) emit(it) }
+        with(api.getUserPosts(login, if (isBefore) lastPageId else null)) {
+            checkSuccessful()
+            with(posts.map { mapper.map(it) }) {
+                if (size > 0) {
+                    last().metapost.pageId?.let { userDataDao.insertItem(UserData(userId, it)) }
+                    postDao.insertAll(map { it.post })
+                    metaPostDao.insertAll(map { it.metapost })
+                    emit(this)
+                }
+            }
+        }
+    }
 
     override fun getAll(): Flow<List<CompleteUserPost>> {
         return metaPostDao.getUserPostsFlow(userId)
@@ -29,20 +48,9 @@ class UserPostRepo(private val api: PointAPI,
         return metaPostDao.getItemFlow(id, userId).map { it ?: throw Exception("post not found") }
     }
 
-    override fun fetchAll() = flow {
-        val login = userDao.getItem(userId)?.login ?: throw Exception("user login is empty")
-        metaPostDao.getUserPosts(userId).let { if (it.isNotEmpty()) emit(it) }
-        with(api.getUserPosts(login, null)) {
-            checkSuccessful()
-            with(posts.map { mapper.map(it) }) {
-                if (size > 0) {
-                    postDao.insertAll(map { it.post })
-                    metaPostDao.insertAll(map { it.metapost })
-                    emit(this)
-                }
-            }
-        }
-    }
+    override fun fetchAll() = fetch(false)
+
+    fun fetchBefore() = fetch(true)
 
     fun getMetaPost(postId: String) = metaPostDao.getMetaPostFlow(postId, userId)
             .map { it ?: throw Exception("Post not found") }

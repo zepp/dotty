@@ -131,4 +131,6 @@ class UserViewModel(application: DottyApplication, vararg args: Any) : DottyView
             .flatMapConcat { userPostRepo.fetchAll() }
             .flowOn(Dispatchers.IO)
 
+    fun fetchBefore() = fetched.flatMapConcat { userPostRepo.fetchBefore() }
+            .flowOn(Dispatchers.IO)
 }
