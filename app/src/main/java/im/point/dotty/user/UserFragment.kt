@@ -17,6 +17,7 @@ import im.point.dotty.feed.FeedAdapter
 import im.point.dotty.model.CompleteUserPost
 import im.point.dotty.model.PostType
 import im.point.dotty.post.PostFragment
+import im.point.dotty.tag.TagFragment
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collect
@@ -51,7 +52,7 @@ class UserFragment : NavFragment<UserViewModel>() {
             bundle.putString(PostFragment.POST_ID, post.id)
             bundle.putLong(PostFragment.USER_ID, post.metapost.userId)
             bundle.putSerializable(PostFragment.POST_TYPE, PostType.USER_POST)
-            findNavController().navigate(R.id.action_userFragment_to_postFragment, bundle)
+            findNavController().navigate(R.id.action_user_to_post, bundle)
         }
         adapter.onUserClicked = { id, login ->
             if (id != userId) {
@@ -60,6 +61,11 @@ class UserFragment : NavFragment<UserViewModel>() {
                 bundle.putString(USER_LOGIN, login)
                 findNavController().navigate(R.id.action_user_fragment_self, bundle)
             }
+        }
+        adapter.onTagClicked = { tag ->
+            val bundle = Bundle()
+            bundle.putString(TagFragment.TAG, tag)
+            findNavController().navigate(R.id.action_user_to_tag, bundle)
         }
         binding.userPosts.adapter = adapter
         binding.userPosts.addItemDecoration(RecyclerItemDecorator(requireContext(), DividerItemDecoration.VERTICAL, 4))
