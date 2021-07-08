@@ -6,6 +6,6 @@ import im.point.dotty.model.UserData
 
 @Dao
 interface UserDataDao : CommonDao<UserData> {
-    @Query("SELECT * FROM user_datum WHERE userId = :userId")
+    @Query("SELECT * FROM user_datum WHERE user_id = :userId")
     fun getItem(userId: Long): UserData?
 }

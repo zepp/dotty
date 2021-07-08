@@ -4,6 +4,7 @@
 package im.point.dotty.login
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import im.point.dotty.DottyApplication
 import im.point.dotty.common.DottyViewModel
@@ -17,7 +18,7 @@ import kotlinx.coroutines.launch
 
 @SuppressLint("CheckResult")
 class LoginViewModel(application: DottyApplication, vararg args: Any) : DottyViewModel(application) {
-    private val userRepo: UserRepo = UserRepo(application.mainApi, state, application.database.getUserDao())
+    private val userRepo: UserRepo = application.repoFactory.getUserRepo()
 
     val isLoginEnabled = MutableStateFlow(false)
 
@@ -38,6 +39,8 @@ class LoginViewModel(application: DottyApplication, vararg args: Any) : DottyVie
             state.csrfToken = csrfToken
                     ?: throw Exception("CSRF token is empty")
             state.token = token ?: throw Exception("token is empty")
+            Log.d(this::class.simpleName, "Authorization: $token")
+            Log.d(this::class.simpleName, "X-CSRF: $csrfToken")
             userRepo.fetchUser(login).collect {
                 state.id = it.id
             }

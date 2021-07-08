@@ -6,11 +6,12 @@ package im.point.dotty.db
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import im.point.dotty.BuildConfig
 import im.point.dotty.model.*
 
 @Database(entities = [User::class,
     RecentPost::class, CommentedPost::class, AllPost::class, UserPost::class, TaggedPost::class,
-    Post::class, Comment::class, TagLastPageId::class, UserData::class], version = 1)
+    Post::class, Comment::class, TagLastPageId::class, UserData::class, UserTag::class], version = BuildConfig.VERSION_CODE)
 @TypeConverters(value = [DateConverter::class, GenderConverter::class, StringListConverter::class])
 abstract class DottyDatabase : RoomDatabase() {
     abstract fun getUserDao(): UserDao
@@ -23,4 +24,5 @@ abstract class DottyDatabase : RoomDatabase() {
     abstract fun getTaggedPostDao(): TaggedPostDao
     abstract fun getTagLastPageIdDao(): TagLastPageIdDao
     abstract fun getUserDataDao(): UserDataDao
+    abstract fun getUserTagDao(): UserTagDao
 }

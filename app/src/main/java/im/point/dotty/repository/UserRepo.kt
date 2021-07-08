@@ -4,7 +4,8 @@
 package im.point.dotty.repository
 
 import im.point.dotty.common.AppState
-import im.point.dotty.db.UserDao
+import im.point.dotty.db.DottyDatabase
+import im.point.dotty.mapper.TagMapper
 import im.point.dotty.mapper.UserMapper
 import im.point.dotty.model.User
 import im.point.dotty.network.PointAPI
@@ -14,14 +15,18 @@ import kotlinx.coroutines.flow.map
 
 class UserRepo(private val api: PointAPI,
                private val state: AppState,
-               private val dao: UserDao,
+               db: DottyDatabase,
                private val mapper: UserMapper = UserMapper()) : Repository<User, Long> {
+
+    private val userDao = db.getUserDao()
+    private val tagDao = db.getUserTagDao()
+
     override fun getAll(): Flow<List<User>> {
-        return dao.getAllFlow()
+        return userDao.getAllFlow()
     }
 
     override fun getItem(id: Long): Flow<User> {
-        return dao.getItemFlow(id).map { it ?: throw Exception("user not found in DB") }
+        return userDao.getItemFlow(id).map { it ?: throw Exception("user not found in DB") }
     }
 
     override fun fetchAll(): Flow<List<User>> {
@@ -29,13 +34,18 @@ class UserRepo(private val api: PointAPI,
     }
 
     fun fetchUser(id: Long) = flow {
-        dao.getItem(id)?.let { emit(it) }
-        with(api.getUser(id)) {
+        userDao.getItem(id)?.let { emit(it) }
+        val user = with(api.getUser(id)) {
             checkSuccessful()
             with(mapper.map(this)) {
-                dao.insertItem(this)
+                userDao.insertItem(this)
                 emit(this)
+                this
             }
+        }
+        with(api.getUserTags(user.login)) {
+            val mapper = TagMapper(user.id)
+            tagDao.insertAll(map { mapper.map(it) })
         }
     }
 
@@ -43,18 +53,18 @@ class UserRepo(private val api: PointAPI,
         with(api.getUser(login)) {
             checkSuccessful()
             with(mapper.map(this)) {
-                dao.insertItem(this)
+                userDao.insertItem(this)
                 emit(this)
             }
         }
     }
 
     fun fetchMe() = flow {
-        dao.getItem(state.id)?.let { emit(it) }
+        userDao.getItem(state.id)?.let { emit(it) }
         with(api.getUser(state.id)) {
             checkSuccessful()
             with(mapper.map(this)) {
-                dao.insertItem(this)
+                userDao.insertItem(this)
                 emit(this)
             }
         }

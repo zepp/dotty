@@ -24,6 +24,9 @@ interface PointAPI {
     @GET("/api/tags/{user}")
     suspend fun getUserTagged(@Path("user") user: String, @Query("tag") tag: String, @Query("before") before: Long?): PostsReply
 
+    @GET("/api/tags/{user}")
+    suspend fun getUserTags(@Path("user") user: String): List<UserTagEntry>
+
     @GET("/api/blog/{user}")
     suspend fun getUserPosts(@Path("user") user: String, @Query("before") before: Long?): PostsReply
 
