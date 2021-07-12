@@ -54,12 +54,15 @@
         <argument
             android:name="userId"
             app:argType="long" />
-        <action
-            android:id="@+id/action_post_fragment_to_user_fragment"
-            app:destination="@id/user_fragment" />
         <argument
             android:name="tag"
             app:argType="string" />
+        <action
+            android:id="@+id/action_post_to_user"
+            app:destination="@id/user_fragment" />
+        <action
+            android:id="@+id/action_post_to_tag"
+            app:destination="@id/tag_fragment" />
     </fragment>
     <fragment
         android:id="@+id/tag_fragment"

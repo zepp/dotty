@@ -16,9 +16,17 @@ import im.point.dotty.model.Comment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 
-class CommentAdapter(val scope: CoroutineScope, val factory: (name: String) -> Flow<Bitmap>) : RecyclerView.Adapter<CommentHolder>() {
+class CommentAdapter(val scope: CoroutineScope) : RecyclerView.Adapter<CommentHolder>() {
+
+    var avatarProvider: (name: String) -> Flow<Bitmap> = { emptyFlow() }
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+
     var list: List<Comment> = listOf()
         set(value) {
             field = value
@@ -44,7 +52,7 @@ class CommentAdapter(val scope: CoroutineScope, val factory: (name: String) -> F
     override fun getItemCount(): Int = list.size
 
     override fun onBindViewHolder(holder: CommentHolder, position: Int) = with(list[position]) {
-        holder.bind(this, position, factory(login), onIdClicked, onUserClicked)
+        holder.bind(this, position, avatarProvider(login), onIdClicked, onUserClicked)
     }
 
     override fun getItemId(position: Int): Long = list[position].number.toLong()

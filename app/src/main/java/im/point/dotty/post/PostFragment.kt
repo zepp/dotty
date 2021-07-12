@@ -21,6 +21,7 @@ import im.point.dotty.common.TagsAdapter
 import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.FragmentPostBinding
 import im.point.dotty.model.PostType
+import im.point.dotty.tag.TagFragment
 import im.point.dotty.user.UserFragment
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.FlowPreview
@@ -61,15 +62,20 @@ class PostFragment : NavFragment<PostViewModel>() {
         binding.lifecycleOwner = this
         binding.postTags.adapter = tagsAdapter
         binding.postTags.addItemDecoration(RecyclerItemDecorator(requireContext(), LinearLayoutManager.HORIZONTAL, 4))
-        binding.postTags.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        adapter = CommentAdapter(lifecycleScope, viewModel::getAvatar)
+        tagsAdapter.onTagClicked = { tag ->
+            val bundle = Bundle()
+            bundle.putString(TagFragment.TAG, tag)
+            findNavController().navigate(R.id.action_post_to_tag, bundle)
+        }
+        adapter = CommentAdapter(lifecycleScope)
         binding.postComments.adapter = adapter
-        adapter.onIdClicked = { id, pos -> binding.postComments.smoothScrollToPosition(pos) }
+        adapter.avatarProvider = viewModel::getAvatar
+        adapter.onIdClicked = { _, pos -> binding.postComments.smoothScrollToPosition(pos) }
         adapter.onUserClicked = { id, login ->
             val bundle = Bundle()
             bundle.putLong(UserFragment.USER_ID, id)
             bundle.putString(UserFragment.USER_LOGIN, login)
-            findNavController().navigate(R.id.action_post_fragment_to_user_fragment, bundle)
+            findNavController().navigate(R.id.action_post_to_user, bundle)
         }
         layout = binding.postSwipeLayout
         layout.setOnRefreshListener {
