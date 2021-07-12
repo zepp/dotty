@@ -16,7 +16,7 @@ import java.io.File
 
 class AvaRepository(private val client: OkHttpClient,
                     private val path: File) {
-    private val nameRegex = Regex("(.*):(\\d+)\\.jpg$");
+    private val nameRegex = Regex("(.*)\\.jpg$");
     private val map24 = mutableMapOf<String, Flow<Bitmap>>()
     private val map40 = mutableMapOf<String, Flow<Bitmap>>()
     private val map80 = mutableMapOf<String, Flow<Bitmap>>()
@@ -27,7 +27,8 @@ class AvaRepository(private val client: OkHttpClient,
             fetchAvatar(name, size)
                 .flowOn(Dispatchers.IO)
                 .stateIn(GlobalScope, SharingStarted.Eagerly,
-                    Bitmap.createBitmap(size.dim, size.dim, Bitmap.Config.ARGB_8888))})
+                        Bitmap.createBitmap(size.dim, size.dim, Bitmap.Config.ARGB_8888))
+        })
     }
 
     private fun map(size: Size): MutableMap<String, Flow<Bitmap>> = when (size) {
@@ -37,9 +38,12 @@ class AvaRepository(private val client: OkHttpClient,
         Size.SIZE_280 -> map280
     }
 
+    private fun root(size: Size) = File(path, size.dim.toString())
+
     private fun fetchAvatar(name: String, size: Size) = flow {
-        path.mkdir()
-        with(File(path, "$name:${size.dim}.jpg")) {
+        val root = root(size)
+        root.mkdir()
+        with(File(root, "$name.jpg")) {
             val response = client.newCall(getRequest(name, size)).execute()
             if (response.isSuccessful) {
                 delete()
@@ -62,17 +66,28 @@ class AvaRepository(private val client: OkHttpClient,
         path.deleteRecursively()
     }
 
-    init {
-        path.mkdir()
-        GlobalScope.launch(Dispatchers.IO) {
-            path.listFiles()?.forEach {
-                nameRegex.matchEntire(it.name)?.groups?.apply {
-                    val name = get(1)?.value ?: throw Exception("avatar name is not specified")
-                    val size = get(2)?.value?.toInt()
-                            ?: throw Exception("avatar size is not specified")
-                    map(Size.fromDim(size))[name] = flowOf(BitmapFactory.decodeFile(it.absolutePath))
+    private suspend fun scan(size: Size) = withContext(Dispatchers.IO) {
+        val map = map(size)
+        with(root(size)) {
+            listFiles()?.forEach {
+                nameRegex.matchEntire(it.name)?.groups?.run {
+                    val name = get(1)?.value ?: throw Exception("avatar name is null")
+                    val flow = flowOf(BitmapFactory.decodeFile(it.absolutePath))
+                    withContext(Dispatchers.Main) {
+                        map[name] = flow
+                    }
                 }
             }
+        }
+    }
+
+    init {
+        path.mkdir()
+        GlobalScope.launch {
+            scan(Size.SIZE_24)
+            scan(Size.SIZE_40)
+            scan(Size.SIZE_80)
+            scan(Size.SIZE_280)
         }
     }
 }
