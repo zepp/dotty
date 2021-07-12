@@ -9,10 +9,12 @@ import im.point.dotty.mapper.Mapper
 import im.point.dotty.mapper.PostMapper
 import im.point.dotty.model.Comment
 import im.point.dotty.model.Post
+import im.point.dotty.model.PostFile
 import im.point.dotty.network.PointAPI
 import im.point.dotty.network.RawComment
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import java.security.MessageDigest
 
 class PostRepo(
         private val api: PointAPI,
@@ -20,9 +22,10 @@ class PostRepo(
         private val postMapper: PostMapper = PostMapper(),
         private val commentMapper: Mapper<Comment, RawComment> = CommentMapper()
 ) : Repository<Post, String> {
-
+    private val digest = MessageDigest.getInstance("SHA-1")
     private val postDao = db.getPostDao()
     private val commentDao = db.getCommentDao()
+    private val fileDao = db.getPostFileDao()
 
     fun fetchPostAndComments(id: String) = flow {
         postDao.getItem(id)?.let { emit(it) }
@@ -34,6 +37,14 @@ class PostRepo(
             with(postMapper.map(post)) {
                 postDao.insertItem(this)
                 emit(this)
+            }
+            post.files?.run {
+                fileDao.insertAll(map { url ->
+                    val fileId = digest.digest(url.toByteArray())
+                            .map { String.format("%02X", it) }
+                            .joinToString(separator = "")
+                    PostFile(fileId, id, url)
+                })
             }
         }
     }

@@ -11,7 +11,8 @@ import im.point.dotty.model.*
 
 @Database(entities = [User::class,
     RecentPost::class, CommentedPost::class, AllPost::class, UserPost::class, TaggedPost::class,
-    Post::class, Comment::class, TagLastPageId::class, UserData::class, UserTag::class], version = BuildConfig.VERSION_CODE)
+    Post::class, Comment::class, TagLastPageId::class, UserData::class, UserTag::class, PostFile::class],
+        version = BuildConfig.VERSION_CODE)
 @TypeConverters(value = [DateConverter::class, GenderConverter::class, StringListConverter::class])
 abstract class DottyDatabase : RoomDatabase() {
     abstract fun getUserDao(): UserDao
@@ -25,4 +26,5 @@ abstract class DottyDatabase : RoomDatabase() {
     abstract fun getTagLastPageIdDao(): TagLastPageIdDao
     abstract fun getUserDataDao(): UserDataDao
     abstract fun getUserTagDao(): UserTagDao
+    abstract fun getPostFileDao(): PostFileDao
 }

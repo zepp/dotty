@@ -12,6 +12,7 @@ import im.point.dotty.network.AuthAPI
 import im.point.dotty.network.AuthInterceptor
 import im.point.dotty.network.PointAPI
 import im.point.dotty.repository.AvaRepository
+import im.point.dotty.repository.PostFileRepository
 import im.point.dotty.repository.RepoFactory
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
@@ -71,6 +72,10 @@ class DottyApplication : Application() {
 
     val avaRepo by lazy {
         AvaRepository(client, File(applicationContext.externalCacheDir, "ava"))
+    }
+
+    val postFilesRepo by lazy {
+        PostFileRepository(client, database.getPostFileDao(), File(applicationContext.externalCacheDir, "files"))
     }
 
     companion object {

@@ -28,6 +28,7 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
     private val repoFactory: RepoFactory = application.repoFactory
     private val api: PointAPI = application.mainApi
     private val avaRepository = application.avaRepo
+    private val filesRepository = application.postFilesRepo
 
     private val postRepo = repoFactory.getPostRepo()
 
@@ -45,6 +46,9 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
 
     val post = postRepo.getItem(postId)
             .stateIn(viewModelScope, SharingStarted.Eagerly, Post(postId, 0L, ""))
+
+    val files = filesRepository.getPostFiles(postId)
+            .stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
 
     val comments = postRepo.getPostComments(postId)
             .map { it.toMutableList().apply { sortBy { entry -> entry.number } } }

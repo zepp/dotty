@@ -31,7 +31,8 @@ import kotlinx.coroutines.launch
 
 @FlowPreview
 class PostFragment : NavFragment<PostViewModel>() {
-    private lateinit var adapter: CommentAdapter
+    private lateinit var commentAdapter: CommentAdapter
+    private lateinit var bitmapAdapter: BitmapAdapter
     private lateinit var binding: FragmentPostBinding
     private lateinit var layout: SwipeRefreshLayout
     private val tagsAdapter: TagsAdapter = TagsAdapter()
@@ -67,16 +68,18 @@ class PostFragment : NavFragment<PostViewModel>() {
             bundle.putString(TagFragment.TAG, tag)
             findNavController().navigate(R.id.action_post_to_tag, bundle)
         }
-        adapter = CommentAdapter(lifecycleScope)
-        binding.postComments.adapter = adapter
-        adapter.avatarProvider = viewModel::getAvatar
-        adapter.onIdClicked = { _, pos -> binding.postComments.smoothScrollToPosition(pos) }
-        adapter.onUserClicked = { id, login ->
+        commentAdapter = CommentAdapter(lifecycleScope)
+        binding.postComments.adapter = commentAdapter
+        commentAdapter.avatarProvider = viewModel::getAvatar
+        commentAdapter.onIdClicked = { _, pos -> binding.postComments.smoothScrollToPosition(pos) }
+        commentAdapter.onUserClicked = { id, login ->
             val bundle = Bundle()
             bundle.putLong(UserFragment.USER_ID, id)
             bundle.putString(UserFragment.USER_LOGIN, login)
             findNavController().navigate(R.id.action_post_to_user, bundle)
         }
+        bitmapAdapter = BitmapAdapter()
+        binding.postFiles.adapter = bitmapAdapter
         layout = binding.postSwipeLayout
         layout.setOnRefreshListener {
             lifecycleScope.launch(exceptionHandler) {
@@ -117,6 +120,12 @@ class PostFragment : NavFragment<PostViewModel>() {
                 binding.postPin.visibility = if (it) View.VISIBLE else View.GONE
             }
         }
+        lifecycleScope.launchWhenStarted {
+            viewModel.files.collect {
+                binding.postFiles.visibility = if (it.size > 0) View.VISIBLE else View.GONE
+                bitmapAdapter.list = it
+            }
+        }
 
         lifecycleScope.launchWhenStarted {
             viewModel.post.collect { post ->
@@ -132,7 +141,7 @@ class PostFragment : NavFragment<PostViewModel>() {
         }
 
         lifecycleScope.launch(exceptionHandler) {
-            viewModel.comments.collect { list -> adapter.list = list }
+            viewModel.comments.collect { commentAdapter.list = it }
         }
     }
 

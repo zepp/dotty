@@ -23,6 +23,7 @@ class MainViewModel internal constructor(application: DottyApplication, vararg a
     private val userRepo = repoFactory.getUserRepo()
     private val api: PointAPI = application.mainApi
     private val avaRepo = application.avaRepo
+    private val filesRepo = application.postFilesRepo
     private val db: DottyDatabase = application.database
 
     val user = userRepo.fetchMe()
@@ -62,6 +63,7 @@ class MainViewModel internal constructor(application: DottyApplication, vararg a
             state.isLoggedIn = false
             db.clearAllTables()
             avaRepo.cleanup()
+            filesRepo.cleanup()
             resetActivityBackStack()
             this
         }
