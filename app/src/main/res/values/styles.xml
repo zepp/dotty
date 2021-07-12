@@ -17,7 +17,6 @@
     </style>
 
     <style name="IdTextView" parent="Widget.AppCompat.TextView">
-        <item name="android:padding">8dp</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
     </style>
