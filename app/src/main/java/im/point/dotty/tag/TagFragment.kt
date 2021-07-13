@@ -49,6 +49,7 @@ class TagFragment : NavFragment<TaggedPostViewModel>() {
 
         adapter = FeedAdapter(lifecycleScope)
         adapter.avatarProvider = viewModel::getPostAvatar
+        adapter.imagesProvider = viewModel::getPostImages
         adapter.onPostClicked = { post ->
             val bundle = Bundle()
             bundle.putString(PostFragment.POST_ID, post.id)

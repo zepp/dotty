@@ -14,6 +14,7 @@ import im.point.dotty.common.AvatarOutline
 import im.point.dotty.common.RecyclerItemDecorator
 import im.point.dotty.common.TagsAdapter
 import im.point.dotty.model.CompletePost
+import im.point.dotty.post.BitmapAdapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -29,15 +30,26 @@ class PostHolder<T : CompletePost<*>>(itemView: View, private val scope:Coroutin
     private val commentsCount: TextView = itemView.findViewById(R.id.post_comments_count)
     private val recommended: ImageView = itemView.findViewById(R.id.post_recommended)
     private val bookmarked: ImageView = itemView.findViewById(R.id.post_bookmarked)
-    private val adapter: TagsAdapter = TagsAdapter()
-    private var job = scope.launch { }
+    private val images: RecyclerView = itemView.findViewById(R.id.post_images)
+    private val tagsAdapter = TagsAdapter()
+    private val bitmapAdapter = BitmapAdapter()
+    private var avatarJob = scope.launch { }
+    private var imagesJob = scope.launch { }
 
-    fun bind(post: T, bitmap: Flow<Bitmap>, onItemClicked: (item: T) -> Unit,
+    fun bind(post: T, bitmap: Flow<Bitmap>, bitmaps: Flow<List<Bitmap>>, onItemClicked: (item: T) -> Unit,
              onUserClicked: (id: Long, login: String) -> Unit,
              onTagClicked: (tag: String) -> Unit) {
-        job.cancel()
-        job = scope.launch {
+        avatarJob.cancel()
+        avatarJob = scope.launch {
             bitmap.collect { avatar.setImageBitmap(it) }
+        }
+        images.visibility = View.GONE
+        imagesJob.cancel()
+        imagesJob = scope.launch {
+            bitmaps.collect {
+                bitmapAdapter.list = it
+                images.visibility = View.VISIBLE
+            }
         }
         post.metapost.let {
             bookmarked.visibility = if (it.bookmarked) View.VISIBLE else View.GONE
@@ -52,8 +64,8 @@ class PostHolder<T : CompletePost<*>>(itemView: View, private val scope:Coroutin
             if (it.tags.isNullOrEmpty()) {
                 tags.visibility = View.GONE;
             } else {
-                adapter.list = it.tags
-                adapter.onTagClicked = onTagClicked
+                tagsAdapter.list = it.tags
+                tagsAdapter.onTagClicked = onTagClicked
             }
             commentsCount.text = it.commentCount.toString()
         }
@@ -62,8 +74,9 @@ class PostHolder<T : CompletePost<*>>(itemView: View, private val scope:Coroutin
     }
 
     init {
-        tags.adapter = adapter
+        tags.adapter = tagsAdapter
         tags.addItemDecoration(RecyclerItemDecorator(itemView.context, DividerItemDecoration.HORIZONTAL, 4))
+        images.adapter = bitmapAdapter
         avatar.outlineProvider = outline
         avatar.clipToOutline = true
     }

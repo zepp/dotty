@@ -30,6 +30,7 @@ class CommentedFragment : FeedFragment<MainViewModel, CompleteCommentedPost>() {
         super.onViewCreated(view, savedInstanceState)
         binding.viewModel = viewModel
         adapter.avatarProvider = viewModel::getAvatar
+        adapter.imagesProvider = viewModel::getPostImages
         adapter.onPostClicked = { post ->
             val bundle = Bundle()
             bundle.putString(PostFragment.POST_ID, post.id)

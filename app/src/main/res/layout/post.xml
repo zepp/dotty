@@ -65,7 +65,7 @@
         android:id="@+id/post_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="@dimen/start_margin"
         android:layout_marginTop="@dimen/start_margin"
         android:layout_marginEnd="@dimen/end_margin"
         android:ellipsize="end"
@@ -74,6 +74,21 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/post_author_avatar"
         tools:text="text text text text text text text text text text text text text text text text" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:visibility="gone"
+        android:id="@+id/post_images"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/start_margin"
+        android:layout_marginTop="@dimen/start_margin"
+        android:layout_marginEnd="@dimen/end_margin"
+        android:orientation="vertical"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/post_text"
+        tools:listitem="@layout/list_item_image" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/post_tags"
@@ -98,7 +113,7 @@
         android:layout_marginBottom="@dimen/bottom_margin"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/post_text"
+        app:layout_constraintTop_toBottomOf="@+id/post_images"
         tools:text="1" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

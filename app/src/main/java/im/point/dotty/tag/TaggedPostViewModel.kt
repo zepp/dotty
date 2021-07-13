@@ -16,10 +16,13 @@ class TaggedPostViewModel(app: DottyApplication, vararg args: Any) : DottyViewMo
 
     private val repo = app.repoFactory.getTaggedPostRepo(tag)
     private val avaRepo = app.avaRepo
+    private val fileRepository = app.postFilesRepo
 
     val posts = repo.getAll().stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
 
     fun getPostAvatar(login: String) = avaRepo.getAvatar(login, Size.SIZE_80)
+
+    fun getPostImages(postId: String) = fileRepository.getPostFiles(postId)
 
     fun fetch(isBefore: Boolean = false) =
             if (isBefore) repo.fetchBefore().flowOn(Dispatchers.IO)

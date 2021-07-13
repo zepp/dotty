@@ -26,6 +26,7 @@ class UserViewModel(application: DottyApplication, vararg args: Any) : DottyView
     private val userPostRepo = application.repoFactory.getUserPostRepo(userId)
     private val api: PointAPI = application.mainApi
     private val avaRepo = application.avaRepo
+    private val fileRepository = application.postFilesRepo
 
     // fetch data first or getItem and fetchAll throw exception
     private val fetched = userRepo.fetchUser(userId)
@@ -79,6 +80,8 @@ class UserViewModel(application: DottyApplication, vararg args: Any) : DottyView
     fun getUserAvatar() = avaRepo.getAvatar(login.value, Size.SIZE_280)
 
     fun getPostAvatar(login: String) = avaRepo.getAvatar(login, Size.SIZE_80)
+
+    fun getPostImages(postId: String) = fileRepository.getPostFiles(postId)
 
     private fun logAndRethrow(e: Throwable) {
         Log.e(this::class.simpleName, "error: ", e)

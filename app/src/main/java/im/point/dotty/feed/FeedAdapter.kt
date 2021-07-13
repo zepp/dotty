@@ -26,6 +26,12 @@ class FeedAdapter<T : CompletePost<*>> internal constructor(val scope: Coroutine
             notifyDataSetChanged()
         }
 
+    var imagesProvider: (name: String) -> Flow<List<Bitmap>> = { emptyFlow() }
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+
     var onPostClicked: (item: T) -> Unit = {}
         set(value) {
             field = value
@@ -49,7 +55,8 @@ class FeedAdapter<T : CompletePost<*>> internal constructor(val scope: Coroutine
                     .let { PostHolder(it, scope) }
 
     override fun onBindViewHolder(holder: PostHolder<T>, position: Int) = with(list[position]) {
-        holder.bind(this, avatarProvider(authorLogin), onPostClicked, onUserClicked, onTagClicked)
+        holder.bind(this, avatarProvider(authorLogin), imagesProvider(id),
+                onPostClicked, onUserClicked, onTagClicked)
     }
 
     override fun getItemCount(): Int = list.size

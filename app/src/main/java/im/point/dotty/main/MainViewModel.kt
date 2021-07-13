@@ -23,6 +23,7 @@ class MainViewModel internal constructor(application: DottyApplication, vararg a
     private val userRepo = repoFactory.getUserRepo()
     private val api: PointAPI = application.mainApi
     private val avaRepo = application.avaRepo
+    private val fileRepository = application.postFilesRepo
     private val filesRepo = application.postFilesRepo
     private val db: DottyDatabase = application.database
 
@@ -57,6 +58,8 @@ class MainViewModel internal constructor(application: DottyApplication, vararg a
     }
 
     fun getAvatar(name: String) = avaRepo.getAvatar(name, Size.SIZE_80)
+
+    fun getPostImages(postId: String) = fileRepository.getPostFiles(postId)
 
     fun logout() = viewModelScope.async(Dispatchers.IO) {
         with(authAPI.logout(state.token, state.csrfToken)) {
