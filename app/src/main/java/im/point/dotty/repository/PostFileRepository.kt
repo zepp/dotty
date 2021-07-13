@@ -3,55 +3,110 @@
  */
 package im.point.dotty.repository
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import im.point.dotty.db.PostFileDao
 import im.point.dotty.model.PostFile
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.transform
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
+import java.security.MessageDigest
+import java.util.concurrent.Executors
 
 class PostFileRepository(private val client: OkHttpClient,
                          private val dao: PostFileDao,
                          private val root: File) {
+    // standalone dispatcher to work with cache map since getOrPut is not atomic
+    private val dispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+    private val digest = MessageDigest.getInstance("SHA-1")
+    private val cache = mutableMapOf<String, Entry>()
+
+    private fun String.digest() = digest.digest(toByteArray())
+            .map { format("%02X", it) }
+            .joinToString(separator = "")
 
     fun getPostFiles(postId: String) = dao.getPostFiles(postId)
-        .map { it.toBitmapList() }
-        .catch { Log.e(this::class.simpleName, "image fetch error: ", it) }
+            .transform { files ->
+                with(mutableListOf<Bitmap>()) {
+                    files.toBitmapFlow().toList(this)
+                    emit(toList())
+                }
+            }
+            .catch { Log.e(PostFileRepository::class.simpleName, "image fetch error: ", it) }
 
-    private suspend fun List<PostFile>.toBitmapList() = map { file ->
-        with(File(root, file.id)) {
+    private fun List<PostFile>.toBitmapFlow() = flow {
+        map { file ->
+            GlobalScope.async(dispatcher) {
+                cache.getOrPut(file.url.digest(), { Entry(file.loadOrFetch()) }).data()
+            }
+        }.forEach { emit(it.await()) }
+    }
+
+    private suspend fun PostFile.loadOrFetch() = withContext(Dispatchers.IO) {
+        with(File(root, id)) {
             if (exists()) {
                 BitmapFactory.decodeFile(absolutePath)
             } else {
-                file.fetch(this)
+                val response = client.newCall(getRequest(url)).execute()
+                if (response.isSuccessful) {
+                    val bytes = response.body()?.bytes() ?: throw Exception("empty response body")
+                    root.mkdir()
+                    writeBytes(bytes)
+                    BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                            ?: throw Exception("failed to decode file")
+                } else {
+                    throw Exception(response.message())
+                }
             }
         }
     }
 
-    private suspend fun PostFile.fetch(to: File) = withContext(Dispatchers.IO) {
-        root.mkdir()
-        val response = client.newCall(getRequest(url)).execute()
-        if (response.isSuccessful) {
-            val bytes = response.body()?.bytes() ?: throw Exception("empty response body")
-            to.writeBytes(bytes)
-            BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                ?: throw Exception("failed to decode file")
-        } else {
-            throw Exception(response.message())
+    private fun getRequest(url: String) = Request.Builder()
+            .url(url)
+            .addHeader("accept", "image/*")
+            .build()
+
+    suspend fun cleanup() = withContext(dispatcher) {
+        root.deleteRecursively()
+    }
+
+    private suspend fun cleanupCache() = withContext(dispatcher) {
+        cache.onEach { it.value.tick() }
+        val stale = cache.filter { it.value.isStale }
+        stale.forEach {
+            Log.d(PostFileRepository::class.simpleName, "cache entry is released: ${it.value}")
+            cache.remove(it.key)
         }
     }
 
-    private fun getRequest(url: String) = Request.Builder()
-        .url(url)
-        .addHeader("accept", "image/*")
-        .build()
+    init {
+        GlobalScope.launch(dispatcher) {
+            do {
+                cleanupCache()
+                delay(1000 * delaySec)
+            } while (isActive)
+        }
+    }
 
-    suspend fun cleanup() = withContext(Dispatchers.IO) {
-        root.deleteRecursively()
+    internal data class Entry(val bitmap: Bitmap, var lifetime: Int = 0) {
+        fun data(): Bitmap {
+            lifetime++
+            return bitmap
+        }
+
+        fun tick() = lifetime--
+
+        val isStale: Boolean
+            get() = lifetime <= 0
+    }
+
+    companion object {
+        const val delaySec = 30L
     }
 }
