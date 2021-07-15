@@ -6,6 +6,7 @@ package im.point.dotty.repository
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import im.point.dotty.common.digest
 import im.point.dotty.db.PostFileDao
 import im.point.dotty.model.PostFile
 import kotlinx.coroutines.*
@@ -24,12 +25,8 @@ class PostFileRepository(private val client: OkHttpClient,
                          private val root: File) {
     // standalone dispatcher to work with cache map since getOrPut is not atomic
     private val dispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
-    private val digest = MessageDigest.getInstance("SHA-1")
+    private val sha1 = MessageDigest.getInstance("SHA-1")
     private val cache = mutableMapOf<String, Entry>()
-
-    private fun String.digest() = digest.digest(toByteArray())
-            .map { format("%02X", it) }
-            .joinToString(separator = "")
 
     fun getPostFiles(postId: String) = dao.getPostFiles(postId)
             .transform { files ->
@@ -43,7 +40,7 @@ class PostFileRepository(private val client: OkHttpClient,
     private fun List<PostFile>.toBitmapFlow() = flow {
         map { file ->
             GlobalScope.async(dispatcher) {
-                cache.getOrPut(file.url.digest(), { Entry(file.loadOrFetch()) }).data()
+                cache.getOrPut(file.url.digest(sha1), { Entry(file.loadOrFetch()) }).data()
             }
         }.forEach { emit(it.await()) }
     }

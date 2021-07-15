@@ -4,6 +4,7 @@ import android.text.Selection.setSelection
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.security.MessageDigest
 
 fun TextView.setTextAndCursor(text: String) {
     setText(text)
@@ -24,3 +25,6 @@ fun RecyclerView.addOnLastItemDisplayedListener(block: () -> Unit) {
         }
     })
 }
+
+fun String.digest(digest: MessageDigest) = digest.digest(toByteArray())
+        .joinToString(separator = "") { String.format("%02X", it) }

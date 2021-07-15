@@ -3,6 +3,7 @@
  */
 package im.point.dotty.repository
 
+import im.point.dotty.common.digest
 import im.point.dotty.db.DottyDatabase
 import im.point.dotty.mapper.CommentMapper
 import im.point.dotty.mapper.Mapper
@@ -22,7 +23,7 @@ class PostRepo(
         private val postMapper: PostMapper = PostMapper(),
         private val commentMapper: Mapper<Comment, RawComment> = CommentMapper()
 ) : Repository<Post, String> {
-    private val digest = MessageDigest.getInstance("SHA-1")
+    private val sha1 = MessageDigest.getInstance("SHA-1")
     private val postDao = db.getPostDao()
     private val commentDao = db.getCommentDao()
     private val fileDao = db.getPostFileDao()
@@ -40,10 +41,7 @@ class PostRepo(
             }
             post.files?.run {
                 fileDao.insertAll(map { url ->
-                    val fileId = digest.digest(url.toByteArray())
-                            .map { String.format("%02X", it) }
-                            .joinToString(separator = "")
-                    PostFile(fileId, id, url)
+                    PostFile(url.digest(sha1), id, url)
                 })
             }
         }
