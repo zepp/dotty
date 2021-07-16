@@ -8,10 +8,13 @@ import im.point.dotty.common.AppState
 import im.point.dotty.db.DottyDatabase
 import im.point.dotty.mapper.CommentedPostMapper
 import im.point.dotty.mapper.Mapper
+import im.point.dotty.mapper.PostFilesMapper
 import im.point.dotty.model.CommentedPost
 import im.point.dotty.model.CompleteCommentedPost
+import im.point.dotty.model.PostFile
 import im.point.dotty.network.MetaPost
 import im.point.dotty.network.PointAPI
+import im.point.dotty.network.RawPost
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -19,11 +22,13 @@ import kotlinx.coroutines.flow.map
 class CommentedPostRepo(private val api: PointAPI,
                         private val state: AppState,
                         db: DottyDatabase,
-                        private val mapper: Mapper<CompleteCommentedPost, MetaPost> = CommentedPostMapper())
+                        private val mapper: Mapper<CompleteCommentedPost, MetaPost> = CommentedPostMapper(),
+                        private val fileMapper: Mapper<List<PostFile>, RawPost> = PostFilesMapper())
     : Repository<CompleteCommentedPost, String> {
 
     private val metaPostDao = db.getCommentedPostDao()
     private val postDao = db.getPostDao()
+    private val fileDao = db.getPostFileDao()
 
     @SuppressLint("CheckResult")
     fun fetch(isBefore: Boolean) = flow {
@@ -38,6 +43,12 @@ class CommentedPostRepo(private val api: PointAPI,
                     emit(this)
                 }
             }
+            fileDao.insertAll(with(mutableListOf<PostFile>()) {
+                for (post in posts.map { it.post ?: throw Exception("raw post is null") }) {
+                    addAll(fileMapper.map(post))
+                }
+                toList()
+            })
         }
     }
 

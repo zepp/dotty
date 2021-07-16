@@ -2,12 +2,15 @@ package im.point.dotty.repository
 
 import im.point.dotty.db.DottyDatabase
 import im.point.dotty.mapper.Mapper
+import im.point.dotty.mapper.PostFilesMapper
 import im.point.dotty.mapper.UserPostMapper
 import im.point.dotty.model.CompleteUserPost
+import im.point.dotty.model.PostFile
 import im.point.dotty.model.UserData
 import im.point.dotty.model.UserPost
 import im.point.dotty.network.MetaPost
 import im.point.dotty.network.PointAPI
+import im.point.dotty.network.RawPost
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -15,13 +18,15 @@ import kotlinx.coroutines.flow.map
 class UserPostRepo(private val api: PointAPI,
                    db: DottyDatabase,
                    private val userId: Long,
-                   private val mapper: Mapper<CompleteUserPost, MetaPost> = UserPostMapper(userId))
+                   private val mapper: Mapper<CompleteUserPost, MetaPost> = UserPostMapper(userId),
+                   private val fileMapper: Mapper<List<PostFile>, RawPost> = PostFilesMapper())
     : Repository<CompleteUserPost, String> {
 
     private val userDao = db.getUserDao()
     private val metaPostDao = db.getUserPostsDao()
     private val postDao = db.getPostDao()
     private val userDataDao = db.getUserDataDao()
+    private val fileDao = db.getPostFileDao()
 
     private fun fetch(isBefore: Boolean) = flow {
         val login = userDao.getItem(userId)?.login ?: throw Exception("user login is empty")
@@ -37,6 +42,12 @@ class UserPostRepo(private val api: PointAPI,
                     emit(this)
                 }
             }
+            fileDao.insertAll(with(mutableListOf<PostFile>()) {
+                for (post in posts.map { it.post ?: throw Exception("raw post is null") }) {
+                    addAll(fileMapper.map(post))
+                }
+                toList()
+            })
         }
     }
 
