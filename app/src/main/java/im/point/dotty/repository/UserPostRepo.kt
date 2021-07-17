@@ -42,12 +42,8 @@ class UserPostRepo(private val api: PointAPI,
                     emit(this)
                 }
             }
-            fileDao.insertAll(with(mutableListOf<PostFile>()) {
-                for (post in posts.map { it.post ?: throw Exception("raw post is null") }) {
-                    addAll(fileMapper.map(post))
-                }
-                toList()
-            })
+            fileDao.insertAll(posts
+                .flatMap { fileMapper.map(it.post ?: throw Exception("raw post is null")) })
         }
     }
 

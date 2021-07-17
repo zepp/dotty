@@ -18,12 +18,13 @@ import im.point.dotty.network.RawPost
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
-class AllPostRepo(private val api: PointAPI,
-                  private val state: AppState,
-                  db: DottyDatabase,
-                  private val mapper: Mapper<CompleteAllPost, MetaPost> = AllPostMapper(),
-                  private val fileMapper: Mapper<List<PostFile>, RawPost> = PostFilesMapper())
-    : Repository<CompleteAllPost, String> {
+class AllPostRepo(
+    private val api: PointAPI,
+    private val state: AppState,
+    db: DottyDatabase,
+    private val mapper: Mapper<CompleteAllPost, MetaPost> = AllPostMapper(),
+    private val fileMapper: Mapper<List<PostFile>, RawPost> = PostFilesMapper()
+) : Repository<CompleteAllPost, String> {
     private val metaPostDao = db.getAllPostDao()
     private val postDao = db.getPostDao()
     private val fileDao = db.getPostFileDao()
@@ -41,24 +42,20 @@ class AllPostRepo(private val api: PointAPI,
                     emit(this)
                 }
             }
-            fileDao.insertAll(with(mutableListOf<PostFile>()) {
-                for (post in posts.map { it.post ?: throw Exception("raw post is null") }) {
-                    addAll(fileMapper.map(post))
-                }
-                toList()
-            })
+            fileDao.insertAll(posts
+                .flatMap { fileMapper.map(it.post ?: throw Exception("raw post is null")) })
         }
     }
 
     override fun getAll() = metaPostDao.getAllFlow()
 
     override fun getItem(id: String) =
-            metaPostDao.getItemFlow(id).map { it ?: throw Exception("post not found") }
+        metaPostDao.getItemFlow(id).map { it ?: throw Exception("post not found") }
 
     override fun fetchAll() = fetch(false)
 
     fun getMetaPost(postId: String) = metaPostDao.getMetaPostFlow(postId)
-            .map { (it ?: throw Exception("Post not found")) }
+        .map { (it ?: throw Exception("Post not found")) }
 
     fun updateMetaPost(post: AllPost) = metaPostDao.insertItem(post)
 
