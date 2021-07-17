@@ -24,9 +24,18 @@ class AvaRepository(private val client: OkHttpClient,
         return map(size).getOrPut(name, {
             fetchOrLoad(name, size)
                 .flowOn(Dispatchers.IO)
-                .stateIn(GlobalScope, SharingStarted.Eagerly,
-                        Bitmap.createBitmap(size.dim, size.dim, Bitmap.Config.ARGB_8888))
+                .stateIn(
+                    GlobalScope, SharingStarted.Eagerly,
+                    Bitmap.createBitmap(size.dim, size.dim, Bitmap.Config.ARGB_8888)
+                )
         })
+    }
+
+    suspend fun cleanupMemoryCache() = withContext(Dispatchers.Main) {
+        map24.clear()
+        map40.clear()
+        map80.clear()
+        map280.clear()
     }
 
     private fun map(size: Size): MutableMap<String, Flow<Bitmap>> = when (size) {
@@ -65,7 +74,7 @@ class AvaRepository(private val client: OkHttpClient,
         Request.Builder().url("https://point.im/avatar/$name/${size.dim}")
             .build()
 
-    suspend fun cleanup() = withContext(Dispatchers.IO) {
+    suspend fun cleanupFileCache() = withContext(Dispatchers.IO) {
         path.deleteRecursively()
     }
 

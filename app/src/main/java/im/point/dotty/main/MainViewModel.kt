@@ -65,8 +65,8 @@ class MainViewModel internal constructor(application: DottyApplication, vararg a
         with(authAPI.logout(state.token, state.csrfToken)) {
             state.isLoggedIn = false
             db.clearAllTables()
-            avaRepo.cleanup()
-            filesRepo.cleanup()
+            avaRepo.cleanupFileCache()
+            filesRepo.cleanupFileCache()
             resetActivityBackStack()
             this
         }

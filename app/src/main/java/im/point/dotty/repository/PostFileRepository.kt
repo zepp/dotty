@@ -65,15 +65,19 @@ class PostFileRepository(private val client: OkHttpClient,
     }
 
     private fun getRequest(url: String) = Request.Builder()
-            .url(url)
-            .addHeader("accept", "image/*")
-            .build()
+        .url(url)
+        .addHeader("accept", "image/*")
+        .build()
 
-    suspend fun cleanup() = withContext(dispatcher) {
+    suspend fun cleanupFileCache() = withContext(dispatcher) {
         root.deleteRecursively()
     }
 
-    private suspend fun cleanupCache() = withContext(dispatcher) {
+    suspend fun cleanupAllMemCache() = withContext(dispatcher) {
+        cache.clear()
+    }
+
+    private suspend fun cleanupStaleMemCache() = withContext(dispatcher) {
         cache.onEach { it.value.tick() }
         val stale = cache.filter { it.value.isStale }
         stale.forEach {
@@ -85,7 +89,7 @@ class PostFileRepository(private val client: OkHttpClient,
     init {
         GlobalScope.launch(dispatcher) {
             do {
-                cleanupCache()
+                cleanupStaleMemCache()
                 delay(1000 * delaySec)
             } while (isActive)
         }

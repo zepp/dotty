@@ -14,6 +14,8 @@ import im.point.dotty.network.PointAPI
 import im.point.dotty.repository.AvaRepository
 import im.point.dotty.repository.PostFileRepository
 import im.point.dotty.repository.RepoFactory
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -75,7 +77,19 @@ class DottyApplication : Application() {
     }
 
     val postFilesRepo by lazy {
-        PostFileRepository(client, database.getPostFileDao(), File(applicationContext.externalCacheDir, "files"))
+        PostFileRepository(
+            client,
+            database.getPostFileDao(),
+            File(applicationContext.externalCacheDir, "files")
+        )
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        GlobalScope.launch {
+            postFilesRepo.cleanupAllMemCache()
+            avaRepo.cleanupMemoryCache()
+        }
     }
 
     companion object {
