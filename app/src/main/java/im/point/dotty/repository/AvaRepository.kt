@@ -5,6 +5,7 @@ package im.point.dotty.repository
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.*
@@ -24,6 +25,9 @@ class AvaRepository(private val client: OkHttpClient,
         return map(size).getOrPut(name, {
             fetchOrLoad(name, size)
                 .flowOn(Dispatchers.IO)
+                .catch { e ->
+                    Log.e(AvaRepository::class.simpleName, "failed to fetch/load avatar", e)
+                }
                 .stateIn(
                     GlobalScope, SharingStarted.Eagerly,
                     Bitmap.createBitmap(size.dim, size.dim, Bitmap.Config.ARGB_8888)

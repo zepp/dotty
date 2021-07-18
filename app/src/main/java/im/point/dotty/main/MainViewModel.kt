@@ -81,7 +81,7 @@ class MainViewModel internal constructor(application: DottyApplication, vararg a
     fun unreadPrivateComments() = state.privateUnreadCommentsFlow
 
     init {
-        viewModelScope.launch(Dispatchers.IO + exceptionHandler) {
+        viewModelScope.launch(exceptionHandler) {
             launch { fetchRecent(false).collect() }
             launch { fetchCommented(false).collect() }
             launch { fetchAll(false).collect() }
