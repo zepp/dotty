@@ -27,9 +27,8 @@ class MainViewModel internal constructor(application: DottyApplication, vararg a
     private val filesRepo = application.postFilesRepo
     private val db: DottyDatabase = application.database
 
-    val user = userRepo.fetchMe()
-            .flowOn(Dispatchers.IO)
-            .stateIn(viewModelScope, SharingStarted.Eagerly, User(state.id, state.userLogin))
+    val user = userRepo.getMe()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, User(state.id, state.userLogin))
     val recent = recentRepo.getAll().stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
     val commented = commentedRepo.getAll().stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
     val all = allRepo.getAll().stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
@@ -82,6 +81,7 @@ class MainViewModel internal constructor(application: DottyApplication, vararg a
 
     init {
         viewModelScope.launch(exceptionHandler) {
+            launch { userRepo.fetchMe().collect() }
             launch { fetchRecent(false).collect() }
             launch { fetchCommented(false).collect() }
             launch { fetchAll(false).collect() }
