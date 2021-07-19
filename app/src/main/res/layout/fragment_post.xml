@@ -22,6 +22,7 @@
             app:expanded="true">
 
             <com.google.android.material.appbar.CollapsingToolbarLayout
+                style="@style/CollapsingLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed"
@@ -41,7 +42,7 @@
                         android:id="@+id/post_subscribe"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:drawableStart="@drawable/ic_post" />
+                        android:drawableStart="@drawable/ic_subscribed" />
 
                     <ToggleButton
                         android:id="@+id/post_recommend"

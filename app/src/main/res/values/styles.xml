@@ -1,24 +1,52 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColorSecondary">@color/textColorInverted</item>
     </style>
 
     <style name="SplashTheme" parent="AppTheme">
         <item name="android:background">@drawable/background_splash</item>
     </style>
 
-    <style name="Toolbar" parent="Theme.AppCompat">
+    <style name="Toolbar" parent="Widget.MaterialComponents.Toolbar">
         <item name="android:background">@color/colorPrimary</item>
+        <item name="titleTextColor">@color/textColorInverted</item>
     </style>
 
-    <style name="IdTextView" parent="Widget.AppCompat.TextView">
+    <style name="CollapsingLayout">
+        <item name="expandedTitleTextAppearance">@style/InvertedText</item>
+        <item name="collapsedTitleTextAppearance">@style/InvertedText</item>
+    </style>
+
+    <style name="InvertedText">
+        <item name="android:textColor">@color/textColorInverted</item>
+    </style>
+
+    <style name="TabLayout" parent="Widget.MaterialComponents.TabLayout.Colored">
+        <item name="theme">@style/TabTheme</item>
+    </style>
+
+    <style name="TabTheme" parent="AppTheme">
+        <item name="android:lines">1</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+
+    <style name="IdTextView">
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
+    </style>
+
+    <style name="UserLogin">
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="PostID">
+        <item name="android:textStyle">bold</item>
     </style>
 
 </resources>

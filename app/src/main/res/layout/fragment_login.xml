@@ -36,6 +36,7 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="196dp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp">
@@ -49,6 +50,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="196dp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -64,7 +66,7 @@
 
             <Button
                 android:id="@+id/login_login"
-                style="@style/Widget.AppCompat.Button.Borderless"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="196dp"
                 android:layout_height="wrap_content"
                 android:text="@string/login_login" />

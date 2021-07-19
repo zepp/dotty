@@ -22,6 +22,7 @@
             app:expanded="true">
 
             <com.google.android.material.appbar.CollapsingToolbarLayout
+                style="@style/CollapsingLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:expandedTitleGravity="top|center_horizontal"
@@ -47,6 +48,7 @@
 
                     <TextView
                         android:id="@+id/user_name"
+                        style="@style/InvertedText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
@@ -61,6 +63,7 @@
 
                     <TextView
                         android:id="@+id/user_about"
+                        style="@style/InvertedText"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
@@ -91,7 +94,7 @@
                             android:id="@+id/user_subscribe"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:drawableStart="@drawable/ic_post" />
+                            android:drawableStart="@drawable/ic_user_subscribe" />
 
                         <ToggleButton
                             android:id="@+id/user_recommend_subscribe"
@@ -110,7 +113,7 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.appcompat.widget.Toolbar
-                    android:id="@+id/user_toolbar"
+                    android:id="@+id/toolbar"
                     style="@style/Toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"

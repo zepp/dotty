@@ -121,7 +121,7 @@ class UserFragment : NavFragment<UserViewModel>() {
 
         launch {
             viewModel.user.collect { user ->
-                binding.userToolbar.title = user.formattedLogin
+                binding.toolbar.title = user.formattedLogin
                 binding.userName.visibility = if (user.name.isNullOrEmpty()) View.GONE else View.VISIBLE
                 binding.userName.text = user.name
                 binding.userAbout.visibility = if (user.about.isNullOrEmpty()) View.GONE else View.VISIBLE

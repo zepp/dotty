@@ -18,7 +18,7 @@ class AvatarBehaviour(private val context: Context, attrs: AttributeSet) : Coord
 
     override fun layoutDependsOn(parent: CoordinatorLayout, child: ImageView, dependency: View): Boolean {
         if (dependency is AppBarLayout) {
-            toolbar = dependency.findViewById(R.id.user_toolbar)
+            toolbar = dependency.findViewById(R.id.toolbar)
             placeholder = dependency.findViewById(R.id.user_avatar_placeholder)
             placeholderBottomY = placeholder.y + placeholder.height
             return true
