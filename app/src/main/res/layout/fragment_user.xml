@@ -61,21 +61,6 @@
                         app:layout_constraintTop_toBottomOf="@id/user_avatar_placeholder"
                         tools:text="User Name" />
 
-                    <TextView
-                        android:id="@+id/user_about"
-                        style="@style/InvertedText"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginEnd="16dp"
-                        android:ellipsize="end"
-                        android:gravity="center"
-                        android:maxLines="4"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/user_name"
-                        tools:text="User BIO" />
 
                     <LinearLayout
                         android:id="@+id/user_actions"
@@ -88,7 +73,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/user_about">
+                        app:layout_constraintTop_toBottomOf="@id/user_name">
 
                         <ToggleButton
                             android:id="@+id/user_subscribe"

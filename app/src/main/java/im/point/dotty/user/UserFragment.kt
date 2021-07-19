@@ -124,12 +124,10 @@ class UserFragment : NavFragment<UserViewModel>() {
                 binding.toolbar.title = user.formattedLogin
                 binding.userName.visibility = if (user.name.isNullOrEmpty()) View.GONE else View.VISIBLE
                 binding.userName.text = user.name
-                binding.userAbout.visibility = if (user.about.isNullOrEmpty()) View.GONE else View.VISIBLE
-                binding.userAbout.text = user.about
             }
         }
 
-        launch(exceptionHandler) {
+        launch {
             viewModel.getUserAvatar().collect {
                 binding.userAvatar.setImageBitmap(it)
             }
