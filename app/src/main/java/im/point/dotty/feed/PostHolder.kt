@@ -61,6 +61,7 @@ class PostHolder<T : CompletePost<*>>(itemView: View, private val scope:Coroutin
             author.setOnClickListener { _ -> onUserClicked(it.authorId, it.authorLogin) }
             id.text = it.formattedId
             text.text = it.text
+            text.visibility = if (it.text.isEmpty()) View.GONE else View.VISIBLE
             if (it.tags.isNullOrEmpty()) {
                 tags.visibility = View.GONE;
             } else {
