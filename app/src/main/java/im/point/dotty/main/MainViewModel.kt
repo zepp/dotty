@@ -10,10 +10,8 @@ import im.point.dotty.db.DottyDatabase
 import im.point.dotty.model.User
 import im.point.dotty.network.PointAPI
 import im.point.dotty.repository.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 
 class MainViewModel internal constructor(application: DottyApplication, vararg args: Any) : DottyViewModel(application) {
     private val repoFactory = application.repoFactory
@@ -63,9 +61,6 @@ class MainViewModel internal constructor(application: DottyApplication, vararg a
     fun logout() = viewModelScope.async(Dispatchers.IO) {
         with(authAPI.logout(state.token, state.csrfToken)) {
             state.isLoggedIn = false
-            db.clearAllTables()
-            avaRepo.cleanupFileCache()
-            filesRepo.cleanupFileCache()
             resetActivityBackStack()
             this
         }
@@ -79,9 +74,21 @@ class MainViewModel internal constructor(application: DottyApplication, vararg a
 
     fun unreadPrivateComments() = state.privateUnreadCommentsFlow
 
+    override fun onCleared() {
+        super.onCleared()
+        GlobalScope.launch(Dispatchers.IO) {
+            // clear DB out of the ViewModel scope
+            if (!state.isLoggedIn) {
+                db.clearAllTables()
+                avaRepo.cleanupFileCache()
+                filesRepo.cleanupFileCache()
+            }
+        }
+    }
+
     init {
         viewModelScope.launch(exceptionHandler) {
-            launch { userRepo.fetchMe().collect() }
+            launch { userRepo.fetchMe().flowOn(Dispatchers.IO).collect() }
             launch { fetchRecent(false).collect() }
             launch { fetchCommented(false).collect() }
             launch { fetchAll(false).collect() }
