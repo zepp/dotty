@@ -64,7 +64,9 @@ class PostFileRepository(
         .build()
 
     suspend fun cleanupFileCache() = withContext(dispatcher) {
+        cleanupAllMemCache()
         root.deleteRecursively()
+        root.mkdir()
     }
 
     suspend fun cleanupAllMemCache() = withContext(dispatcher) {

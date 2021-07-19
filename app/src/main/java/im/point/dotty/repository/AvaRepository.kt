@@ -79,7 +79,9 @@ class AvaRepository(private val client: OkHttpClient,
             .build()
 
     suspend fun cleanupFileCache() = withContext(Dispatchers.IO) {
+        cleanupMemoryCache()
         path.deleteRecursively()
+        path.mkdir()
     }
 
     init {
