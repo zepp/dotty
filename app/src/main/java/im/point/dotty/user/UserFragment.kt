@@ -70,7 +70,7 @@ class UserFragment : NavFragment<UserViewModel>() {
         }
         binding.userPosts.adapter = adapter
         binding.userPosts.addItemDecoration(RecyclerItemDecorator(requireContext(), DividerItemDecoration.VERTICAL, 4))
-        binding.userAvatar.outlineProvider = AvatarOutline(64)
+        binding.userAvatar.outlineProvider = AvatarOutline(8)
         binding.userAvatar.clipToOutline = true
 
         binding.userSubscribe.setOnCheckedChangeListener { _, isChecked ->
@@ -122,7 +122,7 @@ class UserFragment : NavFragment<UserViewModel>() {
         launch {
             viewModel.user.collect { user ->
                 binding.toolbar.title = user.formattedLogin
-                binding.userName.visibility = if (user.name.isNullOrEmpty()) View.GONE else View.VISIBLE
+                binding.userName.visibility = if (user.name.isNullOrEmpty()) View.INVISIBLE else View.VISIBLE
                 binding.userName.text = user.name
             }
         }

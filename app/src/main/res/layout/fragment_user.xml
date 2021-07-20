@@ -25,7 +25,7 @@
                 style="@style/CollapsingLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:expandedTitleGravity="top|center_horizontal"
+                app:expandedTitleGravity="top|center"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
                 app:titleEnabled="true"
                 app:toolbarId="@id/toolbar">
@@ -37,28 +37,20 @@
                     android:layout_marginTop="?android:actionBarSize"
                     app:layout_collapseMode="pin">
 
-                    <Space
-                        android:id="@+id/user_avatar_placeholder"
-                        android:layout_width="140dp"
-                        android:layout_height="140dp"
-                        android:layout_marginTop="24dp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
                     <TextView
                         android:id="@+id/user_name"
                         style="@style/InvertedText"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
+                        android:layout_marginStart="64dp"
                         android:layout_marginTop="24dp"
-                        android:layout_marginEnd="16dp"
+                        android:layout_marginEnd="64dp"
+                        android:gravity="center"
                         android:lines="1"
                         android:textSize="16sp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/user_avatar_placeholder"
+                        app:layout_constraintTop_toTopOf="parent"
                         tools:text="User Name" />
 
 
