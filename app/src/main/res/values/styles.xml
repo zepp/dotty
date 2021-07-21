@@ -49,4 +49,9 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <style name="Avatar">
+        <item name="android:background">@drawable/rounded_avatar_outline</item>
+        <item name="android:outlineProvider">background</item>
+    </style>
+
 </resources>

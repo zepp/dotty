@@ -13,14 +13,15 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/start_margin"
         android:layout_marginTop="@dimen/top_margin"
+        style="@style/Avatar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_height="40dp"
         tools:layout_width="40dp" />
 
     <TextView
-        style="@style/UserLogin"
         android:id="@+id/comment_author"
+        style="@style/UserLogin"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"

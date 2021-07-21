@@ -74,8 +74,6 @@ class TagFragment : NavFragment<TaggedPostViewModel>() {
         with(binding.tagPosts) {
             adapter = this@TagFragment.adapter
             addItemDecoration(RecyclerItemDecorator(requireContext(), DividerItemDecoration.VERTICAL, 4))
-            outlineProvider = AvatarOutline(64)
-            clipToOutline = true
 
             addOnLastItemDisplayedListener {
                 lifecycleScope.launch(exceptionHandler) {

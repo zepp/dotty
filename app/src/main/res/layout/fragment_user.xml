@@ -102,6 +102,7 @@
             android:id="@+id/user_avatar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            style="@style/Avatar"
             android:adjustViewBounds="true"
             android:scaleType="centerInside"
             app:layout_behavior=".user.AvatarBehaviour" />

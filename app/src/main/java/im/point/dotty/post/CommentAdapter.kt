@@ -11,7 +11,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import im.point.dotty.R
-import im.point.dotty.common.AvatarOutline
 import im.point.dotty.model.Comment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -90,11 +89,6 @@ class CommentHolder(view: View, val scope: CoroutineScope) : RecyclerView.ViewHo
     }
 
     init {
-        avatar.outlineProvider = outline
         avatar.clipToOutline = true
-    }
-
-    companion object {
-        val outline = AvatarOutline()
     }
 }

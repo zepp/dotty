@@ -10,7 +10,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import im.point.dotty.R
-import im.point.dotty.common.AvatarOutline
 import im.point.dotty.common.RecyclerItemDecorator
 import im.point.dotty.common.TagsAdapter
 import im.point.dotty.model.CompletePost
@@ -78,12 +77,7 @@ class PostHolder<T : CompletePost<*>>(itemView: View, private val scope:Coroutin
         tags.adapter = tagsAdapter
         tags.addItemDecoration(RecyclerItemDecorator(itemView.context, DividerItemDecoration.HORIZONTAL, 4))
         images.adapter = bitmapAdapter
-        avatar.outlineProvider = outline
         avatar.clipToOutline = true
-    }
-
-    companion object {
-        val outline = AvatarOutline()
     }
 }
 

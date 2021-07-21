@@ -11,7 +11,10 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
-import im.point.dotty.common.*
+import im.point.dotty.common.NavFragment
+import im.point.dotty.common.RecyclerItemDecorator
+import im.point.dotty.common.ViewModelFactory
+import im.point.dotty.common.addOnLastItemDisplayedListener
 import im.point.dotty.databinding.FragmentUserBinding
 import im.point.dotty.feed.FeedAdapter
 import im.point.dotty.model.CompleteUserPost
@@ -70,7 +73,6 @@ class UserFragment : NavFragment<UserViewModel>() {
         }
         binding.userPosts.adapter = adapter
         binding.userPosts.addItemDecoration(RecyclerItemDecorator(requireContext(), DividerItemDecoration.VERTICAL, 4))
-        binding.userAvatar.outlineProvider = AvatarOutline(8)
         binding.userAvatar.clipToOutline = true
 
         binding.userSubscribe.setOnCheckedChangeListener { _, isChecked ->
