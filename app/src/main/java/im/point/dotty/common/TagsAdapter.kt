@@ -7,10 +7,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.RecyclerView
 import im.point.dotty.R
 
-class TagsAdapter : RecyclerView.Adapter<TagHolder>() {
+class TagsAdapter(@LayoutRes val itemLayout: Int = R.layout.list_item_tag) : RecyclerView.Adapter<TagHolder>() {
     var list: List<String> = listOf()
         set(value) {
             field = value
@@ -24,7 +25,7 @@ class TagsAdapter : RecyclerView.Adapter<TagHolder>() {
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-            LayoutInflater.from(parent.context).inflate(R.layout.list_item_tag, parent, false)
+            LayoutInflater.from(parent.context).inflate(itemLayout, parent, false)
                     .let { TagHolder(it) }
 
     override fun getItemCount(): Int = list.size
