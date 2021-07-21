@@ -6,6 +6,7 @@ package im.point.dotty.repository
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import im.point.dotty.common.asFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.*
@@ -24,14 +25,14 @@ class AvaRepository(private val client: OkHttpClient,
     fun getAvatar(name: String, size: Size): Flow<Bitmap> {
         return map(size).getOrPut(name, {
             fetchOrLoad(name, size)
-                .flowOn(Dispatchers.IO)
-                .catch { e ->
-                    Log.e(AvaRepository::class.simpleName, "failed to fetch/load avatar", e)
-                }
-                .stateIn(
-                    GlobalScope, SharingStarted.Eagerly,
-                    Bitmap.createBitmap(size.dim, size.dim, Bitmap.Config.ARGB_8888)
-                )
+                    .flowOn(Dispatchers.IO)
+                    .catch { e ->
+                        Log.e(AvaRepository::class.simpleName, "failed to fetch/load avatar", e)
+                    }
+                    .stateIn(
+                            GlobalScope, SharingStarted.Eagerly,
+                            Bitmap.createBitmap(size.dim, size.dim, Bitmap.Config.ARGB_8888)
+                    )
         })
     }
 
@@ -51,32 +52,33 @@ class AvaRepository(private val client: OkHttpClient,
 
     private fun root(size: Size) = File(path, size.dim.toString())
 
-    private fun fetchOrLoad(name: String, size: Size) = flow {
+    private fun fetchOrLoad(name: String, size: Size): Flow<Bitmap> {
         val root = root(size)
-        root.mkdir()
         with(File(root, "$name.jpg")) {
-            if (exists()) {
-                emit(BitmapFactory.decodeFile(absolutePath))
+            return if (exists()) {
+                flow { emit(BitmapFactory.decodeFile(absolutePath)) }
             } else {
-                val response = client.newCall(getRequest(name, size)).execute()
-                if (response.isSuccessful) {
-                    delete()
-                    val bytes = response.body()?.bytes() ?: throw Exception("empty response body")
-                    writeBytes(bytes)
-                    emit(
-                        BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                            ?: throw Exception("failed to decode file")
-                    )
-                } else {
-                    throw Exception(response.message())
+                client.newCall(getRequest(name, size)).asFlow().map { response ->
+                    root.mkdir()
+                    if (response.isSuccessful) {
+                        delete()
+                        response.body()?.bytes()?.let {
+                            writeBytes(it)
+                            BitmapFactory.decodeByteArray(it, 0, it.size)
+                                    ?: throw Exception("failed to decode image")
+                        }
+                                ?: throw Exception("empty response body")
+                    } else {
+                        throw Exception(response.message())
+                    }
                 }
             }
         }
     }
 
     private fun getRequest(name: String, size: Size) =
-        Request.Builder().url("https://point.im/avatar/$name/${size.dim}")
-            .build()
+            Request.Builder().url("https://point.im/avatar/$name/${size.dim}")
+                    .build()
 
     suspend fun cleanupFileCache() = withContext(Dispatchers.IO) {
         cleanupMemoryCache()

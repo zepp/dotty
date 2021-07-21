@@ -6,6 +6,7 @@ package im.point.dotty.repository
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import im.point.dotty.common.asFlow
 import im.point.dotty.common.toListFlow
 import im.point.dotty.db.PostFileDao
 import im.point.dotty.model.PostFile
@@ -17,51 +18,54 @@ import java.io.File
 import java.util.concurrent.Executors
 
 class PostFileRepository(
-    private val client: OkHttpClient,
-    private val dao: PostFileDao,
-    private val root: File
+        private val client: OkHttpClient,
+        private val dao: PostFileDao,
+        private val root: File
 ) {
     // standalone dispatcher to work with cache map since getOrPut is not atomic
     private val dispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
     private val cache = mutableMapOf<String, Entry>()
 
     fun getPostFiles(postId: String) = dao.getPostFiles(postId)
-        .flatMapConcat {
-            it.asFlow()
-                .flatMapMerge { file -> getFlowFromCache(file) }
-                .toListFlow()
-                .catch { e ->
-                    Log.w(PostFileRepository::class.simpleName, "failed to load/fetch image: ", e)
-                }
-        }
+            .flatMapConcat {
+                it.asFlow()
+                        .flatMapMerge { file -> getFlowFromCache(file) }
+                        .toListFlow()
+                        .catch { e ->
+                            Log.w(PostFileRepository::class.simpleName, "failed to load/fetch image: ", e)
+                        }
+            }
 
     private suspend fun getFlowFromCache(file: PostFile) = withContext(dispatcher) {
-        cache.getOrPut(file.id, { Entry(file.loadOrFetch()) }).flow()
+        cache.getOrPut(file.id, { Entry(file.loadOrFetch().flowOn(Dispatchers.IO).single()) }).flow()
     }
 
-    private suspend fun PostFile.loadOrFetch() = withContext(Dispatchers.IO) {
+    private fun PostFile.loadOrFetch(): Flow<Bitmap> {
         with(File(root, id)) {
-            if (exists()) {
-                BitmapFactory.decodeFile(absolutePath)
+            return if (exists()) {
+                flow { emit(BitmapFactory.decodeFile(absolutePath)) }
             } else {
-                val response = client.newCall(getRequest(url)).execute()
-                if (response.isSuccessful) {
-                    val bytes = response.body()?.bytes() ?: throw Exception("empty response body")
-                    root.mkdir()
-                    writeBytes(bytes)
-                    BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                        ?: throw Exception("failed to decode file")
-                } else {
-                    throw Exception(response.message())
+                client.newCall(getRequest(url)).asFlow().map { response ->
+                    if (response.isSuccessful) {
+                        root.mkdir()
+                        response.body()?.bytes()?.let {
+                            writeBytes(it)
+                            BitmapFactory.decodeByteArray(it, 0, it.size)
+                                    ?: throw Exception("failed to decode image")
+                        }
+                                ?: throw Exception("empty response body")
+                    } else {
+                        throw Exception(response.message())
+                    }
                 }
             }
         }
     }
 
     private fun getRequest(url: String) = Request.Builder()
-        .url(url)
-        .addHeader("accept", "image/*")
-        .build()
+            .url(url)
+            .addHeader("accept", "image/*")
+            .build()
 
     suspend fun cleanupFileCache() = withContext(dispatcher) {
         cleanupAllMemCache()
