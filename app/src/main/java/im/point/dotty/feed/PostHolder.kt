@@ -7,10 +7,8 @@ import android.graphics.Bitmap
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import im.point.dotty.R
-import im.point.dotty.common.RecyclerItemDecorator
 import im.point.dotty.common.TagsAdapter
 import im.point.dotty.model.CompletePost
 import im.point.dotty.post.BitmapAdapter
@@ -42,12 +40,11 @@ class PostHolder<T : CompletePost<*>>(itemView: View, private val scope:Coroutin
         avatarJob = scope.launch {
             bitmap.collect { avatar.setImageBitmap(it) }
         }
-        images.visibility = View.GONE
         imagesJob.cancel()
         imagesJob = scope.launch {
             bitmaps.collect {
                 bitmapAdapter.list = it
-                images.visibility = View.VISIBLE
+                images.visibility = if (it.isEmpty()) View.GONE else View.VISIBLE
             }
         }
         post.metapost.let {
@@ -75,7 +72,6 @@ class PostHolder<T : CompletePost<*>>(itemView: View, private val scope:Coroutin
 
     init {
         tags.adapter = tagsAdapter
-        tags.addItemDecoration(RecyclerItemDecorator(itemView.context, DividerItemDecoration.HORIZONTAL, 4))
         images.adapter = bitmapAdapter
         avatar.clipToOutline = true
     }

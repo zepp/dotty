@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.DividerItemDecoration
 import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
 import im.point.dotty.common.*
@@ -73,7 +72,6 @@ class TagFragment : NavFragment<TaggedPostViewModel>() {
 
         with(binding.tagPosts) {
             adapter = this@TagFragment.adapter
-            addItemDecoration(RecyclerItemDecorator(requireContext(), DividerItemDecoration.VERTICAL, 4))
 
             addOnLastItemDisplayedListener {
                 lifecycleScope.launch(exceptionHandler) {

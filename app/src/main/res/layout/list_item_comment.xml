@@ -1,89 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/comment_layout"
+    style="@style/Card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/background_light">
+    android:layout_marginStart="2dp"
+    android:layout_marginEnd="2dp"
+    android:layout_marginBottom="4dp"
+    app:cardElevation="0dp">
 
-    <ImageView
-        android:id="@+id/comment_author_avatar"
-        android:layout_width="@dimen/avatar_size"
-        android:layout_height="@dimen/avatar_size"
-        android:layout_marginStart="@dimen/start_margin"
-        android:layout_marginTop="@dimen/top_margin"
-        style="@style/Avatar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/comment_author"
-        style="@style/UserLogin"
-        android:layout_width="0dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/comment_layout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:ellipsize="end"
-        android:lines="1"
-        app:layout_constraintBottom_toBottomOf="@id/comment_author_avatar"
-        app:layout_constraintEnd_toStartOf="@id/comment_id"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@id/comment_author_avatar"
-        app:layout_constraintTop_toTopOf="@id/comment_author_avatar"
-        tools:text="author" />
+        android:background="@android:color/background_light">
 
-    <TextView
-        android:id="@+id/comment_id"
-        style="@style/IdTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="4dp"
-        app:layout_constraintBottom_toBottomOf="@id/comment_author_avatar"
-        app:layout_constraintEnd_toStartOf="@id/comment_arrow"
-        app:layout_constraintTop_toTopOf="@id/comment_author_avatar"
-        tools:text="2" />
+        <ImageView
+            android:id="@+id/comment_author_avatar"
+            style="@style/Avatar"
+            android:layout_width="@dimen/avatar_size"
+            android:layout_height="@dimen/avatar_size"
+            android:layout_marginStart="@dimen/start_margin"
+            android:layout_marginTop="@dimen/top_margin"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/comment_arrow"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="4dp"
-        android:gravity="center"
-        android:text="→"
-        app:layout_constraintBottom_toBottomOf="@id/comment_id"
-        app:layout_constraintEnd_toStartOf="@id/comment_reply_to"
-        app:layout_constraintTop_toTopOf="@id/comment_id" />
+        <TextView
+            android:id="@+id/comment_author"
+            style="@style/UserLogin"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:ellipsize="end"
+            android:lines="1"
+            app:layout_constraintBottom_toBottomOf="@id/comment_author_avatar"
+            app:layout_constraintEnd_toStartOf="@id/comment_id"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@id/comment_author_avatar"
+            app:layout_constraintTop_toTopOf="@id/comment_author_avatar"
+            tools:text="author" />
 
-    <TextView
-        android:id="@+id/comment_reply_to"
-        style="@style/IdTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@id/comment_author_avatar"
-        app:layout_constraintEnd_toStartOf="@id/comment_reply_margin"
-        app:layout_constraintTop_toTopOf="@id/comment_author_avatar"
-        tools:text="1" />
+        <TextView
+            android:id="@+id/comment_id"
+            style="@style/IdTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            app:layout_constraintBottom_toBottomOf="@id/comment_author_avatar"
+            app:layout_constraintEnd_toStartOf="@id/comment_arrow"
+            app:layout_constraintTop_toTopOf="@id/comment_author_avatar"
+            tools:text="2" />
 
-    <Space
-        android:id="@+id/comment_reply_margin"
-        android:layout_width="8dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@id/comment_reply_to"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/comment_reply_to" />
+        <TextView
+            android:id="@+id/comment_arrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:gravity="center"
+            android:text="→"
+            app:layout_constraintBottom_toBottomOf="@id/comment_id"
+            app:layout_constraintEnd_toStartOf="@id/comment_reply_to"
+            app:layout_constraintTop_toTopOf="@id/comment_id" />
 
-    <TextView
-        android:id="@+id/comment_text"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/start_margin"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="@dimen/end_margin"
-        android:layout_marginBottom="@dimen/bottom_margin"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/comment_author_avatar"
-        tools:text="text text text text text text text text text text text text text text text text" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/comment_reply_to"
+            style="@style/IdTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@id/comment_author_avatar"
+            app:layout_constraintEnd_toStartOf="@id/comment_reply_margin"
+            app:layout_constraintTop_toTopOf="@id/comment_author_avatar"
+            tools:text="1" />
+
+        <Space
+            android:id="@+id/comment_reply_margin"
+            android:layout_width="8dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@id/comment_reply_to"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/comment_reply_to" />
+
+        <TextView
+            android:id="@+id/comment_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/start_margin"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="@dimen/end_margin"
+            android:layout_marginBottom="@dimen/bottom_margin"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/comment_author_avatar"
+            tools:text="text text text text text text text text text text text text text text text text" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

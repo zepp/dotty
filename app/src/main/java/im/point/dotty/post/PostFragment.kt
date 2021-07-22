@@ -35,7 +35,7 @@ class PostFragment : NavFragment<PostViewModel>() {
     private lateinit var bitmapAdapter: BitmapAdapter
     private lateinit var binding: FragmentPostBinding
     private lateinit var layout: SwipeRefreshLayout
-    private val tagsAdapter: TagsAdapter = TagsAdapter(R.layout.list_item_white_tag)
+    private val tagsAdapter: TagsAdapter = TagsAdapter(R.layout.list_item_inverted_tag)
     private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
         Log.e(this::class.simpleName, exception.message, exception)
         layout.isRefreshing = false

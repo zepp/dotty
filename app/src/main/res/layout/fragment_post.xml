@@ -48,7 +48,7 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        tools:listitem="@layout/list_item_white_tag" />
+                        tools:listitem="@layout/list_item_inverted_tag" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -123,12 +123,12 @@
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/post_files"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
                         android:layout_marginStart="@dimen/start_margin"
                         android:layout_marginTop="8dp"
                         android:layout_marginEnd="@dimen/end_margin"
-                        android:layout_marginBottom="8dp"
                         android:orientation="vertical"
                         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                         tools:listitem="@layout/list_item_image" />
@@ -137,6 +137,7 @@
                         android:id="@+id/post_comments"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
                         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                         tools:listitem="@layout/list_item_comment" />
                 </LinearLayout>

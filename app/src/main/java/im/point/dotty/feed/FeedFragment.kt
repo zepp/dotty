@@ -10,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.DividerItemDecoration
 import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
 import im.point.dotty.common.*
@@ -55,7 +54,6 @@ abstract class FeedFragment<M : DottyViewModel, T : CompletePost<*>> : NavFragme
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         with(binding.feedPosts) {
-            addItemDecoration(RecyclerItemDecorator(requireContext(), DividerItemDecoration.VERTICAL, 4))
             adapter = this@FeedFragment.adapter
             addOnLastItemDisplayedListener { onFeedUpdateBefore() }
         }
