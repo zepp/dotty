@@ -4,4 +4,5 @@
     <dimen name="bottom_margin">8dp</dimen>
     <dimen name="start_margin">8dp</dimen>
     <dimen name="end_margin">8dp</dimen>
+    <dimen name="avatar_size">40dp</dimen>
 </resources>
