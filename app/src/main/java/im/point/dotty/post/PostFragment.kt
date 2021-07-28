@@ -92,25 +92,25 @@ class PostFragment : NavFragment<PostViewModel>() {
 
     private fun bind() {
         lifecycleScope.launchWhenStarted {
-            binding.postSubscribe.setOnCheckedChangeListener { _, isChecked ->
+            binding.postSubscribe.onCheckedChangeListener = { isChecked ->
                 launch(exceptionHandler) { viewModel.onSubscribeChecked(isChecked).collect { } }
             }
             viewModel.isSubscribed.collect { binding.postSubscribe.isChecked = it }
         }
         lifecycleScope.launchWhenStarted {
-            binding.postRecommend.setOnCheckedChangeListener { _, isChecked ->
+            binding.postRecommend.onCheckedChangeListener = { isChecked ->
                 launch(exceptionHandler) { viewModel.onRecommendChecked(isChecked).collect() }
             }
             viewModel.isRecommended.collect { binding.postRecommend.isChecked = it }
         }
         lifecycleScope.launchWhenStarted {
-            binding.postBookmark.setOnCheckedChangeListener { _, isChecked ->
+            binding.postBookmark.onCheckedChangeListener = { isChecked ->
                 launch(exceptionHandler) { viewModel.onBookmarkChecked(isChecked).collect() }
             }
             viewModel.isBookmarked.collect { binding.postBookmark.isChecked = it }
         }
         lifecycleScope.launchWhenStarted {
-            binding.postPin.setOnCheckedChangeListener { _, isChecked ->
+            binding.postPin.onCheckedChangeListener = { isChecked ->
                 launch(exceptionHandler) { viewModel.onPinChecked(isChecked).collect() }
             }
             viewModel.isPinned.collect { binding.postPin.isChecked = it }

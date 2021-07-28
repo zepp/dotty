@@ -61,29 +61,36 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/post_tags">
 
-                        <ToggleButton
+                        <im.point.dotty.view.ToggleImageButton
                             android:id="@+id/post_subscribe"
+                            style="@style/ToggleButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:drawableStart="@drawable/ic_subscribed" />
+                            android:src="@drawable/ic_subscribed" />
 
-                        <ToggleButton
+                        <im.point.dotty.view.ToggleImageButton
                             android:id="@+id/post_recommend"
+                            style="@style/ToggleButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:drawableStart="@drawable/ic_recommended" />
+                            android:layout_marginStart="16dp"
+                            android:src="@drawable/ic_recommended" />
 
-                        <ToggleButton
+                        <im.point.dotty.view.ToggleImageButton
                             android:id="@+id/post_bookmark"
+                            style="@style/ToggleButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:drawableStart="@drawable/ic_bookmarked" />
+                            android:layout_marginStart="16dp"
+                            android:src="@drawable/ic_bookmarked" />
 
-                        <ToggleButton
+                        <im.point.dotty.view.ToggleImageButton
                             android:id="@+id/post_pin"
+                            style="@style/ToggleButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:drawableStart="@drawable/ic_pinned" />
+                            android:layout_marginStart="16dp"
+                            android:src="@drawable/ic_pinned" />
                     </LinearLayout>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>

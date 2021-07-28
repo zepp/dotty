@@ -72,7 +72,7 @@ class UserFragment : NavFragment<UserViewModel>() {
         binding.userPosts.adapter = adapter
         binding.userAvatar.clipToOutline = true
 
-        binding.userSubscribe.setOnCheckedChangeListener { _, isChecked ->
+        binding.userSubscribe.onCheckedChangeListener = { isChecked ->
             lifecycleScope.launch(exceptionHandler) {
                 viewModel.onSubscribeChecked(isChecked).collect()
             }
@@ -80,7 +80,7 @@ class UserFragment : NavFragment<UserViewModel>() {
         lifecycleScope.launchWhenStarted {
             viewModel.isSubscribed.collect { binding.userSubscribe.isChecked = it }
         }
-        binding.userRecommendSubscribe.setOnCheckedChangeListener { _, isChecked ->
+        binding.userRecommendSubscribe.onCheckedChangeListener = { isChecked ->
             lifecycleScope.launch(exceptionHandler) {
                 viewModel.onRecSubscribeChecked(isChecked).collect()
             }
@@ -88,7 +88,7 @@ class UserFragment : NavFragment<UserViewModel>() {
         lifecycleScope.launchWhenStarted {
             viewModel.isRecSubscribed.collect { binding.userRecommendSubscribe.isChecked = it }
         }
-        binding.userBlock.setOnCheckedChangeListener { _, isChecked ->
+        binding.userBlock.onCheckedChangeListener = { isChecked ->
             lifecycleScope.launch(exceptionHandler) {
                 viewModel.onBlockChecked(isChecked).collect()
             }
