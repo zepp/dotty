@@ -80,4 +80,8 @@
         <item name="android:tint">@color/toggle_button_tint</item>
     </style>
 
+    <style name="Counter" parent="InvertedText">
+        <item name="android:drawablePadding">8dp</item>
+    </style>
+
 </resources>

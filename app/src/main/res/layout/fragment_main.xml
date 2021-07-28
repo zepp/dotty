@@ -37,59 +37,40 @@
                 android:orientation="horizontal"
                 app:layout_scrollFlags="scroll">
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_post" />
-
                 <TextView
                     android:id="@+id/main_unread_posts"
-                    style="@style/InvertedText"
+                    style="@style/Counter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
+                    app:drawableStartCompat="@drawable/ic_post"
                     tools:text="0" />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:src="@drawable/ic_comment" />
 
                 <TextView
                     android:id="@+id/main_unread_comments"
-                    style="@style/InvertedText"
+                    style="@style/Counter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
+                    app:drawableStartCompat="@drawable/ic_comment"
                     tools:text="0" />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:src="@drawable/ic_post" />
 
                 <TextView
                     android:id="@+id/main_private_unread_posts"
-                    style="@style/InvertedText"
+                    style="@style/Counter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
+                    app:drawableStartCompat="@drawable/ic_post"
                     tools:text="0" />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:src="@drawable/ic_comment" />
 
                 <TextView
                     android:id="@+id/main_private_unread_comments"
-                    style="@style/InvertedText"
+                    style="@style/Counter"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
+                    app:drawableStartCompat="@drawable/ic_comment"
                     tools:text="0" />
             </LinearLayout>
 
