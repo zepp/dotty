@@ -8,4 +8,5 @@
     <dimen name="avatar_corner">4dp</dimen>
     <dimen name="tag_corner">4dp</dimen>
     <dimen name="tag_stroke_width">1dp</dimen>
+    <dimen name="toggle_button_corner">4dp</dimen>
 </resources>
