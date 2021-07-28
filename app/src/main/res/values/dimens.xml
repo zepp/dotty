@@ -5,4 +5,7 @@
     <dimen name="start_margin">8dp</dimen>
     <dimen name="end_margin">8dp</dimen>
     <dimen name="avatar_size">40dp</dimen>
+    <dimen name="avatar_corner">4dp</dimen>
+    <dimen name="tag_corner">4dp</dimen>
+    <dimen name="tag_stroke_width">1dp</dimen>
 </resources>

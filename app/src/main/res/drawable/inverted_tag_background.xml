@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/grey_rounded_rectangle" android:state_pressed="true" />
-    <item android:drawable="@drawable/white_frame" />
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="@dimen/tag_corner" />
+            <solid android:color="@color/lightGrey" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="@dimen/tag_corner" />
+            <stroke android:width="@dimen/tag_stroke_width" android:color="@android:color/white" />
+        </shape>
+    </item>
 </selector>
