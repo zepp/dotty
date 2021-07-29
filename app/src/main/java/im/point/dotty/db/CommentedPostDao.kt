@@ -30,4 +30,7 @@ interface CommentedPostDao : CommonDao<CommentedPost> {
 
     @Query("SELECT * FROM commented_posts WHERE id = :id")
     fun getMetaPostFlow(id: String): Flow<CommentedPost?>
+
+    @Query("DELETE FROM commented_posts WHERE id = :id")
+    fun removeItem(id: String)
 }

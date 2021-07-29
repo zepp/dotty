@@ -30,4 +30,7 @@ interface TaggedPostDao : CommonDao<TaggedPost> {
 
     @Query("SELECT * FROM tagged_posts WHERE id = :id AND tag = :tag")
     fun getMetaPostFlow(id: String, tag: String): Flow<TaggedPost?>
+
+    @Query("DELETE FROM tagged_posts WHERE id = :id")
+    fun removeItems(id: String)
 }

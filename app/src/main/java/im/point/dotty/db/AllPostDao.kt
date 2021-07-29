@@ -30,4 +30,7 @@ interface AllPostDao : CommonDao<AllPost> {
 
     @Query("SELECT * FROM all_posts WHERE id = :id")
     fun getMetaPostFlow(id: String): Flow<AllPost?>
+
+    @Query("DELETE FROM all_posts WHERE id = :id")
+    fun removeItem(id: String)
 }

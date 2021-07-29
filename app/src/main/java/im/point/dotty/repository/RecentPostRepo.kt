@@ -66,4 +66,6 @@ class RecentPostRepo(private val api: PointAPI,
             .map { it ?: throw Exception("Post not found") }
 
     fun updateMetaPost(post: RecentPost) = metaPostDao.insertItem(post)
+
+    fun removeMetaPost(postId: String) = metaPostDao.removeItem(postId)
 }

@@ -50,14 +50,16 @@ class AllPostRepo(
     override fun getAll() = metaPostDao.getAllFlow()
 
     override fun getItem(id: String) =
-        metaPostDao.getItemFlow(id).map { it ?: throw Exception("post not found") }
+            metaPostDao.getItemFlow(id).map { it ?: throw Exception("post not found") }
 
     override fun fetchAll() = fetch(false)
 
     fun getMetaPost(postId: String) = metaPostDao.getMetaPostFlow(postId)
-        .map { (it ?: throw Exception("Post not found")) }
+            .map { (it ?: throw Exception("Post not found")) }
 
     fun updateMetaPost(post: AllPost) = metaPostDao.insertItem(post)
+
+    fun removeMetaPost(postId: String) = metaPostDao.removeItem(postId)
 
     fun fetchBefore() = fetch(true)
 }

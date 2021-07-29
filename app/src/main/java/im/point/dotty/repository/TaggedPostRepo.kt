@@ -57,4 +57,6 @@ class TaggedPostRepo(private val api: PointAPI,
             .map { it ?: throw Exception("Post not found") }
 
     fun updateMetaPost(post: TaggedPost) = metaPostDao.insertItem(post)
+
+    fun removeAllMetaPosts(postId: String) = metaPostDao.removeItems(postId)
 }

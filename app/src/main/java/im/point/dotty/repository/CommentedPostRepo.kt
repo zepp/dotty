@@ -69,4 +69,6 @@ class CommentedPostRepo(private val api: PointAPI,
             .map { it ?: throw Exception("Post not found") }
 
     fun updateMetaPost(post: CommentedPost) = metaPostDao.insertItem(post)
+
+    fun removeMetaPost(postId: String) = metaPostDao.removeItem(postId)
 }

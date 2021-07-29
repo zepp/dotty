@@ -26,4 +26,10 @@ interface UserPostDao : CommonDao<UserPost> {
 
     @Query("SELECT * FROM user_posts WHERE id = :id AND user_id = :userId")
     fun getMetaPostFlow(id: String, userId: Long): Flow<UserPost?>
+
+    @Query("DELETE FROM user_posts WHERE id = :id")
+    fun removeItems(id: String)
+
+    @Query("DELETE FROM user_posts WHERE id = :id AND user_id = :userId")
+    fun removeItem(id: String, userId: Long)
 }

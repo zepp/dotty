@@ -91,6 +91,14 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
                             android:src="@drawable/ic_pinned" />
+
+                        <androidx.appcompat.widget.AppCompatImageButton
+                            android:id="@+id/post_remove"
+                            style="@style/ToggleButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:src="@drawable/ic_remove" />
                     </LinearLayout>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>

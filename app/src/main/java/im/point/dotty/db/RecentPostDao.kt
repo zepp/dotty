@@ -30,4 +30,7 @@ interface RecentPostDao : CommonDao<RecentPost> {
 
     @Query("SELECT * FROM recent_posts WHERE id = :id")
     fun getMetaPostFlow(id: String): Flow<RecentPost?>
+
+    @Query("DELETE FROM recent_posts WHERE id = :id")
+    fun removeItem(id: String)
 }

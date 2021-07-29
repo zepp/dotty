@@ -3,6 +3,7 @@
  */
 package im.point.dotty.db
 
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Update
@@ -16,4 +17,7 @@ interface CommonDao<T> {
 
     @Update
     fun updateItem(item: T)
+
+    @Delete
+    fun removeItem(item: T)
 }

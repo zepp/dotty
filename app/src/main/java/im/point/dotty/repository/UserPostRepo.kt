@@ -63,4 +63,8 @@ class UserPostRepo(private val api: PointAPI,
             .map { it ?: throw Exception("Post not found") }
 
     fun updateMetaPost(post: UserPost) = metaPostDao.insertItem(post)
+
+    fun removeMetaPost(postId: String) = metaPostDao.removeItem(postId, userId)
+
+    fun removeAllMetaPosts(postId: String) = metaPostDao.removeItems(postId)
 }

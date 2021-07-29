@@ -11,10 +11,9 @@ import im.point.dotty.model.*
 import im.point.dotty.network.PointAPI
 import im.point.dotty.repository.RepoFactory
 import im.point.dotty.repository.Size
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
 
 @FlowPreview
 class PostViewModel(application: DottyApplication, vararg args: Any)
@@ -54,17 +53,21 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
             .map { it.toMutableList().apply { sortBy { entry -> entry.number } } }
             .stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
 
-    val isPinVisible = post.map { it.authorId == state.id }
+    val isUserPost = post.map { it.authorId == state.id }
             .stateIn(viewModelScope, SharingStarted.Eagerly, false)
     val isPinned = post.map { it.isPinned }
             .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
-    val isSubscribed = metaPost.map { it.bookmarked }
+    val isSubscribed = metaPost.map { it.subscribed }
             .stateIn(viewModelScope, SharingStarted.Eagerly, false)
     val isRecommended = metaPost.map { it.recommended }
             .stateIn(viewModelScope, SharingStarted.Eagerly, false)
     val isBookmarked = metaPost.map { it.bookmarked }
             .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    private val isRemoved = AtomicBoolean(false)
+    private val isRecommendationCanceled = AtomicBoolean(false)
+    private val isSubscriptionCanceled = AtomicBoolean(false)
 
     init {
         viewModelScope.launch(Dispatchers.IO + exceptionHandler) {
@@ -74,23 +77,29 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
 
     fun onSubscribeChecked(value: Boolean) = flowOf(value)
             .filter { it.xor(isSubscribed.value) }
-            .flatMapConcat { if (it) subscribe() else unsubscribe() }
-            .flowOn(Dispatchers.IO)
+            .map {
+                if (it) subscribe() else unsubscribe().also { isSubscriptionCanceled.set(true) }
+            }.flowOn(Dispatchers.IO)
 
     fun onRecommendChecked(value: Boolean) = flowOf(value)
             .filter { it.xor(isRecommended.value) }
-            .flatMapConcat { if (it) recommend() else unrecommend() }
-            .flowOn(Dispatchers.IO)
+            .map {
+                if (it) recommend() else unrecommend().also { isRecommendationCanceled.set(true) }
+            }.flowOn(Dispatchers.IO)
 
     fun onBookmarkChecked(value: Boolean) = flowOf(value)
             .filter { it.xor(isBookmarked.value) }
-            .flatMapConcat { if (it) bookmark() else unbookmark() }
+            .map { if (it) bookmark() else unbookmark() }
             .flowOn(Dispatchers.IO)
 
     fun onPinChecked(value: Boolean) = flowOf(value)
             .filter { it.xor(isPinned.value) }
-            .flatMapConcat { if (it) pin() else unpin() }
+            .map { if (it) pin() else unpin() }
             .flatMapConcat { postRepo.fetchPostAndComments(postId) }
+            .flowOn(Dispatchers.IO)
+
+    fun onPostRemove() = remove()
+            .onCompletion { isRemoved.set(true) }
             .flowOn(Dispatchers.IO)
 
     private fun getMetaPost(id: String) = when (type) {
@@ -113,81 +122,108 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
     fun fetchPostComments() =
             postRepo.fetchPostAndComments(postId).flowOn(Dispatchers.IO)
 
-    private fun subscribe() = flow {
+    private suspend fun subscribe() = withContext(Dispatchers.IO) {
         val model = metaPost.value
         with(api.subscribeToPost(postId)) {
             checkSuccessful()
             model.subscribed = true
             updatePost(model)
             Log.d(this::class.simpleName, "subscribed to a post")
-            emit(this)
+            this
         }
     }
 
-    private fun unsubscribe() = flow {
+    private suspend fun unsubscribe() = withContext(Dispatchers.IO) {
         val model = metaPost.value
         with(api.unsubscribeFromPost(postId)) {
             checkSuccessful()
             model.subscribed = false
             updatePost(model)
             Log.d(this::class.simpleName, "unsubscribed from a post")
-            emit(this)
+            this
         }
     }
 
-    private fun recommend() = flow {
+    private suspend fun recommend() = withContext(Dispatchers.IO) {
         val model = metaPost.value
         with(api.recommendPost(postId)) {
             checkSuccessful()
             model.recommended = true
             updatePost(model)
-            emit(this)
+            this
         }
     }
 
-    private fun unrecommend() = flow {
+    private suspend fun unrecommend() = withContext(Dispatchers.IO) {
         val model = metaPost.value
         with(api.unrecommendPost(postId)) {
             checkSuccessful()
             model.recommended = false
             updatePost(model)
-            emit(this)
+            this
         }
     }
 
-    private fun bookmark() = flow {
+    private suspend fun bookmark() = withContext(Dispatchers.IO) {
         val model = metaPost.value
         with(api.bookmarkPost(postId)) {
             checkSuccessful()
             model.bookmarked = true
             updatePost(model)
-            emit(this)
+            this
         }
     }
 
-    private fun unbookmark() = flow {
+    private suspend fun unbookmark() = withContext(Dispatchers.IO) {
         val model = metaPost.value
         with(api.unbookmarkPost(postId)) {
             checkSuccessful()
             model.bookmarked = false
             updatePost(model)
-            emit(this)
+            this
         }
     }
 
-    private fun pin() = flow {
+    private suspend fun pin() = withContext(Dispatchers.IO) {
         with(api.pinPost(postId)) {
             checkSuccessful()
-            emit(this)
+            this
         }
     }
 
-    private fun unpin() = flow {
+    private suspend fun unpin() = withContext(Dispatchers.IO) {
         with(api.unpinPost(postId)) {
             checkSuccessful()
+            this
+        }
+    }
+
+    private fun remove() = flow {
+        with(api.deletePost(postId)) {
+            checkSuccessful()
+            Log.d(this::class.simpleName, "post is removed")
             emit(this)
         }
     }
 
     fun getAvatar(name: String) = avaRepository.getAvatar(name, Size.SIZE_80)
+
+    override fun onCleared() {
+        super.onCleared()
+        GlobalScope.async {
+            if (isRemoved.get()) {
+                recentPostRepo.removeMetaPost(postId)
+                commentedPostRepo.removeMetaPost(postId)
+                allPostRepo.removeMetaPost(postId)
+                taggedPostRepo.removeAllMetaPosts(postId)
+                userPostRepo.removeAllMetaPosts(postId)
+            }
+            if (isRecommendationCanceled.get()) {
+                userPostRepo.removeMetaPost(postId)
+            }
+            if (isSubscriptionCanceled.get()) {
+                commentedPostRepo.removeMetaPost(postId)
+            }
+        }
+    }
 }

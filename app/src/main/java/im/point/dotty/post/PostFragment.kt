@@ -91,38 +91,63 @@ class PostFragment : NavFragment<PostViewModel>() {
     }
 
     private fun bind() {
-        lifecycleScope.launchWhenStarted {
-            binding.postSubscribe.onCheckedChangeListener = { isChecked ->
-                launch(exceptionHandler) { viewModel.onSubscribeChecked(isChecked).collect { } }
+        binding.postSubscribe.onCheckedChangeListener = { isChecked ->
+            lifecycleScope.launch(exceptionHandler) {
+                viewModel.onSubscribeChecked(isChecked).collect {
+                    if (!isChecked) {
+                        findNavController().popBackStack()
+                    }
+                }
             }
+        }
+        lifecycleScope.launchWhenStarted {
             viewModel.isSubscribed.collect { binding.postSubscribe.isChecked = it }
         }
-        lifecycleScope.launchWhenStarted {
-            binding.postRecommend.onCheckedChangeListener = { isChecked ->
-                launch(exceptionHandler) { viewModel.onRecommendChecked(isChecked).collect() }
+        binding.postRecommend.onCheckedChangeListener = { isChecked ->
+            lifecycleScope.launch(exceptionHandler) {
+                viewModel.onRecommendChecked(isChecked).collect {
+                    if (!isChecked) {
+                        findNavController().popBackStack()
+                    }
+                }
             }
+        }
+        lifecycleScope.launchWhenStarted {
             viewModel.isRecommended.collect { binding.postRecommend.isChecked = it }
         }
-        lifecycleScope.launchWhenStarted {
-            binding.postBookmark.onCheckedChangeListener = { isChecked ->
-                launch(exceptionHandler) { viewModel.onBookmarkChecked(isChecked).collect() }
-            }
-            viewModel.isBookmarked.collect { binding.postBookmark.isChecked = it }
+        binding.postBookmark.onCheckedChangeListener = { isChecked ->
+            lifecycleScope.launch(exceptionHandler) { viewModel.onBookmarkChecked(isChecked).collect() }
         }
         lifecycleScope.launchWhenStarted {
-            binding.postPin.onCheckedChangeListener = { isChecked ->
-                launch(exceptionHandler) { viewModel.onPinChecked(isChecked).collect() }
+            viewModel.isBookmarked.collect { binding.postBookmark.isChecked = it }
+        }
+        binding.postPin.onCheckedChangeListener = { isChecked ->
+            lifecycleScope.launch(exceptionHandler) { viewModel.onPinChecked(isChecked).collect() }
+        }
+        lifecycleScope.launchWhenStarted {
+            viewModel.isPinned.collect { binding.postPin.isChecked = it }
+        }
+        binding.postRemove.setOnClickListener {
+            lifecycleScope.launch(exceptionHandler) {
+                it.isEnabled = false
+                viewModel.onPostRemove().collect {
+                    findNavController().popBackStack()
+                }
             }
+        }
+        lifecycleScope.launchWhenStarted {
             viewModel.isPinned.collect { binding.postPin.isChecked = it }
         }
         lifecycleScope.launchWhenStarted {
-            viewModel.isPinVisible.collect {
+            viewModel.isUserPost.collect {
                 binding.postPin.visibility = if (it) View.VISIBLE else View.GONE
+                binding.postRemove.visibility = if (it) View.VISIBLE else View.GONE
+                binding.postRecommend.visibility = if (it) View.GONE else View.VISIBLE
             }
         }
         lifecycleScope.launchWhenStarted {
             viewModel.files.collect {
-                binding.postFiles.visibility = if (it.size > 0) View.VISIBLE else View.GONE
+                binding.postFiles.visibility = if (it.isNotEmpty()) View.VISIBLE else View.GONE
                 bitmapAdapter.list = it
             }
         }
