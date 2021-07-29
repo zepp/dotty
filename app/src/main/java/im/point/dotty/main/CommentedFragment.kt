@@ -5,6 +5,7 @@ package im.point.dotty.main
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -32,10 +33,9 @@ class CommentedFragment : FeedFragment<MainViewModel, CompleteCommentedPost>() {
         adapter.avatarProvider = viewModel::getAvatar
         adapter.imagesProvider = viewModel::getPostImages
         adapter.onPostClicked = { post ->
-            val bundle = Bundle()
-            bundle.putString(PostFragment.POST_ID, post.id)
-            bundle.putSerializable(PostFragment.POST_TYPE, PostType.COMMENTED_POST)
-            findNavController().navigate(R.id.action_main_to_post, bundle)
+            findNavController().navigate(R.id.action_main_to_post,
+                    bundleOf(PostFragment.POST_ID to post.id,
+                            PostFragment.POST_TYPE to PostType.COMMENTED_POST))
         }
         lifecycleScope.launchWhenStarted {
             viewModel.commented.collect { adapter.list = it }

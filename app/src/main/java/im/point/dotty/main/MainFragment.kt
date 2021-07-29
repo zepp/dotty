@@ -4,15 +4,19 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import im.point.dotty.R
 import im.point.dotty.common.NavFragment
 import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.databinding.FragmentMainBinding
+import im.point.dotty.user.UserFragment.Companion.USER_ID
+import im.point.dotty.user.UserFragment.Companion.USER_LOGIN
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -68,6 +72,11 @@ class MainFragment : NavFragment<MainViewModel>() {
 
         lifecycleScope.launch(exceptionHandler) {
             viewModel.fetchUnreadCounters().await()
+        }
+        binding.toolbar.setOnClickListener {
+            findNavController().navigate(R.id.action_main_to_user,
+                    bundleOf(USER_ID to viewModel.user.value.id,
+                            USER_LOGIN to viewModel.user.value.login))
         }
     }
 

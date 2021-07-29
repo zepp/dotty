@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -64,19 +65,16 @@ class PostFragment : NavFragment<PostViewModel>() {
         binding.postTags.adapter = tagsAdapter
         binding.postTags.addItemDecoration(RecyclerItemDecorator(requireContext(), LinearLayoutManager.HORIZONTAL, 4))
         tagsAdapter.onTagClicked = { tag ->
-            val bundle = Bundle()
-            bundle.putString(TagFragment.TAG, tag)
-            findNavController().navigate(R.id.action_post_to_tag, bundle)
+            findNavController().navigate(R.id.action_post_to_tag, bundleOf(TagFragment.TAG to tag))
         }
         commentAdapter = CommentAdapter(lifecycleScope)
         binding.postComments.adapter = commentAdapter
         commentAdapter.avatarProvider = viewModel::getAvatar
         commentAdapter.onIdClicked = { _, pos -> binding.postComments.smoothScrollToPosition(pos) }
         commentAdapter.onUserClicked = { id, login ->
-            val bundle = Bundle()
-            bundle.putLong(UserFragment.USER_ID, id)
-            bundle.putString(UserFragment.USER_LOGIN, login)
-            findNavController().navigate(R.id.action_post_to_user, bundle)
+            findNavController().navigate(R.id.action_post_to_user,
+                    bundleOf(UserFragment.USER_ID to id,
+                            UserFragment.USER_LOGIN to login))
         }
         bitmapAdapter = BitmapAdapter()
         binding.postFiles.adapter = bitmapAdapter

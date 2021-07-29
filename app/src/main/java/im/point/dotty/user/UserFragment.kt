@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -50,24 +51,21 @@ class UserFragment : NavFragment<UserViewModel>() {
         adapter.avatarProvider = viewModel::getPostAvatar
         adapter.imagesProvider = viewModel::getPostImages
         adapter.onPostClicked = { post ->
-            val bundle = Bundle()
-            bundle.putString(PostFragment.POST_ID, post.id)
-            bundle.putLong(PostFragment.USER_ID, post.metapost.userId)
-            bundle.putSerializable(PostFragment.POST_TYPE, PostType.USER_POST)
-            findNavController().navigate(R.id.action_user_to_post, bundle)
+            findNavController().navigate(R.id.action_user_to_post,
+                    bundleOf(PostFragment.POST_ID to post.id,
+                            PostFragment.USER_ID to post.metapost.userId,
+                            PostFragment.POST_TYPE to PostType.USER_POST))
         }
         adapter.onUserClicked = { id, login ->
             if (id != userId) {
-                val bundle = Bundle()
-                bundle.putLong(USER_ID, id)
-                bundle.putString(USER_LOGIN, login)
-                findNavController().navigate(R.id.action_user_fragment_self, bundle)
+                findNavController().navigate(R.id.action_user_fragment_self,
+                        bundleOf(USER_ID to id,
+                                USER_LOGIN to login))
             }
         }
         adapter.onTagClicked = { tag ->
-            val bundle = Bundle()
-            bundle.putString(TagFragment.TAG, tag)
-            findNavController().navigate(R.id.action_user_to_tag, bundle)
+            findNavController().navigate(R.id.action_user_to_tag,
+                    bundleOf(TagFragment.TAG to tag))
         }
         binding.userPosts.adapter = adapter
         binding.userAvatar.clipToOutline = true

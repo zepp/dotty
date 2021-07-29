@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
@@ -32,15 +33,12 @@ abstract class FeedFragment<M : DottyViewModel, T : CompletePost<*>> : NavFragme
         super.onCreate(savedInstanceState)
         adapter = FeedAdapter(lifecycleScope)
         adapter.onUserClicked = { id, login ->
-            val bundle = Bundle()
-            bundle.putLong(UserFragment.USER_ID, id)
-            bundle.putString(UserFragment.USER_LOGIN, login)
-            findNavController().navigate(R.id.action_main_to_user, bundle)
+            findNavController().navigate(R.id.action_main_to_user,
+                    bundleOf(UserFragment.USER_ID to id,
+                            UserFragment.USER_LOGIN to login))
         }
         adapter.onTagClicked = { tag ->
-            val bundle = Bundle()
-            bundle.putString(TagFragment.TAG, tag)
-            findNavController().navigate(R.id.action_main_to_tag, bundle)
+            findNavController().navigate(R.id.action_main_to_tag, bundleOf(TagFragment.TAG to tag))
         }
     }
 

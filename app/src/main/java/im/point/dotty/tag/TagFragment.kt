@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -50,23 +51,19 @@ class TagFragment : NavFragment<TaggedPostViewModel>() {
         adapter.avatarProvider = viewModel::getPostAvatar
         adapter.imagesProvider = viewModel::getPostImages
         adapter.onPostClicked = { post ->
-            val bundle = Bundle()
-            bundle.putString(PostFragment.POST_ID, post.id)
-            bundle.putSerializable(PostFragment.POST_TYPE, PostType.TAGGED_POST)
-            bundle.putString(PostFragment.TAG, myTag)
-            findNavController().navigate(R.id.action_tag_to_post, bundle)
+            findNavController().navigate(R.id.action_tag_to_post,
+                    bundleOf(PostFragment.POST_ID to post.id,
+                            PostFragment.POST_TYPE to PostType.TAGGED_POST,
+                            PostFragment.TAG to myTag))
         }
         adapter.onUserClicked = { id, login ->
-            val bundle = Bundle()
-            bundle.putLong(UserFragment.USER_ID, id)
-            bundle.putString(UserFragment.USER_LOGIN, login)
-            findNavController().navigate(R.id.action_tag_to_user, bundle)
+            findNavController().navigate(R.id.action_tag_to_user,
+                    bundleOf(UserFragment.USER_ID to id,
+                            UserFragment.USER_LOGIN to login))
         }
         adapter.onTagClicked = { tag ->
             if (tag != myTag) {
-                val bundle = Bundle()
-                bundle.putString(TAG, tag)
-                findNavController().navigate(R.id.action_tag_to_tag, bundle)
+                findNavController().navigate(R.id.action_tag_to_tag, bundleOf(TAG to tag))
             }
         }
 
