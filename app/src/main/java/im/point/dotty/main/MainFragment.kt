@@ -6,11 +6,11 @@ import android.view.*
 import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.google.android.material.tabs.TabLayoutMediator
 import im.point.dotty.R
 import im.point.dotty.common.NavFragment
 import im.point.dotty.common.ViewModelFactory
@@ -35,10 +35,18 @@ class MainFragment : NavFragment<MainViewModel>() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         setHasOptionsMenu(true)
         binding = FragmentMainBinding.inflate(layoutInflater, container, false)
-        binding.mainTabLayout.setupWithViewPager(binding.mainPager)
-        binding.mainPager.adapter = Adapter(childFragmentManager)
+        binding.mainPager.adapter = Adapter()
         binding.viewModel = viewModel
         binding.lifecycleOwner = this
+
+        TabLayoutMediator(binding.mainTabLayout, binding.mainPager) { tab, position ->
+            tab.text = when (position) {
+                0 -> getString(R.string.main_recent)
+                1 -> getString(R.string.main_commented)
+                else -> getString(R.string.main_all)
+            }
+        }.attach()
+
         return binding.root
     }
 
@@ -95,8 +103,9 @@ class MainFragment : NavFragment<MainViewModel>() {
         }
     }
 
-    private inner class Adapter internal constructor(fm: FragmentManager?) : FragmentStatePagerAdapter(fm!!) {
-        override fun getItem(position: Int): Fragment {
+    private inner class Adapter : FragmentStateAdapter(childFragmentManager, lifecycle) {
+
+        override fun createFragment(position: Int): Fragment {
             return when (position) {
                 0 -> RecentFragment()
                 1 -> CommentedFragment()
@@ -104,16 +113,6 @@ class MainFragment : NavFragment<MainViewModel>() {
             }
         }
 
-        override fun getPageTitle(position: Int): CharSequence? {
-            return when (position) {
-                0 -> getString(R.string.main_recent)
-                1 -> getString(R.string.main_commented)
-                else -> getString(R.string.main_all)
-            }
-        }
-
-        override fun getCount(): Int {
-            return 3
-        }
+        override fun getItemCount() = 3
     }
 }
