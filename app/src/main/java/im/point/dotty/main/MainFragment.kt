@@ -83,8 +83,9 @@ class MainFragment : NavFragment<MainViewModel>() {
         }
         binding.toolbar.setOnClickListener {
             findNavController().navigate(R.id.action_main_to_user,
-                    bundleOf(USER_ID to viewModel.user.value.id,
-                            USER_LOGIN to viewModel.user.value.login))
+                    with(viewModel.user.value) {
+                        bundleOf(USER_ID to id, USER_LOGIN to login)
+                    })
         }
     }
 
