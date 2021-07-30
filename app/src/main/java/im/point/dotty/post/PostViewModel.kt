@@ -66,8 +66,13 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
             .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     private val isRemoved = AtomicBoolean(false)
-    private val isRecommendationCanceled = AtomicBoolean(false)
-    private val isSubscriptionCanceled = AtomicBoolean(false)
+    private val isRecommendationCanceled = MutableStateFlow(false)
+    private val isSubscriptionCanceled = MutableStateFlow(false)
+
+    val isClosing = combine(
+            isRecommendationCanceled.map { it && type == PostType.USER_POST },
+            isSubscriptionCanceled.map { it && type == PostType.COMMENTED_POST }) { a, b -> a || b }
+            .shareIn(viewModelScope, SharingStarted.Eagerly)
 
     init {
         viewModelScope.launch(Dispatchers.IO + exceptionHandler) {
@@ -78,13 +83,13 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
     fun onSubscribeChecked(value: Boolean) = flowOf(value)
             .filter { it.xor(isSubscribed.value) }
             .map {
-                if (it) subscribe() else unsubscribe().also { isSubscriptionCanceled.set(true) }
+                if (it) subscribe() else unsubscribe().also { isSubscriptionCanceled.emit(true) }
             }.flowOn(Dispatchers.IO)
 
     fun onRecommendChecked(value: Boolean) = flowOf(value)
             .filter { it.xor(isRecommended.value) }
             .map {
-                if (it) recommend() else unrecommend().also { isRecommendationCanceled.set(true) }
+                if (it) recommend() else unrecommend().also { isRecommendationCanceled.emit(true) }
             }.flowOn(Dispatchers.IO)
 
     fun onBookmarkChecked(value: Boolean) = flowOf(value)
@@ -211,17 +216,17 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
     override fun onCleared() {
         super.onCleared()
         GlobalScope.async {
-            if (isRemoved.get()) {
+            if (isRemoved.getAndSet(false)) {
                 recentPostRepo.removeMetaPost(postId)
                 commentedPostRepo.removeMetaPost(postId)
                 allPostRepo.removeMetaPost(postId)
                 taggedPostRepo.removeAllMetaPosts(postId)
                 userPostRepo.removeAllMetaPosts(postId)
             }
-            if (isRecommendationCanceled.get()) {
+            if (isRecommendationCanceled.value) {
                 userPostRepo.removeMetaPost(postId)
             }
-            if (isSubscriptionCanceled.get()) {
+            if (isSubscriptionCanceled.value) {
                 commentedPostRepo.removeMetaPost(postId)
             }
         }

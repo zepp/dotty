@@ -34,7 +34,7 @@ interface PointAPI {
     suspend fun getPost(@Path("post") id: String): PostReply
 
     @DELETE("/api/post/{post}")
-    suspend fun deletePost(@Path("post") id: String): PostReply
+    suspend fun deletePost(@Path("post") id: String): Envelope
 
     @GET("/api/user/login/{login}")
     suspend fun getUser(@Path("login") login: String): UserReply

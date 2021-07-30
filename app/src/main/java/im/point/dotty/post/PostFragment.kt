@@ -26,6 +26,7 @@ import im.point.dotty.tag.TagFragment
 import im.point.dotty.user.UserFragment
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
@@ -91,11 +92,7 @@ class PostFragment : NavFragment<PostViewModel>() {
     private fun bind() {
         binding.postSubscribe.onCheckedChangeListener = { isChecked ->
             lifecycleScope.launch(exceptionHandler) {
-                viewModel.onSubscribeChecked(isChecked).collect {
-                    if (!isChecked) {
-                        findNavController().popBackStack()
-                    }
-                }
+                viewModel.onSubscribeChecked(isChecked).collect()
             }
         }
         lifecycleScope.launchWhenStarted {
@@ -103,11 +100,7 @@ class PostFragment : NavFragment<PostViewModel>() {
         }
         binding.postRecommend.onCheckedChangeListener = { isChecked ->
             lifecycleScope.launch(exceptionHandler) {
-                viewModel.onRecommendChecked(isChecked).collect {
-                    if (!isChecked) {
-                        findNavController().popBackStack()
-                    }
-                }
+                viewModel.onRecommendChecked(isChecked).collect()
             }
         }
         lifecycleScope.launchWhenStarted {
@@ -125,12 +118,16 @@ class PostFragment : NavFragment<PostViewModel>() {
         lifecycleScope.launchWhenStarted {
             viewModel.isPinned.collect { binding.postPin.isChecked = it }
         }
-        binding.postRemove.setOnClickListener {
+        binding.postRemove.setOnClickListener { view ->
             lifecycleScope.launch(exceptionHandler) {
-                it.isEnabled = false
-                viewModel.onPostRemove().collect {
-                    findNavController().popBackStack()
-                }
+                view.isEnabled = false
+                viewModel.onPostRemove()
+                        .catch {
+                            view.isEnabled = true
+                            throw it
+                        }.collect {
+                            findNavController().popBackStack()
+                        }
             }
         }
         lifecycleScope.launchWhenStarted {
@@ -165,6 +162,14 @@ class PostFragment : NavFragment<PostViewModel>() {
 
         lifecycleScope.launch(exceptionHandler) {
             viewModel.comments.collect { commentAdapter.list = it }
+        }
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.isClosing.collect {
+                if (it) {
+                    findNavController().popBackStack()
+                }
+            }
         }
     }
 
