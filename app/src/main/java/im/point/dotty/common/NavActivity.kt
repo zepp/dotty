@@ -14,13 +14,12 @@ import im.point.dotty.R
 
 abstract class NavActivity<T : AndroidViewModel> : AppCompatActivity() {
     private lateinit var nav: NavController
-    protected lateinit var viewModel: T
+    protected val viewModel by lazy { provideViewModel() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_nav)
         nav = (supportFragmentManager.findFragmentById(R.id.fragment_container) as NavHostFragment).navController
-        viewModel = provideViewModel()
     }
 
     protected fun setNavGraph(@NavigationRes id: Int) = nav.setGraph(id)

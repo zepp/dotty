@@ -16,12 +16,7 @@ import androidx.navigation.ui.setupWithNavController
 import im.point.dotty.R
 
 abstract class NavFragment<T : AndroidViewModel> : Fragment() {
-    protected lateinit var viewModel: T
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel = provideViewModel()
-    }
+    protected val viewModel by lazy { provideViewModel() }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
