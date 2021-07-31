@@ -151,12 +151,17 @@ class PostFragment : NavFragment<PostViewModel>() {
             viewModel.post.collect { post ->
                 binding.toolbar.title = post.formattedId
                 binding.postText.text = post.text
-                binding.postTags.visibility = if (post.tags.isEmpty()) {
+                binding.postText.visibility = if (post.text.isEmpty()) {
                     View.GONE
                 } else {
                     View.VISIBLE
                 }
                 tagsAdapter.list = post.tags
+                binding.postTags.visibility = if (post.tags.isEmpty()) {
+                    View.GONE
+                } else {
+                    View.VISIBLE
+                }
             }
         }
 
