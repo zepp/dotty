@@ -89,10 +89,56 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="@dimen/end_margin"
             android:layout_marginBottom="@dimen/bottom_margin"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/comment_actions"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/comment_author_avatar"
             tools:text="text text text text text text text text text text text text text text text text" />
+
+        <LinearLayout
+            android:id="@+id/comment_actions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/comment_text"
+            tools:visibility="visible">
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/comment_edit"
+                style="@style/CommentAction"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_edit" />
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/comment_recommend"
+                style="@style/CommentAction"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/ic_recommended" />
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/comment_remove"
+                style="@style/CommentAction"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/ic_remove" />
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/comment_reply"
+                style="@style/CommentAction"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/ic_reply" />
+        </LinearLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

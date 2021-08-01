@@ -84,4 +84,10 @@
         <item name="android:drawablePadding">8dp</item>
     </style>
 
+    <style name="CommentAction">
+        <item name="android:padding">4dp</item>
+        <item name="tint">@color/colorPrimaryDark</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
 </resources>
