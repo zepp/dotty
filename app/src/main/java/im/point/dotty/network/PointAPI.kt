@@ -22,7 +22,11 @@ interface PointAPI {
     suspend fun getTagged(@Query("tag") tag: String, @Query("before") before: Long?): PostsReply
 
     @GET("/api/tags/{user}")
-    suspend fun getUserTagged(@Path("user") user: String, @Query("tag") tag: String, @Query("before") before: Long?): PostsReply
+    suspend fun getUserTagged(
+        @Path("user") user: String,
+        @Query("tag") tag: String,
+        @Query("before") before: Long?
+    ): PostsReply
 
     @GET("/api/tags/{user}")
     suspend fun getUserTags(@Path("user") user: String): List<UserTagEntry>
@@ -49,7 +53,10 @@ interface PointAPI {
     suspend fun getUnreadCounters(): UnreadCounters
 
     @POST("api/post/{post}/r")
-    suspend fun recommendPost(@Path("post") id: String, @Query("text") text: String? = null): Envelope
+    suspend fun recommendPost(
+        @Path("post") id: String,
+        @Query("text") text: String? = null
+    ): Envelope
 
     @DELETE("api/post/{post}/r")
     suspend fun unrecommendPost(@Path("post") id: String): Envelope
@@ -89,4 +96,31 @@ interface PointAPI {
 
     @DELETE("api/user/bl/{login}")
     suspend fun unblockUser(@Path("login") login: String): Envelope
+
+    @POST("/api/post/{id}")
+    fun addComment(
+        @Path("id") id: String,
+        @Query("text") text: String,
+        @Query("comment_id") relyTo: Int? = null,
+    ): Envelope
+
+    @POST("/api/post/{id}/{number}")
+    fun editComment(
+        @Path("id") id: String,
+        @Path("number") number: String,
+        @Query("text") text: String,
+    ): EditCommentReply
+
+    @DELETE("/api/post/{id}/{number}")
+    fun deleteComment(
+        @Path("id") id: String,
+        @Path("number") number: String
+    ): Envelope
+
+    @POST("/api/post/{id}/{number}/r")
+    fun recommendComment(
+        @Path("id") id: String,
+        @Path("number") number: String,
+        @Query("text") text: String,
+    ): Envelope
 }
