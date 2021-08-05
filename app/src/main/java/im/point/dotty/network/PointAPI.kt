@@ -52,10 +52,11 @@ interface PointAPI {
     @GET("/api/unread-counters")
     suspend fun getUnreadCounters(): UnreadCounters
 
+    @FormUrlEncoded
     @POST("api/post/{post}/r")
     suspend fun recommendPost(
-        @Path("post") id: String,
-        @Query("text") text: String? = null
+            @Path("post") id: String,
+            @Field("text") text: String? = null
     ): Envelope
 
     @DELETE("api/post/{post}/r")
@@ -73,8 +74,9 @@ interface PointAPI {
     @DELETE("api/post/{post}/b")
     suspend fun unbookmarkPost(@Path("post") id: String): Envelope
 
+    @FormUrlEncoded
     @POST("api/post/{post}/pin")
-    suspend fun pinPost(@Path("post") id: String, @Query("text") text: String? = null): Envelope
+    suspend fun pinPost(@Path("post") id: String, @Field("text") text: String? = null): Envelope
 
     @DELETE("api/post/{post}/unpin")
     suspend fun unpinPost(@Path("post") id: String): Envelope
@@ -97,30 +99,33 @@ interface PointAPI {
     @DELETE("api/user/bl/{login}")
     suspend fun unblockUser(@Path("login") login: String): Envelope
 
+    @FormUrlEncoded
     @POST("/api/post/{id}")
-    fun addComment(
-        @Path("id") id: String,
-        @Query("text") text: String,
-        @Query("comment_id") relyTo: Int? = null,
+    suspend fun addComment(
+            @Path("id") id: String,
+            @Field("text") text: String,
+            @Field("comment_id") relyTo: Int? = null,
     ): Envelope
 
-    @POST("/api/post/{id}/{number}")
-    fun editComment(
-        @Path("id") id: String,
-        @Path("number") number: String,
-        @Query("text") text: String,
+    @FormUrlEncoded
+    @PATCH("/api/post/{id}/{number}")
+    suspend fun editComment(
+            @Path("id") id: String,
+            @Path("number") number: Int,
+            @Field("text") text: String,
     ): EditCommentReply
 
     @DELETE("/api/post/{id}/{number}")
-    fun deleteComment(
-        @Path("id") id: String,
-        @Path("number") number: String
+    suspend fun deleteComment(
+            @Path("id") id: String,
+            @Path("number") number: Int
     ): Envelope
 
+    @FormUrlEncoded
     @POST("/api/post/{id}/{number}/r")
-    fun recommendComment(
-        @Path("id") id: String,
-        @Path("number") number: String,
-        @Query("text") text: String,
+    suspend fun recommendComment(
+            @Path("id") id: String,
+            @Path("number") number: Int,
+            @Field("text") text: String,
     ): Envelope
 }

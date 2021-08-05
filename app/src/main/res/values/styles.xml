@@ -86,8 +86,8 @@
 
     <style name="CommentAction">
         <item name="android:padding">4dp</item>
-        <item name="tint">@color/colorPrimaryDark</item>
-        <item name="android:background">@android:color/transparent</item>
+        <item name="tint">@color/action_button_tint</item>
+        <item name="android:background">@drawable/action_button_background</item>
     </style>
 
 </resources>

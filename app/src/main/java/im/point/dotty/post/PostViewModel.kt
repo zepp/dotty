@@ -19,10 +19,10 @@ import java.util.concurrent.atomic.AtomicBoolean
 class PostViewModel(application: DottyApplication, vararg args: Any)
     : DottyViewModel(application) {
 
-    private val type = args[0] as PostType
-    private val postId = args[1] as String
-    private val userId = if (type == PostType.USER_POST) args[2] as Long else null
-    private val tag = if (type == PostType.TAGGED_POST) args[2] as String else null
+    val type = args[0] as PostType
+    val postId = args[1] as String
+    val userId = if (type == PostType.USER_POST) args[2] as Long else null
+    val tag = if (type == PostType.TAGGED_POST) args[2] as String else null
 
     private val repoFactory: RepoFactory = application.repoFactory
     private val api: PointAPI = application.mainApi
@@ -42,6 +42,8 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
                 override val id: String = postId
                 override val authorId = 0L
             })
+
+    val authorId = state.id
 
     val post = postRepo.getItem(postId)
             .stateIn(viewModelScope, SharingStarted.Eagerly, Post(postId, 0L, ""))
@@ -64,6 +66,10 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
             .stateIn(viewModelScope, SharingStarted.Eagerly, false)
     val isBookmarked = metaPost.map { it.bookmarked }
             .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val commentAction = MutableStateFlow<CommentAction>(CommentAction.ADD_COMMENT)
+    val comment = MutableStateFlow<Comment?>(null)
+    val actionText = MutableStateFlow("")
 
     private val isRemoved = AtomicBoolean(false)
     private val isRecommendationCanceled = MutableStateFlow(false)
@@ -106,6 +112,52 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
     fun onPostRemove() = remove()
             .onCompletion { isRemoved.set(true) }
             .flowOn(Dispatchers.IO)
+
+    fun onActionChanged(action: CommentAction, model: Comment?, text: String = "") = viewModelScope.launch {
+        commentAction.emit(action)
+        comment.emit(model)
+        actionText.emit(text)
+    }
+
+    fun onCommentTextChanged(text: String) = viewModelScope.launch {
+        actionText.emit(text)
+    }
+
+    fun onCommentAction() = flow {
+        Log.d(this::class.simpleName,
+                "action: " + commentAction.value.toString() + " " + comment.value + " " + actionText.value)
+        val comment = comment.value
+        when (commentAction.value) {
+            CommentAction.ADD_COMMENT ->
+                with(api.addComment(postId, actionText.value, comment?.number)) {
+                    checkSuccessful()
+                    emit(this)
+                }
+            CommentAction.EDIT_COMMENT ->
+                with(api.editComment(postId, comment?.number
+                        ?: throw Exception("comment number is null"),
+                        actionText.value)) {
+                    checkSuccessful()
+                    emit(this)
+                }
+            CommentAction.RECOMMEND_COMMENT ->
+                with(api.recommendComment(postId, comment?.number
+                        ?: throw Exception("comment number is null"),
+                        actionText.value)) {
+                    checkSuccessful()
+                    emit(this)
+                }
+            CommentAction.REMOVE_COMMENT ->
+                with(api.deleteComment(postId, comment?.number
+                        ?: throw Exception("comment number is null"))) {
+                    postRepo.removeComment(comment.id)
+                    checkSuccessful()
+                    emit(this)
+                }
+        }
+    }.flatMapConcat {
+        fetchPostComments()
+    }.flowOn(Dispatchers.IO)
 
     private fun getMetaPost(id: String) = when (type) {
         PostType.RECENT_POST -> recentPostRepo.getMetaPost(id)

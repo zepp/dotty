@@ -21,4 +21,7 @@ interface CommentDao : CommonDao<Comment> {
 
     @Query("SELECT * FROM comments WHERE post_id = :id")
     fun getPostCommentsFlow(id: String): Flow<List<Comment>>
+
+    @Query("DELETE FROM comments WHERE id = :id")
+    fun removeItem(id: String)
 }

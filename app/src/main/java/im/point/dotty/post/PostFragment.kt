@@ -3,17 +3,23 @@
  */
 package im.point.dotty.post
 
+import android.content.Context
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
 import im.point.dotty.common.NavFragment
@@ -37,6 +43,8 @@ class PostFragment : NavFragment<PostViewModel>() {
     private lateinit var bitmapAdapter: BitmapAdapter
     private lateinit var binding: FragmentPostBinding
     private lateinit var layout: SwipeRefreshLayout
+    private lateinit var behaviour: BottomSheetBehavior<ConstraintLayout>
+    private lateinit var imm: InputMethodManager
     private val tagsAdapter: TagsAdapter = TagsAdapter(R.layout.list_item_inverted_tag)
     private val exceptionHandler = CoroutineExceptionHandler { _, exception ->
         Log.e(this::class.simpleName, exception.message, exception)
@@ -58,9 +66,34 @@ class PostFragment : NavFragment<PostViewModel>() {
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
         binding = FragmentPostBinding.inflate(layoutInflater, container, false)
+        behaviour = BottomSheetBehavior.from(binding.postBackdrop.postBackdropLayout)
+        behaviour.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                when (newState) {
+                    BottomSheetBehavior.STATE_EXPANDED,
+                    BottomSheetBehavior.STATE_HALF_EXPANDED -> {
+                        binding.postBackdrop.postCommentNumber.text = viewModel.comment.value?.number.toString()
+                        binding.postBackdrop.postCommentText.setText(viewModel.actionText.value)
+                    }
+                    BottomSheetBehavior.STATE_COLLAPSED -> {
+                        imm.hideSoftInputFromWindow(binding.postBackdrop.postBackdropLayout.windowToken, 0)
+                        binding.postBackdrop.postCommentNumber.text = null
+                        viewModel.onActionChanged(CommentAction.ADD_COMMENT, null)
+                        commentAdapter.notifyDataSetChanged()
+                    }
+                }
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) = Unit
+        })
         binding.viewModel = viewModel
         binding.lifecycleOwner = this
         binding.postTags.adapter = tagsAdapter
@@ -70,8 +103,36 @@ class PostFragment : NavFragment<PostViewModel>() {
         }
         commentAdapter = CommentAdapter(lifecycleScope)
         binding.postComments.adapter = commentAdapter
+        commentAdapter.userId = viewModel.authorId
         commentAdapter.avatarProvider = viewModel::getAvatar
         commentAdapter.onIdClicked = { _, pos -> binding.postComments.smoothScrollToPosition(pos) }
+        commentAdapter.onCommentReply = { item ->
+            if (behaviour.state == BottomSheetBehavior.STATE_COLLAPSED) {
+                behaviour.state = BottomSheetBehavior.STATE_EXPANDED
+            } else if (item.number == viewModel.comment.value?.number) {
+                behaviour.state = BottomSheetBehavior.STATE_COLLAPSED
+            }
+            viewModel.onActionChanged(CommentAction.ADD_COMMENT, item)
+        }
+        commentAdapter.onCommentEdit = { item ->
+            viewModel.onActionChanged(CommentAction.EDIT_COMMENT, item, item.text ?: "")
+            behaviour.state = BottomSheetBehavior.STATE_EXPANDED
+        }
+        commentAdapter.onCommentRecommend = { item ->
+            viewModel.onActionChanged(CommentAction.RECOMMEND_COMMENT, item)
+            behaviour.state = BottomSheetBehavior.STATE_EXPANDED
+        }
+        commentAdapter.onCommentRemove = { item ->
+            lifecycleScope.launch(exceptionHandler) {
+                viewModel.onActionChanged(CommentAction.REMOVE_COMMENT, item).join()
+                viewModel.onCommentAction()
+                        .onCompletion {
+                            commentAdapter.notifyDataSetChanged()
+                            behaviour.state = BottomSheetBehavior.STATE_COLLAPSED
+                        }
+                        .collect()
+            }
+        }
         commentAdapter.onUserClicked = { id, login ->
             findNavController().navigate(R.id.action_post_to_user,
                     bundleOf(UserFragment.USER_ID to id,
@@ -85,6 +146,24 @@ class PostFragment : NavFragment<PostViewModel>() {
                 viewModel.fetchPostComments().onCompletion { layout.isRefreshing = false }.collect()
             }
         }
+        binding.postBackdrop.postCommentAction.setOnClickListener {
+            imm.hideSoftInputFromWindow(it.windowToken, 0)
+            lifecycleScope.launch(exceptionHandler) {
+                viewModel.onCommentAction()
+                        .onCompletion {
+                            commentAdapter.notifyDataSetChanged()
+                            behaviour.state = BottomSheetBehavior.STATE_COLLAPSED
+                        }
+                        .collect()
+            }
+        }
+        binding.postBackdrop.postCommentText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+
+            override fun afterTextChanged(s: Editable?) = viewModel.onCommentTextChanged(s.toString()).let { }
+        })
         bind()
         return binding.root
     }
@@ -174,6 +253,19 @@ class PostFragment : NavFragment<PostViewModel>() {
                 if (it) {
                     findNavController().popBackStack()
                 }
+            }
+        }
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.comment.collect {
+                binding.postBackdrop.postCommentNumber.visibility = if (it == null) View.GONE else View.VISIBLE
+                binding.postBackdrop.postCommentNumber.text = it?.number.toString()
+            }
+        }
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.actionText.collect {
+                binding.postBackdrop.postCommentAction.isEnabled = !it.isEmpty()
             }
         }
     }

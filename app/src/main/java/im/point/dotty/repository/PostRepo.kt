@@ -56,4 +56,8 @@ class PostRepo(
 
     override fun getItem(id: String) =
             postDao.getItemFlow(id).map { it ?: throw Exception("post is not found") }
+
+    fun removeComment(id: String) {
+        commentDao.removeItem(id)
+    }
 }
