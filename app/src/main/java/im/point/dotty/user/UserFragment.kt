@@ -111,12 +111,6 @@ class UserFragment : NavFragment<UserViewModel>() {
 
     private fun bind() = lifecycleScope.launchWhenStarted {
         launch {
-            viewModel.isActionsVisible.collect { value ->
-                binding.userActions.visibility = if (value) View.VISIBLE else View.GONE
-            }
-        }
-
-        launch {
             viewModel.user.collect { user ->
                 binding.toolbar.title = user.formattedLogin
                 binding.userName.visibility = if (user.name.isNullOrEmpty()) View.INVISIBLE else View.VISIBLE

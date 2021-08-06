@@ -23,6 +23,7 @@
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
+                app:title="@{viewModel.title}"
                 style="@style/Toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
@@ -43,6 +44,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
+                    android:text="@{viewModel.unreadPosts}"
                     app:drawableStartCompat="@drawable/ic_post"
                     tools:text="0" />
 
@@ -52,6 +54,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
+                    android:text="@{viewModel.unreadComments}"
                     app:drawableStartCompat="@drawable/ic_comment"
                     tools:text="0" />
 
@@ -61,6 +64,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
+                    android:text="@{viewModel.unreadPrivatePosts}"
                     app:drawableStartCompat="@drawable/ic_post"
                     tools:text="0" />
 
@@ -70,6 +74,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
+                    android:text="@{viewModel.unreadPrivateComments}"
                     app:drawableStartCompat="@drawable/ic_comment"
                     tools:text="0" />
             </LinearLayout>

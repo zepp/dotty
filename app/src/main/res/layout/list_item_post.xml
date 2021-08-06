@@ -26,13 +26,12 @@
         <TextView
             android:id="@+id/post_author"
             style="@style/UserLogin"
-            android:textSize="16sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginEnd="16dp"
             android:ellipsize="end"
             android:lines="1"
+            android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="@id/post_author_avatar"
             app:layout_constraintStart_toEndOf="@id/post_author_avatar"
             app:layout_constraintTop_toTopOf="@id/post_author_avatar"
@@ -44,9 +43,9 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:src="@drawable/ic_recommended"
-            app:layout_constraintBottom_toBottomOf="@+id/post_author_avatar"
+            app:layout_constraintBottom_toBottomOf="@+id/post_author"
             app:layout_constraintStart_toEndOf="@+id/post_author"
-            app:layout_constraintTop_toTopOf="@+id/post_author_avatar" />
+            app:layout_constraintTop_toTopOf="@+id/post_author" />
 
         <ImageView
             android:id="@+id/post_bookmarked"
@@ -54,9 +53,9 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:src="@drawable/ic_bookmarked"
-            app:layout_constraintBottom_toBottomOf="@+id/post_author_avatar"
+            app:layout_constraintBottom_toBottomOf="@+id/post_author"
             app:layout_constraintStart_toEndOf="@id/post_recommended"
-            app:layout_constraintTop_toTopOf="@+id/post_author_avatar" />
+            app:layout_constraintTop_toTopOf="@+id/post_author" />
 
         <TextView
             android:id="@+id/post_id"
@@ -64,9 +63,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/end_margin"
-            app:layout_constraintBottom_toBottomOf="@+id/post_author"
+            app:layout_constraintBaseline_toBaselineOf="@id/post_author"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/post_author"
             tools:text="axhc" />
 
         <TextView

@@ -66,6 +66,7 @@
                             style="@style/ToggleButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:checked="@{viewModel.isSubscribed()}"
                             android:src="@drawable/ic_subscribed" />
 
                         <im.point.dotty.view.ToggleImageButton
@@ -74,7 +75,9 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
-                            android:src="@drawable/ic_recommended" />
+                            android:checked="@{viewModel.isRecommended()}"
+                            android:src="@drawable/ic_recommended"
+                            android:visibility="@{viewModel.recommendVisibility}" />
 
                         <im.point.dotty.view.ToggleImageButton
                             android:id="@+id/post_bookmark"
@@ -82,6 +85,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
+                            android:checked="@{viewModel.isBookmarked()}"
                             android:src="@drawable/ic_bookmarked" />
 
                         <im.point.dotty.view.ToggleImageButton
@@ -90,7 +94,9 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
-                            android:src="@drawable/ic_pinned" />
+                            android:checked="@{viewModel.isPinned()}"
+                            android:src="@drawable/ic_pinned"
+                            android:visibility="@{viewModel.otherVisibility}" />
 
                         <androidx.appcompat.widget.AppCompatImageButton
                             android:id="@+id/post_remove"
@@ -98,7 +104,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
-                            android:src="@drawable/ic_remove" />
+                            android:src="@drawable/ic_remove"
+                            android:visibility="@{viewModel.otherVisibility}" />
                     </LinearLayout>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
@@ -116,6 +123,7 @@
             android:id="@+id/post_swipe_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginBottom="26dp"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
             <androidx.core.widget.NestedScrollView

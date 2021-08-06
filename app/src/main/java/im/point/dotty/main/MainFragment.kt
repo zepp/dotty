@@ -18,7 +18,6 @@ import im.point.dotty.databinding.FragmentMainBinding
 import im.point.dotty.user.UserFragment.Companion.USER_ID
 import im.point.dotty.user.UserFragment.Companion.USER_LOGIN
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class MainFragment : NavFragment<MainViewModel>() {
@@ -56,28 +55,6 @@ class MainFragment : NavFragment<MainViewModel>() {
     }
 
     fun bind() {
-        lifecycleScope.launchWhenStarted {
-            viewModel.user.collect {
-                binding.toolbar.title = it.formattedLogin
-            }
-        }
-        lifecycleScope.launchWhenStarted {
-            viewModel.unreadPosts()
-                    .collect { binding.mainUnreadPosts.text = it.toString() }
-        }
-        lifecycleScope.launchWhenStarted {
-            viewModel.unreadComments()
-                    .collect { binding.mainUnreadComments.text = it.toString() }
-        }
-        lifecycleScope.launchWhenStarted {
-            viewModel.unreadPrivatePosts()
-                    .collect { binding.mainPrivateUnreadPosts.text = it.toString() }
-        }
-        lifecycleScope.launchWhenStarted {
-            viewModel.unreadPrivateComments()
-                    .collect { binding.mainPrivateUnreadComments.text = it.toString() }
-        }
-
         lifecycleScope.launch(exceptionHandler) {
             viewModel.fetchUnreadCounters().await()
         }

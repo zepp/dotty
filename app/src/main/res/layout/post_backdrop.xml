@@ -9,6 +9,8 @@
     android:clickable="true"
     android:focusable="true"
     android:paddingTop="8dp"
+    android:layout_marginStart="2dp"
+    android:layout_marginEnd="2dp"
     app:behavior_hideable="false"
     app:behavior_peekHeight="24dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
@@ -16,9 +18,9 @@
     <View
         android:id="@+id/post_comment_handle"
         android:layout_width="128dp"
-        android:layout_height="2dp"
+        android:layout_height="4dp"
         android:layout_marginTop="4dp"
-        android:background="@color/colorPrimary"
+        android:background="@drawable/post_handle_background"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

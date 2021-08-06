@@ -56,6 +56,7 @@
 
                     <LinearLayout
                         android:id="@+id/user_actions"
+                        android:visibility="@{viewModel.actionsVisibility}"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"

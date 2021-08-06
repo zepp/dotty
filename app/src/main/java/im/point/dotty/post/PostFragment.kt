@@ -34,6 +34,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 
@@ -85,7 +86,6 @@ class PostFragment : NavFragment<PostViewModel>() {
                     }
                     BottomSheetBehavior.STATE_COLLAPSED -> {
                         imm.hideSoftInputFromWindow(binding.postBackdrop.postBackdropLayout.windowToken, 0)
-                        binding.postBackdrop.postCommentNumber.text = null
                         viewModel.onActionChanged(CommentAction.ADD_COMMENT, null)
                         commentAdapter.notifyDataSetChanged()
                     }
@@ -174,28 +174,16 @@ class PostFragment : NavFragment<PostViewModel>() {
                 viewModel.onSubscribeChecked(isChecked).collect()
             }
         }
-        lifecycleScope.launchWhenStarted {
-            viewModel.isSubscribed.collect { binding.postSubscribe.isChecked = it }
-        }
         binding.postRecommend.onCheckedChangeListener = { isChecked ->
             lifecycleScope.launch(exceptionHandler) {
                 viewModel.onRecommendChecked(isChecked).collect()
             }
         }
-        lifecycleScope.launchWhenStarted {
-            viewModel.isRecommended.collect { binding.postRecommend.isChecked = it }
-        }
         binding.postBookmark.onCheckedChangeListener = { isChecked ->
             lifecycleScope.launch(exceptionHandler) { viewModel.onBookmarkChecked(isChecked).collect() }
         }
-        lifecycleScope.launchWhenStarted {
-            viewModel.isBookmarked.collect { binding.postBookmark.isChecked = it }
-        }
         binding.postPin.onCheckedChangeListener = { isChecked ->
             lifecycleScope.launch(exceptionHandler) { viewModel.onPinChecked(isChecked).collect() }
-        }
-        lifecycleScope.launchWhenStarted {
-            viewModel.isPinned.collect { binding.postPin.isChecked = it }
         }
         binding.postRemove.setOnClickListener { view ->
             lifecycleScope.launch(exceptionHandler) {
@@ -207,16 +195,6 @@ class PostFragment : NavFragment<PostViewModel>() {
                         }.collect {
                             findNavController().popBackStack()
                         }
-            }
-        }
-        lifecycleScope.launchWhenStarted {
-            viewModel.isPinned.collect { binding.postPin.isChecked = it }
-        }
-        lifecycleScope.launchWhenStarted {
-            viewModel.isUserPost.collect {
-                binding.postPin.visibility = if (it) View.VISIBLE else View.GONE
-                binding.postRemove.visibility = if (it) View.VISIBLE else View.GONE
-                binding.postRecommend.visibility = if (it) View.GONE else View.VISIBLE
             }
         }
         lifecycleScope.launchWhenStarted {
@@ -264,8 +242,13 @@ class PostFragment : NavFragment<PostViewModel>() {
         }
 
         lifecycleScope.launchWhenStarted {
-            viewModel.actionText.collect {
-                binding.postBackdrop.postCommentAction.isEnabled = !it.isEmpty()
+            viewModel.actionText.debounce(100).collect {
+                with(binding.postBackdrop) {
+                    postCommentAction.isEnabled = it.isNotEmpty()
+                    if (postCommentText.text.toString() != it) {
+                        postCommentText.setText(it)
+                    }
+                }
             }
         }
     }

@@ -5,6 +5,7 @@
 package im.point.dotty.user
 
 import android.util.Log
+import android.view.View
 import androidx.lifecycle.viewModelScope
 import im.point.dotty.DottyApplication
 import im.point.dotty.common.DottyViewModel
@@ -33,7 +34,7 @@ class UserViewModel(application: DottyApplication, vararg args: Any) : DottyView
             .catch { Log.e(this@UserViewModel::class.simpleName, "error: ", it) }
             .flowOn(Dispatchers.IO)
 
-    val isActionsVisible = MutableStateFlow(state.id != userId)
+    val actionsVisibility = MutableStateFlow(if (state.id == userId) View.GONE else View.VISIBLE)
     val user = fetched.flatMapConcat { userRepo.getItem(userId) }
             .stateIn(viewModelScope, SharingStarted.Eagerly, User(userId, userLogin))
     val posts = fetched.flatMapConcat { userPostRepo.getAll() }

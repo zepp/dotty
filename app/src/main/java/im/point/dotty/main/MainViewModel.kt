@@ -66,13 +66,25 @@ class MainViewModel internal constructor(application: DottyApplication, vararg a
         }
     }
 
-    fun unreadPosts() = state.unreadPostsFlow
+    val unreadPosts = state.unreadPostsFlow
+            .map { it.toString() }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, "0")
 
-    fun unreadComments() = state.unreadCommentsFlow
+    val unreadComments = state.unreadCommentsFlow
+            .map { it.toString() }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, "0")
 
-    fun unreadPrivatePosts() = state.privateUnreadPostsFlow
+    val unreadPrivatePosts = state.privateUnreadPostsFlow
+            .map { it.toString() }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, "0")
 
-    fun unreadPrivateComments() = state.privateUnreadCommentsFlow
+    val unreadPrivateComments = state.privateUnreadCommentsFlow
+            .map { it.toString() }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, "0")
+
+    val title = user
+            .map { it.formattedLogin }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, "dotty")
 
     override fun onCleared() {
         super.onCleared()

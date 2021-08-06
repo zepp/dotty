@@ -51,9 +51,6 @@ class LoginFragment : NavFragment<LoginViewModel>() {
         lifecycleScope.launchWhenStarted {
             binding.loginUserName.setTextAndCursor(viewModel.login.value)
             binding.loginPassword.setTextAndCursor(viewModel.password.value)
-            viewModel.isLoginEnabled.collect {
-                binding.loginLogin.isEnabled = it
-            }
         }
     }
 

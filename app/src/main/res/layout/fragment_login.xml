@@ -69,6 +69,7 @@
                 style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="196dp"
                 android:layout_height="wrap_content"
+                android:enabled="@{viewModel.isLoginEnabled()}"
                 android:text="@string/login_login" />
         </LinearLayout>
 

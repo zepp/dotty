@@ -4,6 +4,7 @@
 package im.point.dotty.post
 
 import android.util.Log
+import android.view.View
 import androidx.lifecycle.viewModelScope
 import im.point.dotty.DottyApplication
 import im.point.dotty.common.DottyViewModel
@@ -55,10 +56,10 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
             .map { it.toMutableList().apply { sortBy { entry -> entry.number } } }
             .stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
 
-    val isUserPost = post.map { it.authorId == state.id }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
-    val isPinned = post.map { it.isPinned }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val recommendVisibility = post.map { if (it.authorId == state.id) View.GONE else View.VISIBLE }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, View.GONE)
+    val otherVisibility = post.map { if (it.authorId == state.id) View.VISIBLE else View.GONE }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, View.GONE)
 
     val isSubscribed = metaPost.map { it.subscribed }
             .stateIn(viewModelScope, SharingStarted.Eagerly, false)
@@ -66,8 +67,10 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
             .stateIn(viewModelScope, SharingStarted.Eagerly, false)
     val isBookmarked = metaPost.map { it.bookmarked }
             .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val isPinned = post.map { it.isPinned }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
-    val commentAction = MutableStateFlow<CommentAction>(CommentAction.ADD_COMMENT)
+    private val commentAction = MutableStateFlow<CommentAction>(CommentAction.ADD_COMMENT)
     val comment = MutableStateFlow<Comment?>(null)
     val actionText = MutableStateFlow("")
 
