@@ -11,7 +11,8 @@
         android:id="@+id/post_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/background_light">
+        android:background="@android:color/background_light"
+        android:paddingBottom="8dp">
 
         <ImageView
             android:id="@+id/post_author_avatar"
@@ -118,7 +119,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="@dimen/end_margin"
-            android:layout_marginBottom="@dimen/bottom_margin"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/post_images"

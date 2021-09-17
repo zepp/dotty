@@ -42,6 +42,7 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
             .stateIn(viewModelScope, SharingStarted.Eagerly, object : MetaPost() {
                 override val id: String = postId
                 override val authorId = 0L
+                override val commentId: String? = postId
             })
 
     val authorId = state.id

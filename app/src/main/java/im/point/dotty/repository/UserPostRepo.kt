@@ -8,7 +8,6 @@ import im.point.dotty.model.CompleteUserPost
 import im.point.dotty.model.PostFile
 import im.point.dotty.model.UserData
 import im.point.dotty.model.UserPost
-import im.point.dotty.network.MetaPost
 import im.point.dotty.network.PointAPI
 import im.point.dotty.network.RawPost
 import kotlinx.coroutines.flow.Flow
@@ -17,8 +16,9 @@ import kotlinx.coroutines.flow.map
 
 class UserPostRepo(private val api: PointAPI,
                    db: DottyDatabase,
+                   private val postRepo: PostRepo,
                    private val userId: Long,
-                   private val mapper: Mapper<CompleteUserPost, MetaPost> = UserPostMapper(userId),
+                   private val mapper: UserPostMapper = UserPostMapper(userId),
                    private val fileMapper: Mapper<List<PostFile>, RawPost> = PostFilesMapper())
     : Repository<CompleteUserPost, String> {
 
@@ -34,7 +34,15 @@ class UserPostRepo(private val api: PointAPI,
         metaPostDao.getUserPosts(userId).let { if (it.isNotEmpty()) emit(it) }
         with(api.getUserPosts(login, if (isBefore) lastPageId else null)) {
             checkSuccessful()
-            with(posts.map { mapper.map(it) }) {
+            with(posts.map {
+                if (it.commentId == null) {
+                    mapper.map(it)
+                } else {
+                    with(postRepo.fetchPostAndComment(it.id, it.commentId!!)) {
+                        mapper.map(it.apply { post = first }, second)
+                    }
+                }
+            }) {
                 if (size > 0) {
                     last().metapost.pageId?.let { userDataDao.insertItem(UserData(userId, it)) }
                     postDao.insertAll(map { it.post })
@@ -43,7 +51,7 @@ class UserPostRepo(private val api: PointAPI,
                 }
             }
             fileDao.insertAll(posts
-                .flatMap { fileMapper.map(it.post ?: throw Exception("raw post is null")) })
+                    .flatMap { fileMapper.map(it.post ?: throw Exception("raw post is null")) })
         }
     }
 

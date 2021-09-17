@@ -8,7 +8,6 @@ import im.point.dotty.model.CompleteTaggedPost
 import im.point.dotty.model.PostFile
 import im.point.dotty.model.TagLastPageId
 import im.point.dotty.model.TaggedPost
-import im.point.dotty.network.MetaPost
 import im.point.dotty.network.PointAPI
 import im.point.dotty.network.RawPost
 import kotlinx.coroutines.flow.Flow
@@ -17,8 +16,9 @@ import kotlinx.coroutines.flow.map
 
 class TaggedPostRepo(private val api: PointAPI,
                      db: DottyDatabase,
+                     private val postRepo: PostRepo,
                      private val tag: String,
-                     private val mapper: Mapper<CompleteTaggedPost, MetaPost> = TaggedPostMapper(tag),
+                     private val mapper: TaggedPostMapper = TaggedPostMapper(tag),
                      private val fileMapper: Mapper<List<PostFile>, RawPost> = PostFilesMapper())
     : Repository<CompleteTaggedPost, String> {
 

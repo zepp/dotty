@@ -40,31 +40,46 @@ class PostHolder<T : CompletePost<*>>(itemView: View, private val scope:Coroutin
         avatarJob = scope.launch {
             bitmap.collect { avatar.setImageBitmap(it) }
         }
-        imagesJob.cancel()
-        imagesJob = scope.launch {
-            bitmaps.collect {
-                bitmapAdapter.list = it
-                images.visibility = if (it.isEmpty()) View.GONE else View.VISIBLE
+        if (!post.isComment) {
+            imagesJob.cancel()
+            imagesJob = scope.launch {
+                bitmaps.collect {
+                    bitmapAdapter.list = it
+                    images.visibility = if (it.isEmpty()) View.GONE else View.VISIBLE
+                }
             }
         }
         post.metapost.let {
             bookmarked.visibility = if (it.bookmarked) View.VISIBLE else View.GONE
             recommended.visibility = if (it.recommended) View.VISIBLE else View.GONE
         }
-        post.post.let {
-            avatar.setOnClickListener { _ -> onUserClicked(it.authorId, it.authorLogin) }
-            author.text = it.formattedLogin
-            author.setOnClickListener { _ -> onUserClicked(it.authorId, it.authorLogin) }
-            id.text = it.formattedId
-            text.text = it.text
-            text.visibility = if (it.text.isEmpty()) View.GONE else View.VISIBLE
-            if (it.tags.isNullOrEmpty()) {
-                tags.visibility = View.GONE;
-            } else {
-                tagsAdapter.list = it.tags
-                tagsAdapter.onTagClicked = onTagClicked
+        if (post.comment == null) {
+            post.post.let {
+                avatar.setOnClickListener { _ -> onUserClicked(it.authorId, it.authorLogin) }
+                author.text = it.formattedLogin
+                author.setOnClickListener { _ -> onUserClicked(it.authorId, it.authorLogin) }
+                id.text = it.formattedId
+                text.text = it.text
+                text.visibility = if (it.text.isEmpty()) View.GONE else View.VISIBLE
+                if (it.tags.isNullOrEmpty()) {
+                    tags.visibility = View.GONE
+                } else {
+                    tagsAdapter.list = it.tags
+                    tagsAdapter.onTagClicked = onTagClicked
+                }
+                commentsCount.text = it.commentCount.toString()
             }
-            commentsCount.text = it.commentCount.toString()
+        } else {
+            post.comment!!.let {
+                avatar.setOnClickListener { _ -> onUserClicked(it.userId, it.login) }
+                author.text = it.formattedLogin
+                author.setOnClickListener { _ -> onUserClicked(it.userId, it.login) }
+                id.text = it.formattedId
+                text.text = it.text
+                text.visibility = if (it.text.isNullOrEmpty()) View.GONE else View.VISIBLE
+                tags.visibility = View.GONE
+                commentsCount.visibility = View.GONE
+            }
         }
 
         itemView.setOnClickListener { onItemClicked(post) }

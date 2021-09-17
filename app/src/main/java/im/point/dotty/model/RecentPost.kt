@@ -11,4 +11,6 @@ import androidx.room.PrimaryKey
 data class RecentPost(@PrimaryKey
                       override val id: String,
                       @ColumnInfo(name = "author_id")
-                      override val authorId: Long) : MetaPost()
+                      override val authorId: Long,
+                      @ColumnInfo(name = "comment_id")
+                      override val commentId: String?) : MetaPost()

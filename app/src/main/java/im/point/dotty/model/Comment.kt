@@ -27,4 +27,7 @@ data class Comment(
 
     val formattedLogin: String
         get() = "@$login"
+
+    val formattedId: String
+        get() = "#$id"
 }

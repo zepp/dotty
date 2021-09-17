@@ -12,7 +12,6 @@ import im.point.dotty.mapper.PostFilesMapper
 import im.point.dotty.model.CommentedPost
 import im.point.dotty.model.CompleteCommentedPost
 import im.point.dotty.model.PostFile
-import im.point.dotty.network.MetaPost
 import im.point.dotty.network.PointAPI
 import im.point.dotty.network.RawPost
 import kotlinx.coroutines.flow.Flow
@@ -22,7 +21,8 @@ import kotlinx.coroutines.flow.map
 class CommentedPostRepo(private val api: PointAPI,
                         private val state: AppState,
                         db: DottyDatabase,
-                        private val mapper: Mapper<CompleteCommentedPost, MetaPost> = CommentedPostMapper(),
+                        private val postRepo: PostRepo,
+                        private val mapper: CommentedPostMapper = CommentedPostMapper(),
                         private val fileMapper: Mapper<List<PostFile>, RawPost> = PostFilesMapper())
     : Repository<CompleteCommentedPost, String> {
 
@@ -35,7 +35,15 @@ class CommentedPostRepo(private val api: PointAPI,
         metaPostDao.getAll().let { if (it.isNotEmpty()) emit(it) }
         with(api.getComments(if (isBefore) state.commentedPageId else null)) {
             checkSuccessful()
-            with(posts.map { mapper.map(it) }) {
+            with(posts.map {
+                if (it.commentId == null) {
+                    mapper.map(it)
+                } else {
+                    with(postRepo.fetchPostAndComment(it.id, it.commentId!!)) {
+                        mapper.map(it.apply { post = first }, second)
+                    }
+                }
+            }) {
                 if (size > 0) {
                     state.commentedPageId = last().metapost.pageId
                     postDao.insertAll(map { it.post })
@@ -44,7 +52,7 @@ class CommentedPostRepo(private val api: PointAPI,
                 }
             }
             fileDao.insertAll(posts
-                .flatMap { fileMapper.map(it.post ?: throw Exception("raw post is null")) })
+                    .flatMap { fileMapper.map(it.post ?: throw Exception("raw post is null")) })
         }
     }
 

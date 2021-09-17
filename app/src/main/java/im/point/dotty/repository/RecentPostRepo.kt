@@ -11,7 +11,6 @@ import im.point.dotty.mapper.RecentPostMapper
 import im.point.dotty.model.CompleteRecentPost
 import im.point.dotty.model.PostFile
 import im.point.dotty.model.RecentPost
-import im.point.dotty.network.MetaPost
 import im.point.dotty.network.PointAPI
 import im.point.dotty.network.RawPost
 import kotlinx.coroutines.flow.Flow
@@ -21,7 +20,8 @@ import kotlinx.coroutines.flow.map
 class RecentPostRepo(private val api: PointAPI,
                      private val state: AppState,
                      db: DottyDatabase,
-                     private val mapper: Mapper<CompleteRecentPost, MetaPost> = RecentPostMapper(),
+                     private val postRepo: PostRepo,
+                     private val mapper: RecentPostMapper = RecentPostMapper(),
                      private val fileMapper: Mapper<List<PostFile>, RawPost> = PostFilesMapper()) :
         Repository<CompleteRecentPost, String> {
 
@@ -33,7 +33,16 @@ class RecentPostRepo(private val api: PointAPI,
         metaPostDao.getAll().let { if (it.isNotEmpty()) emit(it) }
         with(api.getRecent(if (isBefore) state.recentPageId else null)) {
             checkSuccessful()
-            with(posts.map { mapper.map(it) }) {
+            with(posts.map {
+                if (it.commentId == null) {
+                    mapper.map(it)
+                } else {
+                    with(postRepo.fetchPostAndComment(it.id, it.commentId!!)) {
+                        mapper.map(it.apply { post = first }, second)
+                    }
+                }
+            })
+            {
                 if (size > 0) {
                     state.recentPageId = last().metapost.pageId
                     postDao.insertAll(map { it.post })
@@ -42,7 +51,7 @@ class RecentPostRepo(private val api: PointAPI,
                 }
             }
             fileDao.insertAll(posts
-                .flatMap { fileMapper.map(it.post ?: throw Exception("raw post is null")) })
+                    .flatMap { fileMapper.map(it.post ?: throw Exception("raw post is null")) })
         }
     }
 

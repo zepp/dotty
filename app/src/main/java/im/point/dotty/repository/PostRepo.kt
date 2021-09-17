@@ -13,6 +13,7 @@ import im.point.dotty.model.Post
 import im.point.dotty.model.PostFile
 import im.point.dotty.network.PointAPI
 import im.point.dotty.network.RawComment
+import im.point.dotty.network.RawPost
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import java.security.MessageDigest
@@ -27,6 +28,17 @@ class PostRepo(
     private val postDao = db.getPostDao()
     private val commentDao = db.getCommentDao()
     private val fileDao = db.getPostFileDao()
+
+    internal suspend fun fetchPostAndComment(id: String, number: Int): Pair<RawPost, RawComment> {
+        with(api.getPost(id)) {
+            checkSuccessful()
+            with(comments.map { commentMapper.map(it) }) {
+                commentDao.insertAll(this)
+            }
+            return post to (comments.find { it.id == number }
+                    ?: throw Exception("comment not found"))
+        }
+    }
 
     fun fetchPostAndComments(id: String) = flow {
         postDao.getItem(id)?.let { emit(it) }

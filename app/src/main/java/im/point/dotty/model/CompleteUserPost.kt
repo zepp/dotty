@@ -9,4 +9,6 @@ import androidx.room.Relation
 data class CompleteUserPost(@Embedded
                             override val metapost: UserPost,
                             @Relation(parentColumn = "id", entityColumn = "id")
-                            override val post: Post) : CompletePost<UserPost>()
+                            override val post: Post,
+                            @Relation(parentColumn = "comment_id", entityColumn = "id")
+                            override var comment: Comment? = null) : CompletePost<UserPost>()

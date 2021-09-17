@@ -5,9 +5,10 @@ package im.point.dotty.model
 
 import androidx.room.ColumnInfo
 
-abstract class MetaPost() {
+abstract class MetaPost {
     abstract val id: String
     abstract val authorId: Long
+    abstract val commentId: String?
 
     var bookmarked = false
     var recommended = false

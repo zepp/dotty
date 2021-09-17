@@ -7,6 +7,7 @@ import im.point.dotty.model.CompleteTaggedPost
 import im.point.dotty.model.Post
 import im.point.dotty.model.TaggedPost
 import im.point.dotty.network.MetaPost
+import im.point.dotty.network.RawComment
 
 class TaggedPostMapper(private val tag: String) : MetaPostMapper<CompleteTaggedPost>(), Mapper<CompleteTaggedPost, MetaPost> {
     override fun map(entry: MetaPost): CompleteTaggedPost {
@@ -14,8 +15,12 @@ class TaggedPostMapper(private val tag: String) : MetaPostMapper<CompleteTaggedP
             val id = id ?: throw Exception("Post ID is not provided")
             val authorId = author?.id ?: throw Exception("Post's author ID is not provided")
             val login = author?.login ?: throw Exception("Post's author login is not provided")
-            return mergeMetaPost(CompleteTaggedPost(TaggedPost(id, authorId, tag),
+            return mergeMetaPost(CompleteTaggedPost(TaggedPost(id, authorId, null, tag),
                     Post(id, authorId, login)), entry)
         }
+    }
+
+    fun map(post: MetaPost, comment: RawComment): CompleteTaggedPost {
+        return map(post).apply { this.comment = commentMapper.map(comment) }
     }
 }

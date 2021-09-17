@@ -10,12 +10,17 @@ import im.point.dotty.network.RawPost
 import java.text.SimpleDateFormat
 import java.util.*
 
-open class MetaPostMapper<T : CompletePost<*>> {
+abstract class MetaPostMapper<T : CompletePost<*>> {
+    protected val commentMapper = CommentMapper()
+
     protected fun mergeMetaPost(model: T, post: MetaPost): T {
         model.metapost.pageId = post.uid
-        model.metapost.bookmarked = post.isBookmarked ?: false
-        model.metapost.recommended = post.isRecommended ?: false
-        model.metapost.subscribed = post.isSubscribed ?: false
+        if (post.commentId == null) {
+            // copy flags only if it is not recommended comment
+            model.metapost.bookmarked = post.isBookmarked ?: false
+            model.metapost.recommended = post.isRecommended ?: false
+            model.metapost.subscribed = post.isSubscribed ?: false
+        }
         mergeRawPost(model.post, post.post ?: throw Exception("Raw post is not provided"))
         return model
     }

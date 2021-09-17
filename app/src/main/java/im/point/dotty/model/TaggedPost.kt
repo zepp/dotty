@@ -10,5 +10,7 @@ import androidx.room.Entity
 data class TaggedPost(override val id: String,
                       @ColumnInfo(name = "author_id")
                       override val authorId: Long,
+                      @ColumnInfo(name = "comment_id")
+                      override val commentId: String? = id,
                       @ColumnInfo(index = true)
                       val tag: String) : MetaPost()
