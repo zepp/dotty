@@ -6,8 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
@@ -75,24 +77,28 @@ class UserFragment : NavFragment<UserViewModel>() {
                 viewModel.onSubscribeChecked(isChecked).collect()
             }
         }
-        lifecycleScope.launchWhenStarted {
-            viewModel.isSubscribed.collect { binding.userSubscribe.isChecked = it }
-        }
         binding.userRecommendSubscribe.onCheckedChangeListener = { isChecked ->
             lifecycleScope.launch(exceptionHandler) {
                 viewModel.onRecSubscribeChecked(isChecked).collect()
             }
-        }
-        lifecycleScope.launchWhenStarted {
-            viewModel.isRecSubscribed.collect { binding.userRecommendSubscribe.isChecked = it }
         }
         binding.userBlock.onCheckedChangeListener = { isChecked ->
             lifecycleScope.launch(exceptionHandler) {
                 viewModel.onBlockChecked(isChecked).collect()
             }
         }
-        lifecycleScope.launchWhenStarted {
-            viewModel.isBlocked.collect { binding.userBlock.isChecked = it }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                launch {
+                    viewModel.isSubscribed.collect { binding.userSubscribe.isChecked = it }
+                }
+                launch {
+                    viewModel.isRecSubscribed.collect { binding.userRecommendSubscribe.isChecked = it }
+                }
+                launch {
+                    viewModel.isBlocked.collect { binding.userBlock.isChecked = it }
+                }
+            }
         }
         binding.userRefresh.setOnRefreshListener {
             lifecycleScope.launch(exceptionHandler) {
@@ -109,23 +115,25 @@ class UserFragment : NavFragment<UserViewModel>() {
         return binding.root
     }
 
-    private fun bind() = lifecycleScope.launchWhenStarted {
-        launch {
-            viewModel.user.collect { user ->
-                binding.toolbar.title = user.formattedLogin
-                binding.userName.visibility = if (user.name.isNullOrEmpty()) View.INVISIBLE else View.VISIBLE
-                binding.userName.text = user.name
+    private fun bind() = lifecycleScope.launch {
+        repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            launch {
+                viewModel.user.collect { user ->
+                    binding.toolbar.title = user.formattedLogin
+                    binding.userName.visibility = if (user.name.isNullOrEmpty()) View.INVISIBLE else View.VISIBLE
+                    binding.userName.text = user.name
+                }
             }
-        }
 
-        launch {
-            viewModel.getUserAvatar().collect {
-                binding.userAvatar.setImageBitmap(it)
+            launch {
+                viewModel.getUserAvatar().collect {
+                    binding.userAvatar.setImageBitmap(it)
+                }
             }
-        }
 
-        launch {
-            viewModel.posts.collect { items -> adapter.list = items }
+            launch {
+                viewModel.posts.collect { items -> adapter.list = items }
+            }
         }
     }
 

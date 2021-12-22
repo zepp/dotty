@@ -6,8 +6,10 @@ package im.point.dotty.main
 import android.os.Bundle
 import android.view.View
 import androidx.core.os.bundleOf
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import im.point.dotty.R
 import im.point.dotty.common.ViewModelFactory
@@ -36,8 +38,10 @@ class AllFragment : FeedFragment<MainViewModel, CompleteAllPost>() {
                     bundleOf(PostFragment.POST_ID to post.id,
                             PostFragment.POST_TYPE to PostType.ALL_POST))
         }
-        lifecycleScope.launchWhenStarted {
-            viewModel.all.collect { adapter.list = it }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.all.collect { adapter.list = it }
+            }
         }
     }
 
