@@ -11,7 +11,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
-import im.point.dotty.common.*
+import im.point.dotty.common.NavFragment
+import im.point.dotty.common.ViewModelFactory
+import im.point.dotty.common.addOnLastItemDisplayedListener
+import im.point.dotty.common.repeatOnStarted
 import im.point.dotty.databinding.FragmentTagBinding
 import im.point.dotty.feed.FeedAdapter
 import im.point.dotty.model.CompleteTaggedPost
@@ -90,7 +93,7 @@ class TagFragment : NavFragment<TaggedPostViewModel>() {
 
     private fun bind() {
         binding.tagToolbar.title = "#$myTag"
-        lifecycleScope.launchWhenStarted {
+        repeatOnStarted {
             viewModel.posts.collect {
                 adapter.list = it
             }

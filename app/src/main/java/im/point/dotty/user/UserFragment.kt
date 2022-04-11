@@ -6,16 +6,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
 import im.point.dotty.common.NavFragment
 import im.point.dotty.common.ViewModelFactory
 import im.point.dotty.common.addOnLastItemDisplayedListener
+import im.point.dotty.common.repeatOnStarted
 import im.point.dotty.databinding.FragmentUserBinding
 import im.point.dotty.feed.FeedAdapter
 import im.point.dotty.model.CompleteUserPost
@@ -87,18 +86,14 @@ class UserFragment : NavFragment<UserViewModel>() {
                 viewModel.onBlockChecked(isChecked).collect()
             }
         }
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                launch {
-                    viewModel.isSubscribed.collect { binding.userSubscribe.isChecked = it }
-                }
-                launch {
-                    viewModel.isRecSubscribed.collect { binding.userRecommendSubscribe.isChecked = it }
-                }
-                launch {
-                    viewModel.isBlocked.collect { binding.userBlock.isChecked = it }
-                }
-            }
+        repeatOnStarted {
+            viewModel.isSubscribed.collect { binding.userSubscribe.isChecked = it }
+        }
+        repeatOnStarted {
+            viewModel.isRecSubscribed.collect { binding.userRecommendSubscribe.isChecked = it }
+        }
+        repeatOnStarted {
+            viewModel.isBlocked.collect { binding.userBlock.isChecked = it }
         }
         binding.userRefresh.setOnRefreshListener {
             lifecycleScope.launch(exceptionHandler) {
@@ -116,24 +111,22 @@ class UserFragment : NavFragment<UserViewModel>() {
     }
 
     private fun bind() = lifecycleScope.launch {
-        repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            launch {
-                viewModel.user.collect { user ->
-                    binding.toolbar.title = user.formattedLogin
-                    binding.userName.visibility = if (user.name.isNullOrEmpty()) View.INVISIBLE else View.VISIBLE
-                    binding.userName.text = user.name
-                }
+        repeatOnStarted {
+            viewModel.user.collect { user ->
+                binding.toolbar.title = user.formattedLogin
+                binding.userName.visibility = if (user.name.isNullOrEmpty()) View.INVISIBLE else View.VISIBLE
+                binding.userName.text = user.name
             }
+        }
 
-            launch {
-                viewModel.getUserAvatar().collect {
-                    binding.userAvatar.setImageBitmap(it)
-                }
+        repeatOnStarted {
+            viewModel.getUserAvatar().collect {
+                binding.userAvatar.setImageBitmap(it)
             }
+        }
 
-            launch {
-                viewModel.posts.collect { items -> adapter.list = items }
-            }
+        repeatOnStarted {
+            viewModel.posts.collect { items -> adapter.list = items }
         }
     }
 

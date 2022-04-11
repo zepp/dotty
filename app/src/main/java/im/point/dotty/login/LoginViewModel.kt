@@ -10,25 +10,19 @@ import im.point.dotty.DottyApplication
 import im.point.dotty.common.DottyViewModel
 import im.point.dotty.repository.UserRepo
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.*
 
 @SuppressLint("CheckResult")
 class LoginViewModel(application: DottyApplication, vararg args: Any) : DottyViewModel(application) {
     private val userRepo: UserRepo = application.repoFactory.getUserRepo()
 
-    val isLoginEnabled = MutableStateFlow(false)
-
     val login = MutableStateFlow("")
 
     val password = MutableStateFlow("")
 
-    private suspend fun updateLoginEnabled() {
-        isLoginEnabled.emit(!(login.value.isBlank() || password.value.isBlank()))
-    }
+    val isLoginEnabled = combine(login, password) { login, password ->
+        !(login.isBlank() || password.isBlank())
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     fun login() = flow {
         val login = login.value
@@ -48,11 +42,4 @@ class LoginViewModel(application: DottyApplication, vararg args: Any) : DottyVie
             resetActivityBackStack()
         }
     }.flowOn(Dispatchers.IO)
-
-    init {
-        viewModelScope.launch(Dispatchers.Default) {
-            launch { login.collect { updateLoginEnabled() } }
-            launch { password.collect { updateLoginEnabled() } }
-        }
-    }
 }

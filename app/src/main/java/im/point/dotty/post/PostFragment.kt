@@ -22,10 +22,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import im.point.dotty.R
-import im.point.dotty.common.NavFragment
-import im.point.dotty.common.RecyclerItemDecorator
-import im.point.dotty.common.TagsAdapter
-import im.point.dotty.common.ViewModelFactory
+import im.point.dotty.common.*
 import im.point.dotty.databinding.FragmentPostBinding
 import im.point.dotty.model.PostType
 import im.point.dotty.tag.TagFragment
@@ -197,14 +194,14 @@ class PostFragment : NavFragment<PostViewModel>() {
                         }
             }
         }
-        lifecycleScope.launchWhenStarted {
+        repeatOnStarted {
             viewModel.files.collect {
                 binding.postFiles.visibility = if (it.isNotEmpty()) View.VISIBLE else View.GONE
                 bitmapAdapter.list = it
             }
         }
 
-        lifecycleScope.launchWhenStarted {
+        repeatOnStarted {
             viewModel.post.collect { post ->
                 binding.toolbar.title = post.formattedId
                 binding.postText.text = post.text
@@ -226,7 +223,7 @@ class PostFragment : NavFragment<PostViewModel>() {
             viewModel.comments.collect { commentAdapter.list = it }
         }
 
-        lifecycleScope.launchWhenStarted {
+        repeatOnStarted {
             viewModel.isClosing.collect {
                 if (it) {
                     findNavController().popBackStack()
@@ -234,14 +231,14 @@ class PostFragment : NavFragment<PostViewModel>() {
             }
         }
 
-        lifecycleScope.launchWhenStarted {
+        repeatOnStarted {
             viewModel.comment.collect {
                 binding.postBackdrop.postCommentNumber.visibility = if (it == null) View.GONE else View.VISIBLE
                 binding.postBackdrop.postCommentNumber.text = it?.number.toString()
             }
         }
 
-        lifecycleScope.launchWhenStarted {
+        repeatOnStarted {
             viewModel.actionText.debounce(100).collect {
                 with(binding.postBackdrop) {
                     postCommentAction.isEnabled = it.isNotEmpty()
