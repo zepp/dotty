@@ -34,10 +34,10 @@
             android:id="@+id/action_user_to_tag"
             app:destination="@id/tag_fragment" />
         <argument
-            android:name="userId"
+            android:name="user-id"
             app:argType="long" />
         <argument
-            android:name="userLogin"
+            android:name="user-login"
             app:argType="string" />
     </fragment>
     <fragment
@@ -46,15 +46,17 @@
         android:label="PostFragment"
         tools:layout="@layout/fragment_post">
         <argument
-            android:name="postType"
+            android:name="post-type"
             app:argType="im.point.dotty.model.PostType" />
         <argument
-            android:name="postId"
+            android:name="post-id"
             app:argType="string" />
         <argument
-            android:name="userId"
+            android:name="user-id"
+            android:defaultValue="0L"
             app:argType="long" />
         <argument
+            android:defaultValue=""
             android:name="tag"
             app:argType="string" />
         <action

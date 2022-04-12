@@ -24,6 +24,7 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
     val postId = args[1] as String
     val userId = if (type == PostType.USER_POST) args[2] as Long else null
     val tag = if (type == PostType.TAGGED_POST) args[2] as String else null
+    val authorId = state.id
 
     private val repoFactory: RepoFactory = application.repoFactory
     private val api: PointAPI = application.mainApi
@@ -42,10 +43,8 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
             .stateIn(viewModelScope, SharingStarted.Eagerly, object : MetaPost() {
                 override val id: String = postId
                 override val authorId = 0L
-                override val commentId: String? = postId
+                override val commentId: String = postId
             })
-
-    val authorId = state.id
 
     val post = postRepo.getItem(postId)
             .stateIn(viewModelScope, SharingStarted.Eagerly, Post(postId, 0L, ""))
@@ -57,9 +56,9 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
             .map { it.toMutableList().apply { sortBy { entry -> entry.number } } }
             .stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
 
-    val recommendVisibility = post.map { if (it.authorId == state.id) View.GONE else View.VISIBLE }
+    val recommendVisibility = post.map { if (it.authorId == authorId) View.GONE else View.VISIBLE }
             .stateIn(viewModelScope, SharingStarted.Eagerly, View.GONE)
-    val otherVisibility = post.map { if (it.authorId == state.id) View.VISIBLE else View.GONE }
+    val otherVisibility = post.map { if (it.authorId == authorId) View.VISIBLE else View.GONE }
             .stateIn(viewModelScope, SharingStarted.Eagerly, View.GONE)
 
     val isSubscribed = metaPost.map { it.subscribed }
@@ -71,7 +70,7 @@ class PostViewModel(application: DottyApplication, vararg args: Any)
     val isPinned = post.map { it.isPinned }
             .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
-    private val commentAction = MutableStateFlow<CommentAction>(CommentAction.ADD_COMMENT)
+    private val commentAction = MutableStateFlow(CommentAction.ADD_COMMENT)
     val comment = MutableStateFlow<Comment?>(null)
     val actionText = MutableStateFlow("")
 

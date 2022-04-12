@@ -11,6 +11,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatImageButton
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import im.point.dotty.R
 import im.point.dotty.model.Comment
@@ -20,7 +21,11 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 
+typealias OnCommentAction = (item: Comment) -> Unit
+
 class CommentAdapter(val scope: CoroutineScope) : RecyclerView.Adapter<CommentAdapter.CommentHolder>() {
+    private var list: List<Comment> = listOf()
+
     private var selectedPosition = -1
         set(value) {
             field = value
@@ -39,12 +44,6 @@ class CommentAdapter(val scope: CoroutineScope) : RecyclerView.Adapter<CommentAd
             notifyDataSetChanged()
         }
 
-    var list: List<Comment> = listOf()
-        set(value) {
-            field = value
-            notifyDataSetChanged()
-        }
-
     var onIdClicked: (id: Int, pos: Int) -> Unit = { _, _ -> }
         set(value) {
             field = value
@@ -57,29 +56,34 @@ class CommentAdapter(val scope: CoroutineScope) : RecyclerView.Adapter<CommentAd
             notifyDataSetChanged()
         }
 
-    var onCommentReply: (item: Comment) -> Unit = { _ -> }
+    var onCommentReply: OnCommentAction = { _ -> }
         set(value) {
             field = value
             notifyDataSetChanged()
         }
 
-    var onCommentEdit: (item: Comment) -> Unit = { _ -> }
+    var onCommentEdit: OnCommentAction = { _ -> }
         set(value) {
             field = value
             notifyDataSetChanged()
         }
 
-    var onCommentRecommend: (item: Comment) -> Unit = { _ -> }
+    var onCommentRecommend: OnCommentAction = { _ -> }
         set(value) {
             field = value
             notifyDataSetChanged()
         }
 
-    var onCommentRemove: (item: Comment) -> Unit = { _ -> }
+    var onCommentRemove: OnCommentAction = { _ -> }
         set(value) {
             field = value
             notifyDataSetChanged()
         }
+
+    fun calculateDiffAndDispatchUpdate(new: List<Comment>) {
+        DiffUtil.calculateDiff(DiffCallback(list, new)).also { it.dispatchUpdatesTo(this) }
+        list = new
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
             LayoutInflater.from(parent.context).inflate(R.layout.list_item_comment, parent, false)
@@ -145,4 +149,16 @@ class CommentAdapter(val scope: CoroutineScope) : RecyclerView.Adapter<CommentAd
             avatar.clipToOutline = true
         }
     }
+}
+
+internal class DiffCallback(private val old: List<Comment>, private val new: List<Comment>) : DiffUtil.Callback() {
+    override fun getOldListSize() = old.size
+
+    override fun getNewListSize() = new.size
+
+    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) =
+            old[oldItemPosition].id == new[newItemPosition].id
+
+    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) =
+            old[oldItemPosition] == new[newItemPosition]
 }

@@ -111,17 +111,17 @@ class PostFragment : NavFragment<PostViewModel>() {
             }
             viewModel.onActionChanged(CommentAction.ADD_COMMENT, item)
         }
-        commentAdapter.onCommentEdit = { item ->
-            viewModel.onActionChanged(CommentAction.EDIT_COMMENT, item, item.text ?: "")
+        commentAdapter.onCommentEdit = { comment ->
+            viewModel.onActionChanged(CommentAction.EDIT_COMMENT, comment, comment.text ?: "")
             behaviour.state = BottomSheetBehavior.STATE_EXPANDED
         }
-        commentAdapter.onCommentRecommend = { item ->
-            viewModel.onActionChanged(CommentAction.RECOMMEND_COMMENT, item)
+        commentAdapter.onCommentRecommend = { comment ->
+            viewModel.onActionChanged(CommentAction.RECOMMEND_COMMENT, comment)
             behaviour.state = BottomSheetBehavior.STATE_EXPANDED
         }
-        commentAdapter.onCommentRemove = { item ->
+        commentAdapter.onCommentRemove = { comment ->
             lifecycleScope.launch(exceptionHandler) {
-                viewModel.onActionChanged(CommentAction.REMOVE_COMMENT, item).join()
+                viewModel.onActionChanged(CommentAction.REMOVE_COMMENT, comment).join()
                 viewModel.onCommentAction()
                         .onCompletion {
                             commentAdapter.notifyDataSetChanged()
@@ -220,7 +220,7 @@ class PostFragment : NavFragment<PostViewModel>() {
         }
 
         lifecycleScope.launch(exceptionHandler) {
-            viewModel.comments.collect { commentAdapter.list = it }
+            viewModel.comments.collect { commentAdapter.calculateDiffAndDispatchUpdate(it) }
         }
 
         repeatOnStarted {
